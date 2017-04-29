@@ -3,6 +3,7 @@ package display
 import (
 	"github.com/telecoda/pico-go/config"
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/sdl_gfx"
 )
 
 // The display package handles all the output to screen
@@ -20,23 +21,16 @@ type size struct {
 }
 
 type display struct {
-	offscreen    size
-	visible      size
+	config       config.Config
 	window       *sdl.Window
 	pixelSurface *sdl.Surface
 	renderer     *sdl.Renderer
+	fpsMan       *gfx.FPSmanager
 }
 
 func New(cfg config.Config) (Display, error) {
 	d := &display{
-		offscreen: size{
-			width:  cfg.ConsoleWidth,
-			height: cfg.ConsoleHeight,
-		},
-		visible: size{
-			width:  cfg.WindowWidth,
-			height: cfg.WindowHeight,
-		},
+		config: cfg,
 	}
 
 	// init SDL
@@ -46,7 +40,7 @@ func New(cfg config.Config) (Display, error) {
 	// create window
 	window, err := sdl.CreateWindow(
 		title, sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED,
-		int(d.visible.width), int(d.visible.height), sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
+		int(d.config.WindowWidth), int(d.config.WindowHeight), sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
 
 	if err != nil {
 		return nil, err
@@ -59,7 +53,7 @@ func New(cfg config.Config) (Display, error) {
 	gmask := uint32(0x00ff0000)
 	bmask := uint32(0x0000ff00)
 	amask := uint32(0x000000ff)
-	ps, err := sdl.CreateRGBSurface(0, int32(d.offscreen.width), int32(d.offscreen.height), 32, rmask, gmask, bmask, amask)
+	ps, err := sdl.CreateRGBSurface(0, int32(d.config.ConsoleWidth), int32(d.config.ConsoleHeight), 32, rmask, gmask, bmask, amask)
 	if err != nil {
 		return nil, err
 	}
@@ -110,6 +104,7 @@ func (d *display) Render() error {
 
 	// copy and scale offscreen buffer
 	d.renderer.Copy(tex, &vcRect, &winRect)
+
 	d.renderer.Present()
 	return nil
 }
