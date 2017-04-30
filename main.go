@@ -27,7 +27,7 @@ func main() {
 	}
 
 	// Create virtual console
-	c, err := console.New(config)
+	c, err := console.NewConsole(config)
 	if err != nil {
 		panic(err)
 	}

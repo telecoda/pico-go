@@ -28,7 +28,7 @@ type display struct {
 	fpsMan       *gfx.FPSmanager
 }
 
-func New(cfg config.Config) (Display, error) {
+func NewDisplay(cfg config.Config) (Display, error) {
 	d := &display{
 		config: cfg,
 	}
@@ -103,13 +103,10 @@ func (d *display) Render() error {
 	d.renderer.Clear()
 
 	// calc how big to render on window
-
 	winW, winH := d.window.GetSize()
 	var winRect sdl.Rect
 	x1 := int32(0)
-	//x2 := int32(0)
 	y1 := int32(0)
-	//y2 := int32(0)
 
 	// sW, sH - screen width + height
 	sW := int32(winW)
@@ -125,24 +122,19 @@ func (d *display) Render() error {
 	if winW > winH {
 		// wider (use full height)
 		y1 = 0
-		//y2 = 0
 		sH = int32(winH)
 		sW = int32(winH)
 		diff := (winW - winH) / 2
 		x1 = int32(diff)
-		//x2 = int32(diff)
-
 	}
 
 	if winW < winH {
 		// taller (use full width)
 		x1 = 0
-		//x2 = 0
 		sH = int32(winW)
 		sW = int32(winW)
 		diff := (winH - winW) / 2
 		y1 = int32(diff)
-		//y2 = int32(diff)
 	}
 
 	winRect = sdl.Rect{X: x1, Y: y1, W: sW, H: sH}

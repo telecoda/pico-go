@@ -21,7 +21,7 @@ type eventHandler struct {
 var event sdl.Event
 var joysticks [16]*sdl.Joystick
 
-func New() (EventHandler, error) {
+func NewHandler() (EventHandler, error) {
 	handler := &eventHandler{
 		quit: false,
 	}
