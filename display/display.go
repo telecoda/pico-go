@@ -63,7 +63,6 @@ func (d *display) Render() error {
 	// draw to offscreen surface
 	rect := sdl.Rect{X: 0, Y: 0, W: 64, H: 64}
 
-	//d.pixelSurface.FillRect(d.psRect, 0x000000ff)
 	// draw white rect top corner
 	d.pixelSurface.FillRect(&rect, 0xffffffff)
 
@@ -76,6 +75,32 @@ func (d *display) Render() error {
 	pixels[4*(y*w+x)+1] = 0   // g
 	pixels[4*(y*w+x)+2] = 0   // b
 
+	return d.Flip()
+
+}
+
+func (d *display) Destroy() {
+	if d.window != nil {
+		d.window.Destroy()
+	}
+}
+
+// API
+
+// Cls - clears pixel buffer
+func (d *display) Cls() {
+	_, color := d.palette.getRGBA(0)
+	d.pixelSurface.FillRect(d.psRect, color)
+}
+
+// Cls - fill pixel buffer with a set color
+func (d *display) ClsColor(colorId api.Color) {
+	_, color := d.palette.getRGBA(colorId)
+	d.pixelSurface.FillRect(d.psRect, color)
+}
+
+// Flip - copy offscreen buffer to onscreen buffer
+func (d *display) Flip() error {
 	tex, err := d.renderer.CreateTextureFromSurface(d.pixelSurface)
 	if err != nil {
 		return err
@@ -124,25 +149,6 @@ func (d *display) Render() error {
 	d.renderer.Copy(tex, d.psRect, &winRect)
 
 	d.renderer.Present()
+
 	return nil
-}
-
-func (d *display) Destroy() {
-	if d.window != nil {
-		d.window.Destroy()
-	}
-}
-
-// API
-
-// Cls - clears pixel buffer
-func (d *display) Cls() {
-	_, color := d.palette.getRGBA(0)
-	d.pixelSurface.FillRect(d.psRect, color)
-}
-
-// Cls - fill pixel buffer with a set color
-func (d *display) ClsColor(colorId api.Color) {
-	_, color := d.palette.getRGBA(colorId)
-	d.pixelSurface.FillRect(d.psRect, color)
 }

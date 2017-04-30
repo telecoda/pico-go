@@ -16,6 +16,8 @@ type Display interface {
 
 	Cls()
 	ClsColor(color api.Color)
+
+	Flip() error
 }
 
 type size struct {
