@@ -80,7 +80,7 @@ func (e *eventHandler) PollEvents() error {
 				fmt.Printf("Joystick %d disconnected\n", t.Which)
 			}
 		default:
-			fmt.Printf("Some event\n")
+			fmt.Printf("Some event: %#v \n", event)
 		}
 	}
 
