@@ -6,14 +6,14 @@ import (
 
 	"github.com/telecoda/pico-go/api"
 	"github.com/telecoda/pico-go/display"
-	"github.com/telecoda/pico-go/events"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
 func NewConsole(cfg api.Config) (Console, error) {
 	console := &console{
-		Config: cfg,
-		mode:   CLI,
+		Config:      cfg,
+		currentMode: CLI,
+		hasQuit:     false,
 	}
 
 	// initialise display
@@ -28,23 +28,16 @@ func NewConsole(cfg api.Config) (Console, error) {
 
 	console.Display = display
 
-	// initialise event handler
-	if console.Verbose {
-		fmt.Printf("Initialising event handler\n")
-	}
+	// initialise modes
+	modes := console.initModes()
 
-	handler, err := events.NewHandler()
-	if err != nil {
-		return nil, err
-	}
-
-	console.EventHandler = handler
+	console.modes = modes
 
 	return console, nil
 }
 
-func (c *console) SetMode(mode Mode) {
-	c.mode = mode
+func (c *console) SetMode(newMode ModeType) {
+	c.currentMode = newMode
 }
 
 func (c *console) LoadCart(path string) error {
@@ -62,18 +55,29 @@ func (c *console) Run() error {
 
 	endFrame = time.Now() // init end frame
 	timeBudget = time.Duration(1*time.Second).Nanoseconds() / int64(c.Config.FPS)
-	for !c.EventHandler.HasQuit() {
+	for !c.hasQuit {
 		startFrame = time.Now() // used for framerate timing
 
-		if err := c.EventHandler.PollEvents(); err != nil {
-			return err
-		}
+		if mode, ok := c.modes[c.currentMode]; ok {
 
-		if err := c.Display.Render(); err != nil {
-			return err
+			if err := mode.PollEvents(); err != nil {
+				return err
+			}
+			if err := mode.Update(); err != nil {
+				return err
+			}
+
+			if err := mode.Render(); err != nil {
+				return err
+			}
+			c.Flip()
+
+			// lock framerate
+			lockFps()
+
+		} else {
+			return fmt.Errorf("Mode :%d not found in console.modes", c.currentMode)
 		}
-		// lock delay
-		lockFps()
 
 	}
 

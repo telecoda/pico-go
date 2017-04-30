@@ -3,16 +3,15 @@ package console
 import (
 	"github.com/telecoda/pico-go/api"
 	"github.com/telecoda/pico-go/display"
-	"github.com/telecoda/pico-go/events"
 )
 
 // This is the main control package for the virtual console
 // the console package coordinates with all other console subsystems
 
-type Mode int
+type ModeType int
 
 const (
-	CLI Mode = iota
+	CLI ModeType = iota
 	CODE_EDITOR
 	RUNTIME
 	MAP_EDITOR
@@ -24,16 +23,17 @@ type Console interface {
 	LoadCart(path string) error
 	Run() error
 	Destroy()
-	SetMode(mode Mode)
+	SetMode(newMode ModeType)
 	api.PicoGoAPI
 }
 
 type console struct {
 	api.Config
 	display.Display
-	EventHandler events.EventHandler
 
-	mode Mode
+	currentMode ModeType
+	modes       map[ModeType]Mode
+	hasQuit     bool
 
 	cart Cartridge
 }
@@ -46,3 +46,11 @@ type Cartridge interface {
 
 type cartridge struct {
 }
+
+type Mode interface {
+	Render() error
+	Update() error
+	PollEvents() error
+}
+
+type mode struct{}
