@@ -38,6 +38,8 @@ func NewDisplay(cfg api.Config) (Display, error) {
 
 	d.pixelSurface = ps
 
+	d.psRect = &sdl.Rect{X: 0, Y: 0, W: d.pixelSurface.W, H: d.pixelSurface.H}
+
 	// create renderer
 	r, _ := sdl.CreateRenderer(window, -2, sdl.RENDERER_ACCELERATED)
 	if r == nil {
@@ -55,11 +57,13 @@ func NewDisplay(cfg api.Config) (Display, error) {
 
 func (d *display) Render() error {
 
+	// clear offscreen buffer
+	d.ClsColor(3)
+
 	// draw to offscreen surface
 	rect := sdl.Rect{X: 0, Y: 0, W: 64, H: 64}
-	vcRect := sdl.Rect{X: 0, Y: 0, W: d.pixelSurface.W, H: d.pixelSurface.H}
-	// clear offscreen buffer
-	d.pixelSurface.FillRect(&vcRect, 0x000000ff)
+
+	//d.pixelSurface.FillRect(d.psRect, 0x000000ff)
 	// draw white rect top corner
 	d.pixelSurface.FillRect(&rect, 0xffffffff)
 
@@ -77,8 +81,8 @@ func (d *display) Render() error {
 		return err
 	}
 
-	// clear screen
-	d.Cls()
+	// clear window
+	d.renderer.Clear()
 	// calc how big to render on window
 	winW, winH := d.window.GetSize()
 	var winRect sdl.Rect
@@ -117,7 +121,7 @@ func (d *display) Render() error {
 	winRect = sdl.Rect{X: x1, Y: y1, W: sW, H: sH}
 
 	// copy and scale offscreen buffer
-	d.renderer.Copy(tex, &vcRect, &winRect)
+	d.renderer.Copy(tex, d.psRect, &winRect)
 
 	d.renderer.Present()
 	return nil
@@ -131,14 +135,14 @@ func (d *display) Destroy() {
 
 // API
 
+// Cls - clears pixel buffer
 func (d *display) Cls() {
-	rgbColor := d.palette[0]
-	d.renderer.SetDrawColor(rgbColor.R, rgbColor.G, rgbColor.B, rgbColor.A)
-	d.renderer.Clear()
+	_, color := d.palette.getRGBA(0)
+	d.pixelSurface.FillRect(d.psRect, color)
 }
 
-func (d *display) ClsColor(color api.Color) {
-	rgbColor := d.palette[int(color)]
-	d.renderer.SetDrawColor(rgbColor.R, rgbColor.G, rgbColor.B, rgbColor.A)
-	d.renderer.Clear()
+// Cls - fill pixel buffer with a set color
+func (d *display) ClsColor(colorId api.Color) {
+	_, color := d.palette.getRGBA(colorId)
+	d.pixelSurface.FillRect(d.psRect, color)
 }

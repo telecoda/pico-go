@@ -6,6 +6,6 @@ func (c *console) Cls() {
 	c.Display.Cls()
 }
 
-func (c *console) ClsColor(color api.Color) {
-	c.Display.ClsColor(color)
+func (c *console) ClsColor(colorId api.Color) {
+	c.Display.ClsColor(colorId)
 }

@@ -35,7 +35,8 @@ type palette map[int]rgba
 type display struct {
 	config       api.Config
 	window       *sdl.Window
-	pixelSurface *sdl.Surface
+	pixelSurface *sdl.Surface // offscreen pixel buffer
+	psRect       *sdl.Rect    // rect of pixelSurface
 	renderer     *sdl.Renderer
 	fpsMan       *gfx.FPSmanager
 	palette
