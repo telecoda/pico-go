@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/telecoda/pico-go/config"
+	"github.com/telecoda/pico-go/api"
 	"github.com/telecoda/pico-go/display"
 	"github.com/telecoda/pico-go/events"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-func NewConsole(cfg config.Config) (Console, error) {
+func NewConsole(cfg api.Config) (Console, error) {
 	console := &console{
 		Config: cfg,
+		mode:   CLI,
 	}
 
 	// initialise display
@@ -42,6 +43,10 @@ func NewConsole(cfg config.Config) (Console, error) {
 	return console, nil
 }
 
+func (c *console) SetMode(mode Mode) {
+	c.mode = mode
+}
+
 func (c *console) LoadCart(path string) error {
 	return nil
 }
@@ -67,7 +72,6 @@ func (c *console) Run() error {
 		if err := c.Display.Render(); err != nil {
 			return err
 		}
-
 		// lock delay
 		lockFps()
 
