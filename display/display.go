@@ -20,7 +20,7 @@ func NewDisplay(cfg api.Config) (Display, error) {
 	ttf.Init()
 
 	// load assets
-	font, err := ttf.OpenFont("./fonts/droid-sans/DroidSans.ttf", 8)
+	font, err := ttf.OpenFont("./fonts/PICO-8.ttf", 4)
 	if err != nil {
 		return nil, fmt.Errorf("Error in font:%s", err)
 	}
