@@ -1,8 +1,11 @@
 package display
 
 import (
+	"fmt"
+
 	"github.com/telecoda/pico-go/api"
 	"github.com/veandco/go-sdl2/sdl"
+	ttf "github.com/veandco/go-sdl2/sdl_ttf"
 )
 
 func NewDisplay(cfg api.Config) (Display, error) {
@@ -14,6 +17,15 @@ func NewDisplay(cfg api.Config) (Display, error) {
 	// init SDL
 	sdl.Init(sdl.INIT_EVERYTHING)
 	sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "0")
+	ttf.Init()
+
+	// load assets
+	font, err := ttf.OpenFont("./fonts/droid-sans/DroidSans.ttf", 8)
+	if err != nil {
+		return nil, fmt.Errorf("Error in font:%s", err)
+	}
+
+	d.font = font
 
 	// create window
 	window, err := sdl.CreateWindow(
@@ -105,6 +117,7 @@ func (d *display) Flip() error {
 	if err != nil {
 		return err
 	}
+	defer tex.Destroy()
 
 	// clear window
 	d.renderer.Clear()
@@ -151,4 +164,22 @@ func (d *display) Flip() error {
 	d.renderer.Present()
 
 	return nil
+}
+
+// PrintColorAt a string of characters to the screen at position with color
+func (d *display) PrintColorAt(str string, x, y int, colorId api.Color) {
+	rgba, _ := d.palette.getRGBA(colorId)
+	sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
+	textSurface, err := d.font.RenderUTF8_Blended(str, sColor)
+	if err != nil {
+		panic(err)
+	}
+	defer textSurface.Free()
+
+	// copy text surface to offscreen buffer
+
+	tRect := &sdl.Rect{X: 0, Y: 0, W: textSurface.W, H: textSurface.H}
+	posRect := &sdl.Rect{X: int32(x), Y: int32(x), W: textSurface.W, H: textSurface.H}
+
+	textSurface.Blit(tRect, d.pixelSurface, posRect)
 }

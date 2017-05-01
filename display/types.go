@@ -4,6 +4,7 @@ import (
 	"github.com/telecoda/pico-go/api"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/sdl_gfx"
+	ttf "github.com/veandco/go-sdl2/sdl_ttf"
 )
 
 // The display package handles all the output to screen
@@ -18,6 +19,8 @@ type Display interface {
 	ClsColor(color api.Color)
 
 	Flip() error
+
+	PrintColorAt(str string, x, y int, color api.Color)
 }
 
 type size struct {
@@ -42,6 +45,7 @@ type display struct {
 	renderer     *sdl.Renderer
 	fpsMan       *gfx.FPSmanager
 	palette
+	font *ttf.Font
 }
 
 func initPico8Palette() palette {

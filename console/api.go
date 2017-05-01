@@ -16,3 +16,8 @@ func (c *console) ClsColor(colorId api.Color) {
 func (c *console) Flip() {
 	c.Display.Flip()
 }
+
+// PrintColorAt a string of characters to the screen at position with color
+func (c *console) PrintColorAt(str string, x, y int, color api.Color) {
+	c.Display.PrintColorAt(str, x, y, color)
+}

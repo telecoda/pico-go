@@ -24,5 +24,7 @@ type PicoGoAPI interface {
 
 	Flip() // Copy graphics buffer to screen
 
-	//Print(str string, x *int, y *int, color *Color) // Print a string of character to the scree
+	//Print(str string)                               // Print a string of characters to the screen
+	//PrintAt(str string, x, y int)                   // Print a string of characters to the screen at position
+	PrintColorAt(str string, x, y int, color Color) // Print a string of characters to the screen at position with color
 }
