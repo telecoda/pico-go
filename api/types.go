@@ -22,7 +22,7 @@ type PicoGoAPI interface {
 	Cls()                 // Clear screen
 	ClsColor(color Color) // Clear screen
 
-	Flip() // Copy graphics buffer to screen
+	Flip() error // Copy graphics buffer to screen
 
 	//Print(str string)                               // Print a string of characters to the screen
 	//PrintAt(str string, x, y int)                   // Print a string of characters to the screen at position

@@ -8,12 +8,16 @@ import (
 
 type codeEditor struct {
 	console *console
+	PixelBuffer
 }
 
 func newCodeEditorMode(c *console) Mode {
 	codeEditor := &codeEditor{
 		console: c,
 	}
+	pb, _ := newPixelBuffer(c.Config)
+
+	codeEditor.PixelBuffer = pb
 	return codeEditor
 }
 
@@ -43,6 +47,6 @@ func (c *codeEditor) Update() error {
 }
 
 func (c *codeEditor) Render() error {
-	c.console.Display.ClsColor(5)
+	c.PixelBuffer.ClsColor(5)
 	return nil
 }

@@ -5,35 +5,66 @@ import (
 	"time"
 
 	"github.com/telecoda/pico-go/api"
-	"github.com/telecoda/pico-go/display"
 	"github.com/veandco/go-sdl2/sdl"
+	ttf "github.com/veandco/go-sdl2/sdl_ttf"
 )
 
+// Global var
+
+var _console *console
+
 func NewConsole(cfg api.Config) (Console, error) {
-	console := &console{
+	_console = &console{
 		Config:      cfg,
 		currentMode: CLI,
 		hasQuit:     false,
 	}
 
-	// initialise display
-	if console.Verbose {
-		fmt.Printf("Initialising display\n")
-	}
+	// init SDL
+	sdl.Init(sdl.INIT_EVERYTHING)
+	sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "0")
+	ttf.Init()
 
-	display, err := display.NewDisplay(cfg)
+	// initialise window
+	window, err := sdl.CreateWindow(
+		title, sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED,
+		int(cfg.WindowWidth), int(cfg.WindowHeight), sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
+
 	if err != nil {
 		return nil, err
 	}
+	_console.window = window
 
-	console.Display = display
+	// initialse renderer
+	// create renderer
+	r, _ := sdl.CreateRenderer(window, -2, sdl.RENDERER_ACCELERATED)
+	if r == nil {
+		// revert to software
+		r, _ = sdl.CreateRenderer(window, -2, sdl.RENDERER_SOFTWARE)
+		if r == nil {
+			return nil, err
+		}
+	}
+
+	_console.renderer = r
+
+	// init palette
+	_console.palette = initPico8Palette()
+
+	// init font
+	font, err := ttf.OpenFont("./fonts/PICO-8.ttf", 4)
+	if err != nil {
+		return nil, fmt.Errorf("Error in font:%s", err)
+	}
+
+	_console.font = font
 
 	// initialise modes
-	modes := console.initModes()
+	modes := _console.initModes()
 
-	console.modes = modes
+	_console.modes = modes
 
-	return console, nil
+	return _console, nil
 }
 
 func (c *console) SetMode(newMode ModeType) {
@@ -70,7 +101,8 @@ func (c *console) Run() error {
 			if err := mode.Render(); err != nil {
 				return err
 			}
-			c.Flip()
+
+			mode.Flip()
 
 			// lock framerate
 			lockFps()
@@ -107,5 +139,5 @@ func lockFps() float64 {
 
 // Destroy cleans up any resources at end
 func (c *console) Destroy() {
-	c.Display.Destroy()
+	c.window.Destroy()
 }

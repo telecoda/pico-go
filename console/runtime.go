@@ -8,12 +8,16 @@ import (
 
 type runtime struct {
 	console *console
+	PixelBuffer
 }
 
 func newRuntimeMode(c *console) Mode {
 	runtime := &runtime{
 		console: c,
 	}
+	pb, _ := newPixelBuffer(c.Config)
+
+	runtime.PixelBuffer = pb
 	return runtime
 }
 
@@ -81,6 +85,6 @@ func (r *runtime) Update() error {
 }
 
 func (r *runtime) Render() error {
-	r.console.Display.ClsColor(15)
+	r.PixelBuffer.ClsColor(15)
 	return nil
 }

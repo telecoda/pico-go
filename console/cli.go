@@ -8,6 +8,7 @@ import (
 
 type cli struct {
 	console *console
+	PixelBuffer
 }
 
 var event sdl.Event
@@ -17,6 +18,9 @@ func newCLIMode(c *console) Mode {
 	cli := &cli{
 		console: c,
 	}
+	pb, _ := newPixelBuffer(c.Config)
+
+	cli.PixelBuffer = pb
 	return cli
 }
 
@@ -45,8 +49,8 @@ func (c *cli) Update() error {
 }
 
 func (c *cli) Render() error {
-	c.console.Display.ClsColor(8)
+	c.PixelBuffer.ClsColor(8)
 
-	c.console.PrintColorAt("CLI Print Test", 10, 10, 7)
+	c.PixelBuffer.PrintColorAt("CLI Print Test", 10, 10, 7)
 	return nil
 }
