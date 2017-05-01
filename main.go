@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 
-	"github.com/telecoda/pico-go/api"
 	"github.com/telecoda/pico-go/console"
 )
 
@@ -17,7 +16,7 @@ func main() {
 
 	flag.Parse()
 
-	config := api.Config{
+	config := console.Config{
 		ConsoleWidth:  128,
 		ConsoleHeight: 128,
 		WindowWidth:   800,

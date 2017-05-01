@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/telecoda/pico-go/api"
 	"github.com/veandco/go-sdl2/sdl"
 	ttf "github.com/veandco/go-sdl2/sdl_ttf"
 )
@@ -13,7 +12,7 @@ import (
 
 var _console *console
 
-func NewConsole(cfg api.Config) (Console, error) {
+func NewConsole(cfg Config) (Console, error) {
 	_console = &console{
 		Config:      cfg,
 		currentMode: CLI,

@@ -48,5 +48,7 @@ func (c *codeEditor) Update() error {
 
 func (c *codeEditor) Render() error {
 	c.PixelBuffer.ClsColor(5)
+
+	c.PixelBuffer.PrintColorAt("Code editor Print Test", 10, 10, 7)
 	return nil
 }

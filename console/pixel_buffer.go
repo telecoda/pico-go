@@ -1,11 +1,10 @@
 package console
 
 import (
-	"github.com/telecoda/pico-go/api"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-func newPixelBuffer(cfg api.Config) (PixelBuffer, error) {
+func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 	p := &pixelBuffer{}
 	rmask := uint32(0xff000000)
 	gmask := uint32(0x00ff0000)
@@ -56,7 +55,7 @@ func (p *pixelBuffer) Cls() {
 }
 
 // Cls - fill pixel buffer with a set color
-func (p *pixelBuffer) ClsColor(colorId api.Color) {
+func (p *pixelBuffer) ClsColor(colorId Color) {
 	_, color := _console.palette.getRGBA(colorId)
 	p.pixelSurface.FillRect(p.psRect, color)
 }
@@ -117,7 +116,7 @@ func (p *pixelBuffer) Flip() error {
 }
 
 // PrintColorAt a string of characters to the screen at position with color
-func (p *pixelBuffer) PrintColorAt(str string, x, y int, colorId api.Color) {
+func (p *pixelBuffer) PrintColorAt(str string, x, y int, colorId Color) {
 	rgba, _ := _console.palette.getRGBA(colorId)
 	sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
 	textSurface, err := _console.font.RenderUTF8_Blended(str, sColor)

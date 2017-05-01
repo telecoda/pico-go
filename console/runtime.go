@@ -85,6 +85,8 @@ func (r *runtime) Update() error {
 }
 
 func (r *runtime) Render() error {
-	r.PixelBuffer.ClsColor(15)
+	r.PixelBuffer.ClsColor(0)
+
+	r.PixelBuffer.PrintColorAt("Runtime Print Test", 10, 10, RED)
 	return nil
 }
