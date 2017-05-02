@@ -32,6 +32,7 @@ type PicoGoAPI interface {
 	//Print(str string)                               // Print a string of characters to the screen
 	//PrintAt(str string, x, y int)                   // Print a string of characters to the screen at position
 	PrintColorAt(str string, x, y int, color Color) // Print a string of characters to the screen at position with color
+
 }
 
 type ModeType int
@@ -55,9 +56,10 @@ type Console interface {
 type console struct {
 	Config
 
-	currentMode ModeType
-	modes       map[ModeType]Mode
-	hasQuit     bool
+	currentMode   ModeType
+	secondaryMode ModeType
+	modes         map[ModeType]Mode
+	hasQuit       bool
 
 	cart Cartridge
 
@@ -66,6 +68,7 @@ type console struct {
 
 	palette
 	font *ttf.Font
+	logo *sdl.Surface
 }
 
 type Cartridge interface {
@@ -78,9 +81,10 @@ type cartridge struct {
 }
 
 type Mode interface {
+	Init() error
 	Render() error
 	Update() error
-	PollEvents() error
+	HandleEvent(event sdl.Event) error
 	PixelBuffer
 }
 

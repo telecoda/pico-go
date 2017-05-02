@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/sdl_image"
 	ttf "github.com/veandco/go-sdl2/sdl_ttf"
 )
 
@@ -12,11 +13,18 @@ import (
 
 var _console *console
 
+const (
+	_version    = "v0.1"
+	_logoWidth  = 57
+	_logoHeight = 24
+)
+
 func NewConsole(cfg Config) (Console, error) {
 	_console = &console{
-		Config:      cfg,
-		currentMode: CLI,
-		hasQuit:     false,
+		Config:        cfg,
+		currentMode:   CLI,
+		secondaryMode: CODE_EDITOR,
+		hasQuit:       false,
 	}
 
 	// init SDL
@@ -53,14 +61,24 @@ func NewConsole(cfg Config) (Console, error) {
 	// init font
 	font, err := ttf.OpenFont("./fonts/PICO-8.ttf", 4)
 	if err != nil {
-		return nil, fmt.Errorf("Error in font:%s", err)
+		return nil, fmt.Errorf("Error loading font:%s", err)
 	}
 
 	_console.font = font
 
-	// initialise modes
-	modes := _console.initModes()
+	// init logo
+	logo, err := img.Load("./images/pico-go-logo.png")
+	if err != nil {
+		return nil, fmt.Errorf("Error loading image: %s\n", err)
+	}
 
+	_console.logo = logo
+
+	// initialise modes
+	modes, err := _console.initModes()
+	if err != nil {
+		return nil, err
+	}
 	_console.modes = modes
 
 	return _console, nil
@@ -90,9 +108,25 @@ func (c *console) Run() error {
 
 		if mode, ok := c.modes[c.currentMode]; ok {
 
-			if err := mode.PollEvents(); err != nil {
-				return err
+			// poll all events
+			for event = sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+				// this is the common event handling code
+				switch t := event.(type) {
+				case *sdl.QuitEvent:
+					c.hasQuit = true
+				case *sdl.KeyDownEvent:
+					switch t.Keysym.Sym {
+					case sdl.K_ESCAPE:
+						c.toggleCLI()
+					default:
+						// if not handled pass event to mode event handler
+						if err := mode.HandleEvent(event); err != nil {
+							return err
+						}
+					}
+				}
 			}
+
 			if err := mode.Update(); err != nil {
 				return err
 			}
@@ -113,6 +147,16 @@ func (c *console) Run() error {
 	}
 
 	return nil
+}
+
+// toggleCLI - toggle between CLI and secondary mode
+func (c *console) toggleCLI() {
+	if c.currentMode == CLI {
+		c.SetMode(c.secondaryMode)
+	} else {
+		c.secondaryMode = c.currentMode
+		c.SetMode(CLI)
+	}
 }
 
 // lockFps - locks rendering to a steady framerate

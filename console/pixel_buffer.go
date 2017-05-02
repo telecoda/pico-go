@@ -128,7 +128,7 @@ func (p *pixelBuffer) PrintColorAt(str string, x, y int, colorId Color) {
 	// copy text surface to offscreen buffer
 
 	tRect := &sdl.Rect{X: 0, Y: 0, W: textSurface.W, H: textSurface.H}
-	posRect := &sdl.Rect{X: int32(x), Y: int32(x), W: textSurface.W, H: textSurface.H}
+	posRect := &sdl.Rect{X: int32(x), Y: int32(y), W: textSurface.W, H: textSurface.H}
 
 	textSurface.Blit(tRect, p.pixelSurface, posRect)
 }

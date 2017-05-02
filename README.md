@@ -17,9 +17,7 @@ First fetch all the dependencies:
 
 You will also need to install the SDL2 dependencies for your platform.  See the [go-sdl README](https://github.com/telecoda/go-sdl2/blob/master/README.md) for details
 
-    go build
-    ./pico-go
-
+    go run main.go
 
 More docs will be added as I progress..
 

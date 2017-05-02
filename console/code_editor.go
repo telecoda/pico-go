@@ -21,25 +21,25 @@ func newCodeEditorMode(c *console) Mode {
 	return codeEditor
 }
 
-func (c *codeEditor) PollEvents() error {
-	for event = sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-		switch t := event.(type) {
-		case *sdl.QuitEvent:
-			c.console.hasQuit = true
-		case *sdl.KeyDownEvent:
-			switch t.Keysym.Sym {
-			case sdl.K_RIGHT:
-				fmt.Printf("Switching to runtime\n")
-
-				c.console.SetMode(RUNTIME)
-			}
-		default:
-			fmt.Printf("Some event: %#v \n", event)
+func (c *codeEditor) HandleEvent(event sdl.Event) error {
+	switch t := event.(type) {
+	case *sdl.KeyDownEvent:
+		switch t.Keysym.Sym {
+		case sdl.K_RIGHT:
+			fmt.Printf("Switching to runtime\n")
+			c.console.SetMode(RUNTIME)
 		}
+	default:
+		fmt.Printf("Some event: %#v \n", event)
 	}
 
 	return nil
+}
 
+func (c *codeEditor) Init() error {
+	c.PixelBuffer.ClsColor(5)
+	c.PixelBuffer.PrintColorAt("Code editor Print Test", 10, 10, 7)
+	return nil
 }
 
 func (c *codeEditor) Update() error {
@@ -47,8 +47,5 @@ func (c *codeEditor) Update() error {
 }
 
 func (c *codeEditor) Render() error {
-	c.PixelBuffer.ClsColor(5)
-
-	c.PixelBuffer.PrintColorAt("Code editor Print Test", 10, 10, 7)
 	return nil
 }
