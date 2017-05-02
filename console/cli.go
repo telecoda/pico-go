@@ -9,6 +9,7 @@ import (
 type cli struct {
 	console *console
 	PixelBuffer
+	*cursor
 }
 
 var event sdl.Event
@@ -16,11 +17,16 @@ var joysticks [16]*sdl.Joystick
 
 func newCLIMode(c *console) Mode {
 	cli := &cli{
+
 		console: c,
 	}
 	pb, _ := newPixelBuffer(c.Config)
+	cursor := newCursor(pb, RED)
 
 	cli.PixelBuffer = pb
+	cli.cursor = cursor
+	cursor.x = 1
+	cursor.y = 8
 	return cli
 }
 
@@ -63,6 +69,6 @@ func (c *cli) Update() error {
 }
 
 func (c *cli) Render() error {
-
+	c.cursor.render()
 	return nil
 }

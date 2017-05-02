@@ -14,9 +14,12 @@ import (
 var _console *console
 
 const (
-	_version    = "v0.1"
-	_logoWidth  = 57
-	_logoHeight = 24
+	_version     = "v0.1"
+	_logoWidth   = 57
+	_logoHeight  = 24
+	_charWidth   = int32(4)
+	_charHeight  = int32(8)
+	_cursorFlash = time.Duration(500 * time.Millisecond)
 )
 
 func NewConsole(cfg Config) (Console, error) {
