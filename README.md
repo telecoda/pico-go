@@ -1,4 +1,4 @@
-#pico-go
+# pico-go
 
 Written by @telecoda
 
@@ -10,7 +10,7 @@ The plan is to build something similar to pico8 but where the games can be coded
 Note: this project is very much work in progress at the moment, watch this space..**</font>
 
 
-##Building
+## Building
 
     go get github.com/telecoda/pico-go
 
@@ -24,6 +24,6 @@ You will also need to install the SDL2 dependencies for your platform.  See the 
 
 More docs will be added as I progress..
 
-#References
+# References
 
 [PICO8 font](https://drive.google.com/file/d/0B97Um39fHXlcWUFRZlBqUndhbXM/view) by RhythmLynx
