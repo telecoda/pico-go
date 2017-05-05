@@ -84,6 +84,9 @@ func NewConsole(cfg Config) (Console, error) {
 	}
 	_console.modes = modes
 
+	// text input
+	sdl.StartTextInput()
+
 	return _console, nil
 }
 
@@ -122,10 +125,15 @@ func (c *console) Run() error {
 					case sdl.K_ESCAPE:
 						c.toggleCLI()
 					default:
-						// if not handled pass event to mode event handler
+						// pass keydown events to mode handle
 						if err := mode.HandleEvent(event); err != nil {
 							return err
 						}
+					}
+				default:
+					// if not handled pass event to mode event handler
+					if err := mode.HandleEvent(event); err != nil {
+						return err
 					}
 				}
 			}

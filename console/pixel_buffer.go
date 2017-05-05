@@ -117,6 +117,9 @@ func (p *pixelBuffer) Flip() error {
 
 // PrintColorAt a string of characters to the screen at position with color
 func (p *pixelBuffer) PrintColorAt(str string, x, y int, colorId Color) {
+	if str == "" {
+		return
+	}
 	rgba, _ := _console.palette.getRGBA(colorId)
 	sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
 	textSurface, err := _console.font.RenderUTF8_Blended(str, sColor)
@@ -131,6 +134,16 @@ func (p *pixelBuffer) PrintColorAt(str string, x, y int, colorId Color) {
 	posRect := &sdl.Rect{X: int32(x), Y: int32(y), W: textSurface.W, H: textSurface.H}
 
 	textSurface.Blit(tRect, p.pixelSurface, posRect)
+}
+
+func (p *pixelBuffer) RectFillWithColor(x0, y0, x1, y1 int, colorId Color) {
+
+	_, color := _console.palette.getRGBA(colorId)
+
+	fRect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - x0)}
+
+	p.pixelSurface.FillRect(fRect, color)
+
 }
 
 // Destroy cleans up any resources at end

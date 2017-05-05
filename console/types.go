@@ -24,15 +24,16 @@ type Color int
 */
 
 type PicoGoAPI interface {
-	Cls()                 // Clear screen
-	ClsColor(color Color) // Clear screen
+	Cls()                   // Clear screen
+	ClsColor(colorId Color) // Clear screen
 
 	Flip() error // Copy graphics buffer to screen
 
 	//Print(str string)                               // Print a string of characters to the screen
 	//PrintAt(str string, x, y int)                   // Print a string of characters to the screen at position
-	PrintColorAt(str string, x, y int, color Color) // Print a string of characters to the screen at position with color
-
+	PrintColorAt(str string, x, y int, colorId Color) // Print a string of characters to the screen at position with color
+	//RectFill(x0, y0, x1, y1 int)
+	RectFillWithColor(x0, y0, x1, y1 int, colorId Color)
 }
 
 type ModeType int
@@ -111,8 +112,8 @@ type size struct {
 }
 
 type pos struct {
-	x uint
-	y uint
+	x int32
+	y int32
 }
 
 type rgba struct {
