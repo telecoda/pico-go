@@ -1,0 +1,27 @@
+install mingw - local dir c:/user/rob/Development/mingw
+
+set path to mingq
+
+download sdl development (VC) libraries
+unzip
+
+copy <lib>/include/* to <mingw>mingw64/x86_64-w64-minggw32/include/SDL2/
+copy <lib>/lib/x64/* to <mingw>mingw64/x86_64-w64-minggw32/lib
+eg. SDL2.dll SDL2.lin etc.
+
+repeat for SDL_Image, SDL_ttf, SDL_audio
+https://www.libsdl.org/projects/SDL_image/
+https://www.libsdl.org/projects/SDL_ttf/
+https://www.libsdl.org/projects/SDL_mixer/
+
+
+Copy the windows dlls to
+
+C:\Users\Rob\Development\mingw\mingw64\x86_64-w64-mingw32\bin
+
+
+Edit path
+
+add
+
+C:\Users\Rob\Development\mingw\mingw64\x86_64-w64-mingw32\bin
