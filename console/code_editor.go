@@ -37,8 +37,8 @@ func (c *codeEditor) HandleEvent(event sdl.Event) error {
 }
 
 func (c *codeEditor) Init() error {
-	c.PixelBuffer.ClsColor(5)
-	c.PixelBuffer.PrintColorAt("Code editor Print Test", 10, 10, 7)
+	c.PixelBuffer.ClsWithColor(5)
+	c.PixelBuffer.PrintAtWithColor("Code editor Print Test", 10, 10, 7)
 	return nil
 }
 

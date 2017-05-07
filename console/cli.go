@@ -10,7 +10,7 @@ type cli struct {
 	console *console
 	PixelBuffer
 	*cursor
-	maxLineLen int32
+	maxLineLen int
 	cmd        string
 	cmdPos     pos
 }
@@ -32,7 +32,7 @@ func newCLIMode(c *console) Mode {
 	cursor.y = 8
 	cli.cmdPos = cursor.pos
 	// calc max line width
-	cli.maxLineLen = (int32(c.Config.ConsoleWidth) / _charWidth) - 2
+	cli.maxLineLen = (int(c.Config.ConsoleWidth) / _charWidth) - 2
 	return cli
 }
 
@@ -124,7 +124,8 @@ func (c *cli) cmdBackspace() {
 
 func (c *cli) cursorLeft() {
 	c.cursor.x--
-	if int32(c.cursor.x) < c.cmdPos.x {
+	fmt.Printf("TEMP: c.cmdPos: %#v c.cursor: %#v\n", c.cmdPos, c.cursor)
+	if c.cursor.x < c.cmdPos.x {
 		c.cursor.x = c.maxLineLen + c.cmdPos.x - 1
 		c.cursor.y--
 	}
@@ -135,7 +136,7 @@ func (c *cli) cursorLeft() {
 
 func (c *cli) cursorRight() {
 	c.cursor.x++
-	if int32(c.cursor.x) >= c.maxLineLen+c.cmdPos.x {
+	if c.cursor.x >= c.maxLineLen+c.cmdPos.x {
 		c.cursor.x = c.cmdPos.x
 		c.cursor.y++
 	}
@@ -143,7 +144,7 @@ func (c *cli) cursorRight() {
 
 func (c *cli) Init() error {
 	// get native pixel buffer
-	c.PixelBuffer.ClsColor(BLACK)
+	c.PixelBuffer.ClsWithColor(BLACK)
 	pb := c.PixelBuffer.(*pixelBuffer)
 
 	logoRect := &sdl.Rect{X: 0, Y: 0, W: _logoWidth, H: _logoHeight}
@@ -151,12 +152,16 @@ func (c *cli) Init() error {
 	_console.logo.Blit(logoRect, pb.pixelSurface, screenRect)
 
 	title := fmt.Sprintf("PICO-GO %s", _version)
-	c.PixelBuffer.PrintColorAt(title, 0, 24, LIGHT_GRAY)
-	c.PixelBuffer.PrintColorAt("(C) 2017 @TELECODA", 0, 32, LIGHT_GRAY)
-	c.PixelBuffer.PrintColorAt("TYPE HELP FOR HELP", 0, 48, LIGHT_GRAY)
+	c.PixelBuffer.PrintAtWithColor(title, 0, 24, LIGHT_GRAY)
 
-	c.PixelBuffer.PrintColorAt(">", 0, 64, WHITE)
+	c.PixelBuffer.Print("(C) 2017 @TELECODA")
+	c.PixelBuffer.Print("TYPE HELP FOR HELP")
 
+	currPos := c.GetCursor()
+	c.cmdPos.x = 0
+	c.cmdPos.y = currPos.y
+	c.cursor.pos = c.cmdPos
+	c.cursor.pos.x = 2
 	return nil
 }
 
@@ -165,8 +170,10 @@ func (c *cli) Update() error {
 }
 
 func (c *cli) Render() error {
-	//c.Cls()
 	// render text
+
+	// set text cursor pos
+	//c.PixelBuffer.Cursor(5, 10)
 	lines := c.getCmdLines()
 	c.clearCmd(len(lines))
 	c.renderCmd(lines)
@@ -177,7 +184,7 @@ func (c *cli) Render() error {
 // getCmdLines - splits a command string into slices
 func (c *cli) getCmdLines() []string {
 
-	cmdLen := int32(len(c.cmd))
+	cmdLen := len(c.cmd)
 
 	if cmdLen > c.maxLineLen {
 		// split command across multiple lines
@@ -188,8 +195,8 @@ func (c *cli) getCmdLines() []string {
 			totalLines++
 		}
 		lines := make([]string, totalLines)
-		pos := int32(0)
-		for i := int32(0); i < wholeLines; i++ {
+		pos := 0
+		for i := 0; i < wholeLines; i++ {
 			lines[i] = c.cmd[pos : pos+c.maxLineLen]
 			pos += c.maxLineLen
 		}
@@ -199,28 +206,32 @@ func (c *cli) getCmdLines() []string {
 		}
 		return lines
 
-	} else {
-		return []string{c.cmd}
 	}
+	return []string{c.cmd}
+
 }
 
 // clearCmd - clears screen where command will be rendered
 func (c *cli) clearCmd(count int) {
-	x0 := int(c.cmdPos.x * _charWidth)
-	y0 := int(c.cmdPos.y * _charHeight)
-	x1 := x0 + int(c.maxLineLen*_charWidth)
+	x0 := c.cmdPos.x * int(_charWidth)
+	y0 := c.cmdPos.y * int(_charHeight)
+	x1 := x0 + c.maxLineLen*int(_charWidth)
 	y1 := y0 + (count+1)*int(_charHeight)
 	c.RectFillWithColor(x0, y0, x1, y1, BLACK)
 }
 
 // renderCmd - renders command string across multiple lines
 func (c *cli) renderCmd(lines []string) {
+	c.PixelBuffer.Color(WHITE)
 
-	// render prompt
-	c.PixelBuffer.PrintColorAt(">", 0, int(c.cmdPos.y*_charHeight), WHITE)
-
+	// set print color
+	currentPos := c.GetCursor()
+	c.Color(WHITE)
+	c.Cursor(0, currentPos.y)
+	c.Print(">")
+	c.Cursor(2, currentPos.y)
 	for i := range lines {
-		c.PrintColorAt(lines[i], int(c.cmdPos.x*_charWidth), int((c.cmdPos.y+int32(i))*_charHeight), WHITE)
+		c.Print(lines[i])
 	}
-
+	c.Cursor(0, currentPos.y)
 }

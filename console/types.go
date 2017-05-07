@@ -6,11 +6,11 @@ import (
 )
 
 type Config struct {
-	ConsoleWidth  uint
-	ConsoleHeight uint
-	WindowWidth   uint
-	WindowHeight  uint
-	FPS           uint8
+	ConsoleWidth  int
+	ConsoleHeight int
+	WindowWidth   int
+	WindowHeight  int
+	FPS           int
 	Verbose       bool
 }
 
@@ -24,16 +24,20 @@ type Color int
 */
 
 type PicoGoAPI interface {
-	Cls()                   // Clear screen
-	ClsColor(colorId Color) // Clear screen
+	Cls()                       // Clear screen
+	ClsWithColor(colorID Color) // Clear screen
+
+	Color(colorID Color) // Set drawing color (colour!!!)
+	Cursor(x, y int)     // Set text cursor
 
 	Flip() error // Copy graphics buffer to screen
 
-	//Print(str string)                               // Print a string of characters to the screen
+	GetCursor() pos
+	Print(str string) // Print a string of characters to the screen at default pos
 	//PrintAt(str string, x, y int)                   // Print a string of characters to the screen at position
-	PrintColorAt(str string, x, y int, colorId Color) // Print a string of characters to the screen at position with color
+	PrintAtWithColor(str string, x, y int, colorID Color) // Print a string of characters to the screen at position with color
 	//RectFill(x0, y0, x1, y1 int)
-	RectFillWithColor(x0, y0, x1, y1 int, colorId Color)
+	RectFillWithColor(x0, y0, x1, y1 int, colorID Color)
 }
 
 type ModeType int
@@ -94,26 +98,11 @@ type PixelBuffer interface {
 	PicoGoAPI
 }
 
-type mode struct {
-	pixelBuffer
-}
-
-type pixelBuffer struct {
-	cursor       pos
-	pixelSurface *sdl.Surface // offscreen pixel buffer
-	psRect       *sdl.Rect    // rect of pixelSurface
-}
-
 var title = "pico-go virtual games console"
 
 type size struct {
-	width  uint
-	height uint
-}
-
-type pos struct {
-	x int32
-	y int32
+	width  int
+	height int
 }
 
 type rgba struct {

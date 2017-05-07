@@ -77,8 +77,8 @@ func (r *runtime) HandleEvent(event sdl.Event) error {
 //	}
 
 func (r *runtime) Init() error {
-	r.PixelBuffer.ClsColor(0)
-	r.PixelBuffer.PrintColorAt("Runtime Print Test", 10, 10, RED)
+	r.PixelBuffer.ClsWithColor(0)
+	r.PixelBuffer.PrintAtWithColor("Runtime Print Test", 10, 10, RED)
 	return nil
 }
 
