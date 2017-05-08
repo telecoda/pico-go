@@ -11,6 +11,7 @@ type cli struct {
 	PixelBuffer
 	*cursor
 	maxLineLen int
+	lastLine   int
 	cmd        string
 	cmdPos     pos
 }
@@ -33,6 +34,7 @@ func newCLIMode(c *console) Mode {
 	cli.cmdPos = cursor.pos
 	// calc max line width
 	cli.maxLineLen = (int(c.Config.ConsoleWidth) / _charWidth) - 2
+	cli.lastLine = c.Config.ConsoleWidth / _charHeight
 	return cli
 }
 
@@ -52,8 +54,8 @@ func (c *cli) HandleEvent(event sdl.Event) error {
 			c.cursorLeft()
 		case sdl.K_RIGHT:
 			c.cursorRight()
-			// fmt.Printf("fSwitching to code editor\n")
-			// c.console.SetMode(CODE_EDITOR)
+		case sdl.K_RETURN:
+			c.cmdExec()
 		}
 	default:
 		//fmt.Printf("Some event: %#v \n", event)
@@ -86,6 +88,7 @@ func (c *cli) cmdInsert(t string) {
 			// append to end
 			c.cmd += t
 		}
+
 	}
 	// then move cursor
 	c.cursorRight()
@@ -129,6 +132,23 @@ func (c *cli) cmdBackspace() {
 	c.cursorLeft()
 }
 
+// cmdExec - execute current command entered
+func (c *cli) cmdExec() {
+	// redraw without cursor
+	c.cursor.on = false
+	lines := c.getCmdLines()
+	c.clearCmd(len(lines))
+	c.renderCmd(lines, false)
+	if c.cmd != "" {
+		c.Color(PINK)
+		c.Print("")
+		c.Print("SYNTAX ERROR")
+	} else {
+		c.Print("")
+	}
+	c.initCmd()
+}
+
 func (c *cli) cursorLeft() {
 	// if at beginning of command - can't move left
 	if c.getCmdCharIndex() == 0 {
@@ -153,6 +173,17 @@ func (c *cli) cursorRight() {
 	if c.cursor.x >= c.maxLineLen+c.cmdPos.x {
 		c.cursor.x = c.cmdPos.x
 		c.cursor.y++
+		// if cursor off screen we need to scroll
+		if c.cursor.y >= c.lastLine-1 {
+			// we're gonna scroll
+			lines := c.getCmdLines()
+			c.clearCmd(len(lines) + 1)
+			c.renderCmd(lines, false)
+
+			c.ScrollUpLine()
+			c.cursor.y--
+			c.cmdPos.y--
+		}
 	}
 }
 
@@ -166,22 +197,25 @@ func (c *cli) Init() error {
 	_console.logo.Blit(logoRect, pb.pixelSurface, screenRect)
 
 	title := fmt.Sprintf("PICO-GO %s", _version)
-	c.PixelBuffer.PrintAtWithColor(title, 0, 24, LIGHT_GRAY)
+	c.Cursor(0, 3)
+	c.Color(LIGHT_GRAY)
+	c.PixelBuffer.Print(title)
 
 	c.PixelBuffer.Print("(C) 2017 @TELECODA")
 	c.PixelBuffer.Print("TYPE HELP FOR HELP")
 
-	c.initCursor()
+	c.initCmd()
 	return nil
 }
 
-func (c *cli) initCursor() {
+func (c *cli) initCmd() {
 	currPos := c.GetCursor()
 	// cmdPos is location of first char of command on screen
 	// cursor is current location of cursor on screen
 	c.cursor.pos = currPos
 	c.cursor.pos.x = 2
 	c.cmdPos = c.cursor.pos
+	c.cmd = ""
 }
 
 func (c *cli) Update() error {
@@ -192,7 +226,7 @@ func (c *cli) Render() error {
 	// render text
 	lines := c.getCmdLines()
 	c.clearCmd(len(lines))
-	c.renderCmd(lines)
+	c.renderCmd(lines, true)
 	c.cursor.render()
 	return nil
 }
@@ -229,25 +263,31 @@ func (c *cli) getCmdLines() []string {
 
 // clearCmd - clears screen where command will be rendered
 func (c *cli) clearCmd(count int) {
-	x0 := c.cmdPos.x * int(_charWidth)
+	x0 := 0
 	y0 := c.cmdPos.y * int(_charHeight)
-	x1 := x0 + c.maxLineLen*int(_charWidth)
-	y1 := y0 + (count+1)*int(_charHeight)
+	x1 := c.console.ConsoleWidth
+	y1 := y0 + (count)*int(_charHeight)
 	c.RectFillWithColor(x0, y0, x1, y1, BLACK)
 }
 
 // renderCmd - renders command string across multiple lines
-func (c *cli) renderCmd(lines []string) {
+func (c *cli) renderCmd(lines []string, resetCursor bool) {
 	c.PixelBuffer.Color(WHITE)
 
 	// set print color
-	currentPos := c.GetCursor()
+	currentPos := c.cmdPos
 	c.Color(WHITE)
 	c.Cursor(0, currentPos.y)
-	c.Print(">")
+	c.PrintAtWithColor(">", 0, currentPos.y*8, WHITE)
 	c.Cursor(2, currentPos.y)
 	for i := range lines {
-		c.Print(lines[i])
+		if currentPos.y < c.lastLine {
+			c.PrintAtWithColor(lines[i], 2*_charWidth, (currentPos.y+i)*_charHeight, WHITE)
+		} else {
+			c.PrintAtWithColor(lines[i], 2*_charWidth, c.lastLine*_charHeight, WHITE)
+		}
 	}
-	c.Cursor(0, currentPos.y)
+	if resetCursor {
+		c.Cursor(0, currentPos.y)
+	}
 }

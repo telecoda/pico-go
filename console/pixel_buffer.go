@@ -167,11 +167,12 @@ func pixelToChar(pixelPos pos) pos {
 	}
 }
 
-// scrollLine - scrolls display up a single line
-func (p *pixelBuffer) scrollLine() {
+// ScrolUpLLine - scrolls display up a single line
+func (p *pixelBuffer) ScrollUpLine() {
 	fromRect := &sdl.Rect{X: 0, Y: _charHeight, W: p.pixelSurface.W, H: p.pixelSurface.H - _charHeight}
 	toRect := &sdl.Rect{X: 0, Y: 0, W: p.pixelSurface.W, H: p.pixelSurface.H - _charHeight}
 	p.pixelSurface.Blit(fromRect, p.pixelSurface, toRect)
+	p.textCursor.y = p.charRows - 2
 }
 
 // Print string of characters to the screen
@@ -180,38 +181,36 @@ func (p *pixelBuffer) Print(str string) {
 
 	p.PrintAtWithColor(str, int(pixelPos.x), int(pixelPos.y), p.printColor)
 
+	// increase printPos by 1 line
+	p.textCursor.y++
+
+	if p.textCursor.y > p.charRows-2 {
+		p.ScrollUpLine()
+	}
 }
 
 // PrintAtWithColor a string of characters to the screen at position with color
 func (p *pixelBuffer) PrintAtWithColor(str string, x, y int, colorID Color) {
 	p.printColor = colorID
-	if str == "" {
-		return
+	if str != "" {
+		rgba, _ := _console.palette.getRGBA(colorID)
+		sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
+		textSurface, err := _console.font.RenderUTF8_Blended(str, sColor)
+		if err != nil {
+			panic(err)
+		}
+		defer textSurface.Free()
+
+		// copy text surface to offscreen buffer
+
+		tRect := &sdl.Rect{X: 0, Y: 0, W: textSurface.W, H: textSurface.H}
+		posRect := &sdl.Rect{X: int32(x), Y: int32(y), W: textSurface.W, H: textSurface.H}
+
+		textSurface.Blit(tRect, p.pixelSurface, posRect)
 	}
-	rgba, _ := _console.palette.getRGBA(colorID)
-	sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
-	textSurface, err := _console.font.RenderUTF8_Blended(str, sColor)
-	if err != nil {
-		panic(err)
-	}
-	defer textSurface.Free()
-
-	// copy text surface to offscreen buffer
-
-	tRect := &sdl.Rect{X: 0, Y: 0, W: textSurface.W, H: textSurface.H}
-	posRect := &sdl.Rect{X: int32(x), Y: int32(y), W: textSurface.W, H: textSurface.H}
-
-	textSurface.Blit(tRect, p.pixelSurface, posRect)
-
 	// save print pos
 	p.textCursor = pixelToChar(pos{x, y})
 
-	// increase printPos by 1 line
-	p.textCursor.y++
-	if p.textCursor.y > p.charRows {
-		p.scrollLine()
-		p.textCursor.y--
-	}
 }
 
 func (p *pixelBuffer) RectFillWithColor(x0, y0, x1, y1 int, colorID Color) {

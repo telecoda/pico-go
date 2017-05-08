@@ -38,6 +38,7 @@ type PicoGoAPI interface {
 	PrintAtWithColor(str string, x, y int, colorID Color) // Print a string of characters to the screen at position with color
 	//RectFill(x0, y0, x1, y1 int)
 	RectFillWithColor(x0, y0, x1, y1 int, colorID Color)
+	ScrollUpLine()
 }
 
 type ModeType int
