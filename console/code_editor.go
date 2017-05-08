@@ -30,7 +30,7 @@ func (c *codeEditor) HandleEvent(event sdl.Event) error {
 			c.console.SetMode(RUNTIME)
 		}
 	default:
-		fmt.Printf("Some event: %#v \n", event)
+		//fmt.Printf("Some event: %#v \n", event)
 	}
 
 	return nil

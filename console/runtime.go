@@ -30,7 +30,7 @@ func (r *runtime) HandleEvent(event sdl.Event) error {
 			r.console.SetMode(CLI)
 		}
 	default:
-		fmt.Printf("Some event: %#v \n", event)
+		//fmt.Printf("Some event: %#v \n", event)
 	}
 
 	return nil

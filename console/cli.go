@@ -56,23 +56,31 @@ func (c *cli) HandleEvent(event sdl.Event) error {
 			// c.console.SetMode(CODE_EDITOR)
 		}
 	default:
-		fmt.Printf("Some event: %#v \n", event)
+		//fmt.Printf("Some event: %#v \n", event)
 	}
 
 	return nil
 }
 
+// getCmdCharIndex - returns relative position in command string that cursor currently is
+func (c *cli) getCmdCharIndex() int {
+	return int(c.cursor.x-c.cmdPos.x) + int(((c.cursor.y - c.cmdPos.y) * c.maxLineLen))
+}
+
 func (c *cli) cmdInsert(t string) {
+	if len(c.cmd) >= _maxCmdLen {
+		return
+	}
 	if c.cmd == "" {
 		c.cmd = t
 	} else {
 		// should insert text relative to cursor
-		curpos := int(c.cursor.x-c.cmdPos.x) + int(((c.cursor.y - c.cmdPos.y) * c.maxLineLen))
+		charIndex := c.getCmdCharIndex()
 		// check if cursor if at end of cmd string
-		if int(curpos) < len(c.cmd) {
-			newCmd := c.cmd[0:curpos]
+		if int(charIndex) < len(c.cmd) {
+			newCmd := c.cmd[0:charIndex]
 			newCmd += t
-			newCmd += c.cmd[curpos:]
+			newCmd += c.cmd[charIndex:]
 			c.cmd = newCmd
 		} else {
 			// append to end
@@ -88,14 +96,13 @@ func (c *cli) cmdDelete() {
 		return
 	}
 	// should delete text relative to cursor
-	curpos := int(c.cursor.x-c.cmdPos.x) + int(((c.cursor.y - c.cmdPos.y) * c.maxLineLen))
+	charIndex := int(c.cursor.x-c.cmdPos.x) + int(((c.cursor.y - c.cmdPos.y) * c.maxLineLen))
 
-	newCmd := c.cmd[0:curpos]
-	if int(curpos) < len(c.cmd) {
-		newCmd += c.cmd[curpos+1:]
+	newCmd := c.cmd[0:charIndex]
+	if int(charIndex) < len(c.cmd) {
+		newCmd += c.cmd[charIndex+1:]
 	}
 	c.cmd = newCmd
-	// don't move cursor
 }
 
 func (c *cli) cmdBackspace() {
@@ -123,8 +130,11 @@ func (c *cli) cmdBackspace() {
 }
 
 func (c *cli) cursorLeft() {
+	// if at beginning of command - can't move left
+	if c.getCmdCharIndex() == 0 {
+		return
+	}
 	c.cursor.x--
-	fmt.Printf("TEMP: c.cmdPos: %#v c.cursor: %#v\n", c.cmdPos, c.cursor)
 	if c.cursor.x < c.cmdPos.x {
 		c.cursor.x = c.maxLineLen + c.cmdPos.x - 1
 		c.cursor.y--
@@ -135,6 +145,10 @@ func (c *cli) cursorLeft() {
 }
 
 func (c *cli) cursorRight() {
+	// if at end of command - can't move right
+	if c.getCmdCharIndex() >= len(c.cmd) {
+		return
+	}
 	c.cursor.x++
 	if c.cursor.x >= c.maxLineLen+c.cmdPos.x {
 		c.cursor.x = c.cmdPos.x
@@ -157,12 +171,17 @@ func (c *cli) Init() error {
 	c.PixelBuffer.Print("(C) 2017 @TELECODA")
 	c.PixelBuffer.Print("TYPE HELP FOR HELP")
 
-	currPos := c.GetCursor()
-	c.cmdPos.x = 0
-	c.cmdPos.y = currPos.y
-	c.cursor.pos = c.cmdPos
-	c.cursor.pos.x = 2
+	c.initCursor()
 	return nil
+}
+
+func (c *cli) initCursor() {
+	currPos := c.GetCursor()
+	// cmdPos is location of first char of command on screen
+	// cursor is current location of cursor on screen
+	c.cursor.pos = currPos
+	c.cursor.pos.x = 2
+	c.cmdPos = c.cursor.pos
 }
 
 func (c *cli) Update() error {
@@ -171,9 +190,6 @@ func (c *cli) Update() error {
 
 func (c *cli) Render() error {
 	// render text
-
-	// set text cursor pos
-	//c.PixelBuffer.Cursor(5, 10)
 	lines := c.getCmdLines()
 	c.clearCmd(len(lines))
 	c.renderCmd(lines)
