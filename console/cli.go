@@ -3,6 +3,8 @@ package console
 import (
 	"fmt"
 
+	"strings"
+
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -55,7 +57,7 @@ func (c *cli) HandleEvent(event sdl.Event) error {
 		case sdl.K_RIGHT:
 			c.cursorRight()
 		case sdl.K_RETURN:
-			c.cmdExec()
+			c.cmdEnter()
 		}
 	default:
 		//fmt.Printf("Some event: %#v \n", event)
@@ -132,21 +134,43 @@ func (c *cli) cmdBackspace() {
 	c.cursorLeft()
 }
 
-// cmdExec - execute current command entered
-func (c *cli) cmdExec() {
+// cmdEnter - parse and execute command entered
+func (c *cli) cmdEnter() {
 	// redraw without cursor
 	c.cursor.on = false
 	lines := c.getCmdLines()
 	c.clearCmd(len(lines))
 	c.renderCmd(lines, false)
-	if c.cmd != "" {
+	err := c.cmdExec(c.cmd)
+	if err != nil {
 		c.Color(PINK)
 		c.Print("")
-		c.Print("SYNTAX ERROR")
-	} else {
-		c.Print("")
+		c.Print(err.Error())
 	}
 	c.initCmd()
+}
+
+func (c *cli) cmdExec(statement string) error {
+	// parse command entered
+	cmd, err := c.cmdParse(statement)
+	if err != nil {
+		return err
+	}
+	c.Print("")
+	return cmd.Exec(c.PixelBuffer)
+}
+
+func (c *cli) cmdParse(statement string) (Command, error) {
+
+	// split statement into tokens
+	tokens := strings.Split(statement, " ")
+	if len(tokens) == 0 {
+		return nil, nil
+	}
+	if cmd, ok := commands[tokens[0]]; ok {
+		return cmd, nil
+	}
+	return nil, fmt.Errorf("SYNTAX ERROR")
 }
 
 func (c *cli) cursorLeft() {
@@ -197,7 +221,7 @@ func (c *cli) Init() error {
 	_console.logo.Blit(logoRect, pb.pixelSurface, screenRect)
 
 	title := fmt.Sprintf("PICO-GO %s", _version)
-	c.Cursor(0, 3)
+	c.Cursor(0, 4)
 	c.Color(LIGHT_GRAY)
 	c.PixelBuffer.Print(title)
 
@@ -278,7 +302,7 @@ func (c *cli) renderCmd(lines []string, resetCursor bool) {
 	currentPos := c.cmdPos
 	c.Color(WHITE)
 	c.Cursor(0, currentPos.y)
-	c.PrintAtWithColor(">", 0, currentPos.y*8, WHITE)
+	c.PrintAtWithColor(">", 0, currentPos.y*_charHeight, WHITE)
 	c.Cursor(2, currentPos.y)
 	for i := range lines {
 		if currentPos.y < c.lastLine {

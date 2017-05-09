@@ -179,7 +179,7 @@ func (p *pixelBuffer) ScrollUpLine() {
 func (p *pixelBuffer) Print(str string) {
 	pixelPos := charToPixel(p.textCursor)
 
-	p.PrintAtWithColor(str, int(pixelPos.x), int(pixelPos.y), p.printColor)
+	p.PrintAtWithColor(str, 0, int(pixelPos.y), p.printColor)
 
 	// increase printPos by 1 line
 	p.textCursor.y++

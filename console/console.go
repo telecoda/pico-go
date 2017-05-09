@@ -18,7 +18,7 @@ const (
 	_logoWidth   = 57
 	_logoHeight  = 24
 	_charWidth   = 4
-	_charHeight  = 8
+	_charHeight  = 6
 	_maxCmdLen   = 254
 	_cursorFlash = time.Duration(500 * time.Millisecond)
 )
