@@ -6,6 +6,8 @@ import (
 
 	"os"
 
+	"sync"
+
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/sdl_image"
 	ttf "github.com/veandco/go-sdl2/sdl_ttf"
@@ -33,6 +35,7 @@ type Console interface {
 }
 
 type console struct {
+	sync.Mutex
 	Config
 
 	currentMode   ModeType
@@ -130,6 +133,8 @@ func NewConsole(cfg Config) (Console, error) {
 }
 
 func (c *console) SetMode(newMode ModeType) {
+	c.Lock()
+	defer c.Unlock()
 	c.currentMode = newMode
 }
 

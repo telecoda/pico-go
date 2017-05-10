@@ -25,9 +25,9 @@ func (r *runtime) HandleEvent(event sdl.Event) error {
 	switch t := event.(type) {
 	case *sdl.KeyDownEvent:
 		switch t.Keysym.Sym {
-		case sdl.K_RIGHT:
-			fmt.Printf("Switching to cli\n")
-			r.console.SetMode(CLI)
+		// case sdl.K_RIGHT:
+		// 	fmt.Printf("Switching to cli\n")
+		// 	r.console.SetMode(CLI)
 		}
 	default:
 		//fmt.Printf("Some event: %#v \n", event)
@@ -76,9 +76,12 @@ func (r *runtime) HandleEvent(event sdl.Event) error {
 // 		fmt.Printf("Joystick %d disconnected\n", t.Which)
 //	}
 
+var count = 0
+
 func (r *runtime) Init() error {
 	r.PixelBuffer.ClsWithColor(0)
 	r.PixelBuffer.PrintAtWithColor("Runtime Print Test", 10, 10, RED)
+	count = 0
 	return nil
 }
 
@@ -87,5 +90,9 @@ func (r *runtime) Update() error {
 }
 
 func (r *runtime) Render() error {
+
+	count++
+	r.PixelBuffer.Print(fmt.Sprintf("c:%d", count))
+
 	return nil
 }

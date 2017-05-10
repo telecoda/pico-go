@@ -1,8 +1,6 @@
 package console
 
 import (
-	"fmt"
-
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -25,9 +23,9 @@ func (c *codeEditor) HandleEvent(event sdl.Event) error {
 	switch t := event.(type) {
 	case *sdl.KeyDownEvent:
 		switch t.Keysym.Sym {
-		case sdl.K_RIGHT:
-			fmt.Printf("Switching to runtime\n")
-			c.console.SetMode(RUNTIME)
+		// case sdl.K_RIGHT:
+		// 	fmt.Printf("Switching to runtime\n")
+		// 	c.console.SetMode(RUNTIME)
 		}
 	default:
 		//fmt.Printf("Some event: %#v \n", event)

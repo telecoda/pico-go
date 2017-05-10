@@ -14,6 +14,7 @@ var commands = map[string]Command{
 	"LS":    NewDirCommand(),
 	"CD":    NewCDCommand(),
 	"MKDIR": NewMkDirCommand(),
+	"RUN":   NewRunCommand(),
 }
 
 type command struct {
@@ -43,6 +44,10 @@ type cdCommand struct {
 }
 
 type mkdirCommand struct {
+	command
+}
+
+type runCommand struct {
 	command
 }
 
@@ -214,4 +219,28 @@ func (m *mkdirCommand) Exec(pb PixelBuffer, statement string) error {
 	}
 
 	return nil
+}
+
+func NewRunCommand() Command {
+	c := &runCommand{
+		command{
+
+			Name: "RUN",
+			Desc: "Run code",
+		},
+	}
+	return c
+}
+
+func (r *runCommand) Exec(pb PixelBuffer, statement string) error {
+	pb.Color(GREEN)
+	pb.Print("RUNNING...")
+
+	if runMode, ok := _console.modes[RUNTIME]; ok {
+		runMode.Init()
+		_console.SetMode(RUNTIME)
+		return nil
+	}
+	panic("Unable to fetch RUNTIME mode!")
+
 }
