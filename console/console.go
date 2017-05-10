@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"os"
+
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/sdl_image"
 	ttf "github.com/veandco/go-sdl2/sdl_ttf"
@@ -22,6 +24,35 @@ const (
 	_maxCmdLen   = 254
 	_cursorFlash = time.Duration(500 * time.Millisecond)
 )
+
+type Console interface {
+	LoadCart(path string) error
+	Run() error
+	Destroy()
+	SetMode(newMode ModeType)
+}
+
+type console struct {
+	Config
+
+	currentMode   ModeType
+	secondaryMode ModeType
+	modes         map[ModeType]Mode
+	hasQuit       bool
+
+	// files
+	baseDir    string
+	currentDir string
+
+	cart Cartridge
+
+	window   *sdl.Window
+	renderer *sdl.Renderer
+
+	palette
+	font *ttf.Font
+	logo *sdl.Surface
+}
 
 func NewConsole(cfg Config) (Console, error) {
 	_console = &console{
@@ -84,6 +115,13 @@ func NewConsole(cfg Config) (Console, error) {
 		return nil, err
 	}
 	_console.modes = modes
+
+	// init files
+	_console.currentDir = "/"
+	_console.baseDir, err = os.Getwd()
+	if err != nil {
+		return nil, err
+	}
 
 	// text input
 	sdl.StartTextInput()
@@ -159,6 +197,10 @@ func (c *console) Run() error {
 	}
 
 	return nil
+}
+
+func (c *console) Quit() {
+	c.hasQuit = true
 }
 
 // toggleCLI - toggle between CLI and secondary mode

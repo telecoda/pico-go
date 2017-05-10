@@ -58,6 +58,10 @@ func (c *cli) HandleEvent(event sdl.Event) error {
 			c.cursorRight()
 		case sdl.K_RETURN:
 			c.cmdEnter()
+		case sdl.K_q:
+			if t.Keysym.Mod == sdl.KMOD_CTRL {
+				c.console.Quit()
+			}
 		}
 	default:
 		//fmt.Printf("Some event: %#v \n", event)
@@ -75,6 +79,7 @@ func (c *cli) cmdInsert(t string) {
 	if len(c.cmd) >= _maxCmdLen {
 		return
 	}
+	t = strings.ToUpper(t)
 	if c.cmd == "" {
 		c.cmd = t
 	} else {
@@ -157,7 +162,7 @@ func (c *cli) cmdExec(statement string) error {
 		return err
 	}
 	c.Print("")
-	return cmd.Exec(c.PixelBuffer)
+	return cmd.Exec(c.PixelBuffer, statement)
 }
 
 func (c *cli) cmdParse(statement string) (Command, error) {

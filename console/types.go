@@ -2,7 +2,6 @@ package console
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
-	ttf "github.com/veandco/go-sdl2/sdl_ttf"
 )
 
 type Config struct {
@@ -51,31 +50,6 @@ const (
 	SFX_EDITOR
 	MUSIC_EDITOR
 )
-
-type Console interface {
-	LoadCart(path string) error
-	Run() error
-	Destroy()
-	SetMode(newMode ModeType)
-}
-
-type console struct {
-	Config
-
-	currentMode   ModeType
-	secondaryMode ModeType
-	modes         map[ModeType]Mode
-	hasQuit       bool
-
-	cart Cartridge
-
-	window   *sdl.Window
-	renderer *sdl.Renderer
-
-	palette
-	font *ttf.Font
-	logo *sdl.Surface
-}
 
 type Cartridge interface {
 	Init()
