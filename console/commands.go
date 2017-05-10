@@ -9,15 +9,17 @@ import (
 
 // init command list
 var commands = map[string]Command{
-	"HELP": NewHelpCommand(),
-	"DIR":  NewDirCommand(),
-	"LS":   NewDirCommand(),
-	"CD":   NewCDCommand(),
+	"HELP":  NewHelpCommand(),
+	"DIR":   NewDirCommand(),
+	"LS":    NewDirCommand(),
+	"CD":    NewCDCommand(),
+	"MKDIR": NewMkDirCommand(),
 }
 
 type command struct {
 	Name string
 	Desc string
+	Help string
 }
 
 type Command interface {
@@ -37,6 +39,10 @@ type dirCommand struct {
 }
 
 type cdCommand struct {
+	command
+}
+
+type mkdirCommand struct {
 	command
 }
 
@@ -138,6 +144,7 @@ func (c *cdCommand) Exec(pb PixelBuffer, statement string) error {
 		newDir := strings.ToLower(tokens[1])
 
 		newDir = _console.currentDir + "/" + newDir + "/"
+		// TODO get code working for case insensitive dir names
 		if err := os.Chdir(_console.baseDir + newDir); err != nil {
 			pb.Color(WHITE)
 			pb.Print("DIRECTORY NOT FOUND")
@@ -169,6 +176,42 @@ func (c *cdCommand) Exec(pb PixelBuffer, statement string) error {
 
 	}
 	pwd(pb)
+
+	return nil
+}
+
+func NewMkDirCommand() Command {
+	c := &mkdirCommand{
+		command{
+
+			Name: "MKDIR",
+			Desc: "Make directory",
+			Help: "MAKE [NAME]",
+		},
+	}
+	return c
+}
+
+func (m *mkdirCommand) Exec(pb PixelBuffer, statement string) error {
+
+	// split statement into tokens
+	tokens := strings.Split(statement, " ")
+	if len(tokens) < 2 {
+		pb.Color(LIGHT_GRAY)
+		pb.Print(m.Help)
+		return nil
+	} else {
+		newDir := strings.ToLower(tokens[1])
+
+		newDir = _console.baseDir + _console.currentDir + newDir
+		// TODO get code working for case insensitive dir names
+		if err := os.Mkdir(newDir, 0700); err != nil {
+			pb.Color(WHITE)
+			pb.Print("MKDIR: FAILED")
+			fmt.Printf("TEMP: err: %s\n", err)
+			return nil
+		}
+	}
 
 	return nil
 }
