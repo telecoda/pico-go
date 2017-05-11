@@ -1,24 +1,29 @@
 package console
 
 import (
-	"fmt"
-
 	"github.com/veandco/go-sdl2/sdl"
 )
 
 type runtime struct {
 	console *console
 	PixelBuffer
+	Cartridge
 }
 
-func newRuntimeMode(c *console) Mode {
+func newRuntimeMode(c *console) Runtime {
 	runtime := &runtime{
 		console: c,
 	}
 	pb, _ := newPixelBuffer(c.Config)
 
 	runtime.PixelBuffer = pb
+
 	return runtime
+}
+
+func (r *runtime) LoadCart(cart Cartridge) error {
+	r.Cartridge = cart
+	return nil
 }
 
 func (r *runtime) HandleEvent(event sdl.Event) error {
@@ -79,20 +84,23 @@ func (r *runtime) HandleEvent(event sdl.Event) error {
 var count = 0
 
 func (r *runtime) Init() error {
-	r.PixelBuffer.ClsWithColor(0)
-	r.PixelBuffer.PrintAtWithColor("Runtime Print Test", 10, 10, RED)
-	count = 0
+	r.Cartridge.Init(r.PixelBuffer)
+	// r.PixelBuffer.ClsWithColor(0)
+	// r.PixelBuffer.PrintAtWithColor("Runtime Print Test", 10, 10, RED)
+	// count = 0
 	return nil
 }
 
 func (r *runtime) Update() error {
+	r.Cartridge.Update()
 	return nil
 }
 
 func (r *runtime) Render() error {
 
-	count++
-	r.PixelBuffer.Print(fmt.Sprintf("c:%d", count))
+	r.Cartridge.Render()
+	// count++
+	// r.PixelBuffer.Print(fmt.Sprintf("c:%d", count))
 
 	return nil
 }

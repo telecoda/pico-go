@@ -4,6 +4,7 @@ import (
 	"flag"
 
 	"github.com/telecoda/pico-go/console"
+	"github.com/telecoda/pico-go/demo"
 )
 
 var optVerbose bool
@@ -19,21 +20,27 @@ func main() {
 	config := console.Config{
 		ConsoleWidth:  128,
 		ConsoleHeight: 128,
-		WindowWidth:   800,
-		WindowHeight:  800,
+		WindowWidth:   400,
+		WindowHeight:  400,
 		FPS:           60,
 		Verbose:       optVerbose,
 	}
 
 	// Create virtual console
-	c, err := console.NewConsole(config)
+	con, err := console.NewConsole(config)
 	if err != nil {
 		panic(err)
 	}
 
-	defer c.Destroy()
+	defer con.Destroy()
 
-	if err := c.Run(); err != nil {
+	cart := demo.NewCart()
+
+	if err := con.LoadCart(cart); err != nil {
+		panic(err)
+	}
+
+	if err := con.Run(); err != nil {
 		panic(err)
 	}
 }

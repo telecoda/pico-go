@@ -52,7 +52,7 @@ const (
 )
 
 type Cartridge interface {
-	Init()
+	Init(pb PixelBuffer)
 	Render()
 	Update()
 }
@@ -66,6 +66,11 @@ type Mode interface {
 	Update() error
 	HandleEvent(event sdl.Event) error
 	PixelBuffer
+}
+
+type Runtime interface {
+	Mode
+	LoadCart(cart Cartridge) error
 }
 
 type PixelBuffer interface {

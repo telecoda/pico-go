@@ -28,7 +28,7 @@ const (
 )
 
 type Console interface {
-	LoadCart(path string) error
+	LoadCart(cart Cartridge) error
 	Run() error
 	Destroy()
 	SetMode(newMode ModeType)
@@ -138,7 +138,15 @@ func (c *console) SetMode(newMode ModeType) {
 	c.currentMode = newMode
 }
 
-func (c *console) LoadCart(path string) error {
+func (c *console) LoadCart(cart Cartridge) error {
+	c.cart = cart
+	// init runtime mode
+	runtime := newRuntimeMode(c)
+	if err := runtime.LoadCart(cart); err != nil {
+		return err
+	}
+
+	c.modes[RUNTIME] = runtime
 	return nil
 }
 

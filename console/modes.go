@@ -8,7 +8,7 @@ func (c *console) initModes() (map[ModeType]Mode, error) {
 	modes := map[ModeType]Mode{
 		CLI:         newCLIMode(c),
 		CODE_EDITOR: newCodeEditorMode(c),
-		RUNTIME:     newRuntimeMode(c),
+		//		RUNTIME:     newRuntimeMode(c),
 	}
 
 	for _, mode := range modes {
