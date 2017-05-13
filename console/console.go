@@ -97,7 +97,8 @@ func NewConsole(cfg Config) (Console, error) {
 	_console.palette = initPico8Palette()
 
 	// init font
-	font, err := ttf.OpenFont("./fonts/PICO-8.ttf", 4)
+	// TOOD don't load assets from relative paths
+	font, err := ttf.OpenFont("../../pico-go/fonts/PICO-8.ttf", 4)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading font:%s", err)
 	}
@@ -105,7 +106,8 @@ func NewConsole(cfg Config) (Console, error) {
 	_console.font = font
 
 	// init logo
-	logo, err := img.Load("./images/pico-go-logo.png")
+	// TOOD don't load assets from relative paths
+	logo, err := img.Load("../../pico-go/images/pico-go-logo.png")
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
 	}
@@ -150,7 +152,8 @@ func (c *console) LoadCart(cart Cartridge) error {
 	return nil
 }
 
-var timeBudget int64
+var runtimeTimeBudget int64
+var modesTimeBudget int64
 var lastFrame time.Time
 var startFrame time.Time
 var endFrame time.Time
@@ -160,7 +163,8 @@ func (c *console) Run() error {
 	// poll events
 
 	endFrame = time.Now() // init end frame
-	timeBudget = time.Duration(1*time.Second).Nanoseconds() / int64(c.Config.FPS)
+	runtimeTimeBudget = time.Duration(1*time.Second).Nanoseconds() / int64(c.Config.FPS)
+	modesTimeBudget = time.Duration(1*time.Second).Nanoseconds() / 60
 	for !c.hasQuit {
 		startFrame = time.Now() // used for framerate timing
 
@@ -201,8 +205,7 @@ func (c *console) Run() error {
 			mode.Flip()
 
 			// lock framerate
-			lockFps()
-
+			c.lockFps()
 		} else {
 			return fmt.Errorf("Mode :%d not found in console.modes", c.currentMode)
 		}
@@ -227,7 +230,12 @@ func (c *console) toggleCLI() {
 }
 
 // lockFps - locks rendering to a steady framerate
-func lockFps() float64 {
+func (c *console) lockFps() float64 {
+
+	var timeBudget = runtimeTimeBudget
+	if c.currentMode != RUNTIME {
+		timeBudget = modesTimeBudget
+	}
 	now := time.Now()
 	// calc time to process frame so since start
 	procTime := now.Sub(startFrame)

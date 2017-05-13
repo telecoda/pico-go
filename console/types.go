@@ -51,13 +51,15 @@ const (
 	MUSIC_EDITOR
 )
 
+type Configger interface {
+	GetConfig() Config
+}
+
 type Cartridge interface {
+	Configger
 	Init(pb PixelBuffer)
 	Render()
 	Update()
-}
-
-type cartridge struct {
 }
 
 type Mode interface {
