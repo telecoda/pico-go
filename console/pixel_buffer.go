@@ -10,7 +10,8 @@ type mode struct {
 
 type pixelBuffer struct {
 	textCursor   pos // note print pos in char/line pos not pixel pos
-	printColor   Color
+	fgColor      Color
+	bgColor      Color
 	charCols     int
 	charRows     int
 	pixelSurface *sdl.Surface // offscreen pixel buffer
@@ -39,7 +40,8 @@ func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 
 	p.textCursor.x = 0
 	p.textCursor.y = 0
-	p.printColor = WHITE
+	p.fgColor = WHITE
+	p.bgColor = BLACK
 
 	p.charCols = int(int32(cfg.ConsoleWidth) / _charWidth)
 	p.charRows = int(int32(cfg.ConsoleHeight) / _charHeight)
@@ -75,18 +77,18 @@ func (p *pixelBuffer) Render() error {
 
 // Cls - clears pixel buffer
 func (p *pixelBuffer) Cls() {
-	_, color := _console.palette.getRGBA(0)
+	_, color := _console.palette.getRGBA(p.bgColor)
 	p.pixelSurface.FillRect(p.psRect, color)
 }
 
 // ClsWithColor - fill pixel buffer with a set color
 func (p *pixelBuffer) ClsWithColor(colorID Color) {
-	_, color := _console.palette.getRGBA(colorID)
-	p.pixelSurface.FillRect(p.psRect, color)
+	p.bgColor = colorID
+	p.Cls()
 }
 
 func (p *pixelBuffer) Color(colorID Color) {
-	p.printColor = colorID
+	p.fgColor = colorID
 }
 
 func (p *pixelBuffer) Cursor(x, y int) {
@@ -179,7 +181,7 @@ func (p *pixelBuffer) ScrollUpLine() {
 func (p *pixelBuffer) Print(str string) {
 	pixelPos := charToPixel(p.textCursor)
 
-	p.PrintAtWithColor(str, 0, int(pixelPos.y), p.printColor)
+	p.PrintAtWithColor(str, 0, int(pixelPos.y), p.fgColor)
 
 	// increase printPos by 1 line
 	p.textCursor.y++
@@ -191,7 +193,7 @@ func (p *pixelBuffer) Print(str string) {
 
 // PrintAtWithColor a string of characters to the screen at position with color
 func (p *pixelBuffer) PrintAtWithColor(str string, x, y int, colorID Color) {
-	p.printColor = colorID
+	p.fgColor = colorID
 	if str != "" {
 		rgba, _ := _console.palette.getRGBA(colorID)
 		sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}

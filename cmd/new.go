@@ -46,7 +46,6 @@ This will generate all the scaffolding files to run your project with pico-go.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("pico-go Create new project:")
-		printBanner()
 		if len(args) != 1 {
 			er("`new` command needs a name for the project")
 		}

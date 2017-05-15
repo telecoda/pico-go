@@ -15,7 +15,7 @@ type cartridge struct {
 	counter int // just used in demo code
 	x       int
 	y       int
-	speedX  int
+	speedY  int
 }
 
 // NewCart - initialise a struct implementing Cartridge interface
@@ -39,22 +39,22 @@ func (c *cartridge) Init(pb console.PixelBuffer) {
 	c.ClsWithColor(console.BLUE)
 
 	c.counter = 0
-	c.x = 50
-	c.y = 50
-	c.speedX = 2
+	c.x = 40
+	c.y = 0
+	c.speedY = 2
 }
 
 // Update -  called once every frame
 func (c *cartridge) Update() {
-	c.x += c.speedX
-	if c.x < 0 {
-		c.x = 0
-		c.speedX = -c.speedX
+	c.y += c.speedY
+	if c.y < 0 {
+		c.y = 0
+		c.speedY = -c.speedY
 	}
 
-	if c.x > c.cfg.ConsoleWidth {
-		c.x = c.cfg.ConsoleWidth
-		c.speedX = -c.speedX
+	if c.y > c.cfg.ConsoleHeight {
+		c.y = c.cfg.ConsoleHeight
+		c.speedY = -c.speedY
 	}
 
 	c.counter++
@@ -63,5 +63,5 @@ func (c *cartridge) Update() {
 // Render - called once every frame
 func (c *cartridge) Render() {
 	c.Cls()
-	c.PrintAtWithColor(fmt.Sprintf("c:%d", c.counter), c.x, c.y, console.RED)
+	c.PrintAtWithColor(fmt.Sprintf("counter:%d", c.counter), c.x, c.y, console.WHITE)
 }
