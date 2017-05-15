@@ -16,6 +16,7 @@ type pixelBuffer struct {
 	charRows     int
 	pixelSurface *sdl.Surface // offscreen pixel buffer
 	psRect       *sdl.Rect    // rect of pixelSurface
+	renderer     *sdl.Renderer
 }
 
 type pos struct {
@@ -46,6 +47,10 @@ func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 	p.charCols = int(int32(cfg.ConsoleWidth) / _charWidth)
 	p.charRows = int(int32(cfg.ConsoleHeight) / _charHeight)
 
+	p.renderer, err = sdl.CreateSoftwareRenderer(p.pixelSurface)
+	if err != nil {
+		return nil, err
+	}
 	return p, nil
 }
 
@@ -177,7 +182,7 @@ func (p *pixelBuffer) ScrollUpLine() {
 	p.textCursor.y = p.charRows - 2
 }
 
-// Print string of characters to the screen
+// Print - prints string of characters to the screen with drawing color
 func (p *pixelBuffer) Print(str string) {
 	pixelPos := charToPixel(p.textCursor)
 
@@ -191,7 +196,12 @@ func (p *pixelBuffer) Print(str string) {
 	}
 }
 
-// PrintAtWithColor a string of characters to the screen at position with color
+// PrintAt - prints a string of characters to the screen at position with drawing color
+func (p *pixelBuffer) PrintAt(str string, x, y int) {
+	p.PrintAtWithColor(str, x, y, p.fgColor)
+}
+
+// PrintAtWithColor - prints a string of characters to the screen at position with color
 func (p *pixelBuffer) PrintAtWithColor(str string, x, y int, colorID Color) {
 	p.fgColor = colorID
 	if str != "" {
@@ -204,7 +214,6 @@ func (p *pixelBuffer) PrintAtWithColor(str string, x, y int, colorID Color) {
 		defer textSurface.Free()
 
 		// copy text surface to offscreen buffer
-
 		tRect := &sdl.Rect{X: 0, Y: 0, W: textSurface.W, H: textSurface.H}
 		posRect := &sdl.Rect{X: int32(x), Y: int32(y), W: textSurface.W, H: textSurface.H}
 
@@ -215,14 +224,51 @@ func (p *pixelBuffer) PrintAtWithColor(str string, x, y int, colorID Color) {
 
 }
 
+// Line - line in drawing color
+func (p *pixelBuffer) Line(x0, y0, x1, y1 int) {
+	p.LineWithColor(x0, y0, x1, y1, p.fgColor)
+}
+
+// LineWithColor - line with color
+func (p *pixelBuffer) LineWithColor(x0, y0, x1, y1 int, colorID Color) {
+	p.fgColor = colorID
+	rgba, _ := _console.palette.getRGBA(p.fgColor)
+	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
+	p.renderer.DrawLine(x0, y0, x1, y1)
+}
+
+// PSet - pixel set in drawing color
+func (p *pixelBuffer) PSet(x0, y0 int) {
+	p.PSetWithColor(x0, y0, p.fgColor)
+}
+
+// PSetWithColor - pixel set with color
+func (p *pixelBuffer) PSetWithColor(x0, y0 int, colorID Color) {
+	p.fgColor = colorID
+	rgba, _ := _console.palette.getRGBA(p.fgColor)
+	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
+	p.renderer.DrawPoint(x0, y0)
+}
+
+// Rect - draw rectangle with drawing color
+func (p *pixelBuffer) Rect(x0, y0, x1, y1 int) {
+	rect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - x0)}
+	rgba, _ := _console.palette.getRGBA(p.fgColor)
+	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
+	p.renderer.DrawRect(rect)
+}
+
+// RectFill - fill rectangle with drawing color
+func (p *pixelBuffer) RectFill(x0, y0, x1, y1 int) {
+	p.RectFillWithColor(x0, y0, x1, y1, p.fgColor)
+}
+
+// RectFillWithColor - fill rectangle with color
 func (p *pixelBuffer) RectFillWithColor(x0, y0, x1, y1 int, colorID Color) {
-
+	p.fgColor = colorID
 	_, color := _console.palette.getRGBA(colorID)
-
 	fRect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - x0)}
-
 	p.pixelSurface.FillRect(fRect, color)
-
 }
 
 // Destroy cleans up any resources at end

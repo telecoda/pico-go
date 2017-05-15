@@ -23,21 +23,29 @@ type Color int
 */
 
 type PicoGoAPI interface {
+
+	// Common graphics functions
 	Cls()                       // Clear screen
-	ClsWithColor(colorID Color) // Clear screen
+	ClsWithColor(colorID Color) // Clear screen with color
+	Color(colorID Color)        // Set drawing color (colour!!!)
+	Flip() error                // Copy graphics buffer to screen
 
-	Color(colorID Color) // Set drawing color (colour!!!)
-	Cursor(x, y int)     // Set text cursor
-
-	Flip() error // Copy graphics buffer to screen
-
+	// Text/Printing
+	Cursor(x, y int) // Set text cursor
 	GetCursor() pos
-	Print(str string) // Print a string of characters to the screen at default pos
-	//PrintAt(str string, x, y int)                   // Print a string of characters to the screen at position
+	Print(str string)                                     // Print a string of characters to the screen at default pos
+	PrintAt(str string, x, y int)                         // Print a string of characters to the screen at position
 	PrintAtWithColor(str string, x, y int, colorID Color) // Print a string of characters to the screen at position with color
-	//RectFill(x0, y0, x1, y1 int)
-	RectFillWithColor(x0, y0, x1, y1 int, colorID Color)
 	ScrollUpLine()
+
+	// drawing primatives
+	Line(x0, y0, x1, y1 int)
+	LineWithColor(x0, y0, x1, y1 int, colorID Color)
+	PSet(x0, y0 int)
+	PSetWithColor(x0, y0 int, colorID Color)
+	Rect(x0, y0, x1, y1 int)
+	RectFill(x0, y0, x1, y1 int)
+	RectFillWithColor(x0, y0, x1, y1 int, colorID Color)
 }
 
 type ModeType int
