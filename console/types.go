@@ -30,10 +30,6 @@ type PicoGoAPI interface {
 	Drawer
 }
 
-type Paletter interface {
-	Color(colorID Color) // Set drawing color (colour!!!)
-}
-
 type Clearer interface {
 	Cls()                       // Clear screen
 	ClsWithColor(colorID Color) // Clear screen with color
@@ -43,11 +39,16 @@ type Drawer interface {
 	// drawing primatives
 	Line(x0, y0, x1, y1 int)
 	LineWithColor(x0, y0, x1, y1 int, colorID Color)
+	PGet(x0, y0 int) Color
 	PSet(x0, y0 int)
 	PSetWithColor(x0, y0 int, colorID Color)
 	Rect(x0, y0, x1, y1 int)
 	RectFill(x0, y0, x1, y1 int)
 	RectFillWithColor(x0, y0, x1, y1 int, colorID Color)
+}
+
+type Paletter interface {
+	Color(colorID Color) // Set drawing color (colour!!!)
 }
 
 type Printer interface {
@@ -106,12 +107,3 @@ type size struct {
 	width  int
 	height int
 }
-
-type rgba struct {
-	R uint8
-	G uint8
-	B uint8
-	A uint8
-}
-
-type palette map[Color]rgba

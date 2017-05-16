@@ -237,6 +237,22 @@ func (p *pixelBuffer) LineWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.renderer.DrawLine(x0, y0, x1, y1)
 }
 
+// PGet - pixel get
+func (p *pixelBuffer) PGet(x0, y0 int) Color {
+	pixels := p.pixelSurface.Pixels()
+	// get specific pixel
+	w := _console.ConsoleWidth
+	offset := 4 * (y0*w + x0)
+	r := pixels[offset+3]
+	g := pixels[offset+2]
+	b := pixels[offset+1]
+	a := pixels[offset+0]
+
+	rgba := rgba{R: r, G: g, B: b, A: a}
+
+	return _console.palette.getColor(rgba)
+}
+
 // PSet - pixel set in drawing color
 func (p *pixelBuffer) PSet(x0, y0 int) {
 	p.PSetWithColor(x0, y0, p.fgColor)
