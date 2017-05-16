@@ -8,6 +8,8 @@ import (
 
 	"sync"
 
+	"go/build"
+
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/sdl_image"
 	ttf "github.com/veandco/go-sdl2/sdl_ttf"
@@ -99,7 +101,7 @@ func NewConsole(cfg Config) (Console, error) {
 	// init palette
 	_console.palette = initPico8Palette()
 
-	goPath, _ := os.LookupEnv("GOPATH")
+	goPath, _ := build.Default.GOPATH
 
 	// init font
 	// TOOD don't load assets from relative paths

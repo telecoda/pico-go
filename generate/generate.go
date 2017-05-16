@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"go/build"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -33,7 +34,7 @@ func NewProject(projectName string) error {
 	}
 
 	// calculate name of project to be generated
-	goPath, _ := os.LookupEnv("GOPATH")
+	goPath := build.Default.GOPATH
 
 	if !strings.HasPrefix(projectPath, goPath) {
 		return fmt.Errorf("Project directory must be within $GOPATH: %s", goPath)
