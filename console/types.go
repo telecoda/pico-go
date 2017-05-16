@@ -37,12 +37,17 @@ type Clearer interface {
 
 type Drawer interface {
 	// drawing primatives
+	Circle(x, y, r int)
+	CircleWithColor(x, y, r int, colorID Color)
+	CircleFill(x, y, r int)
+	CircleFillWithColor(x, y, r int, colorID Color)
 	Line(x0, y0, x1, y1 int)
 	LineWithColor(x0, y0, x1, y1 int, colorID Color)
-	PGet(x0, y0 int) Color
-	PSet(x0, y0 int)
-	PSetWithColor(x0, y0 int, colorID Color)
+	PGet(x, y int) Color
+	PSet(x, y int)
+	PSetWithColor(x, y int, colorID Color)
 	Rect(x0, y0, x1, y1 int)
+	RectWithColor(x0, y0, x1, y1 int, colorID Color)
 	RectFill(x0, y0, x1, y1 int)
 	RectFillWithColor(x0, y0, x1, y1 int, colorID Color)
 }

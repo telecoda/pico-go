@@ -2,6 +2,7 @@ package console
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
+	gfx "github.com/veandco/go-sdl2/sdl_gfx"
 )
 
 type mode struct {
@@ -224,6 +225,36 @@ func (p *pixelBuffer) PrintAtWithColor(str string, x, y int, colorID Color) {
 
 }
 
+// Drawer methods
+
+// Circle - draw circle with drawing color
+func (p *pixelBuffer) Circle(x, y, r int) {
+	p.CircleWithColor(x, y, r, p.fgColor)
+}
+
+// CircleWithColor - draw circle with color
+func (p *pixelBuffer) CircleWithColor(x, y, r int, colorID Color) {
+	p.fgColor = colorID
+	rgba, _ := _console.palette.getRGBA(p.fgColor)
+	//	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
+	sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
+	gfx.CircleColor(p.renderer, x, y, r, sColor)
+}
+
+// CircleFill - fill circle with drawing color
+func (p *pixelBuffer) CircleFill(x, y, r int) {
+	p.CircleFillWithColor(x, y, r, p.fgColor)
+}
+
+// CircleFillWithColor - fill circle with color
+func (p *pixelBuffer) CircleFillWithColor(x, y, r int, colorID Color) {
+	p.fgColor = colorID
+	rgba, _ := _console.palette.getRGBA(p.fgColor)
+	//	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
+	sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
+	gfx.FilledCircleColor(p.renderer, x, y, r, sColor)
+}
+
 // Line - line in drawing color
 func (p *pixelBuffer) Line(x0, y0, x1, y1 int) {
 	p.LineWithColor(x0, y0, x1, y1, p.fgColor)
@@ -238,11 +269,11 @@ func (p *pixelBuffer) LineWithColor(x0, y0, x1, y1 int, colorID Color) {
 }
 
 // PGet - pixel get
-func (p *pixelBuffer) PGet(x0, y0 int) Color {
+func (p *pixelBuffer) PGet(x, y int) Color {
 	pixels := p.pixelSurface.Pixels()
 	// get specific pixel
 	w := _console.ConsoleWidth
-	offset := 4 * (y0*w + x0)
+	offset := 4 * (y*w + x)
 	r := pixels[offset+3]
 	g := pixels[offset+2]
 	b := pixels[offset+1]
@@ -254,8 +285,8 @@ func (p *pixelBuffer) PGet(x0, y0 int) Color {
 }
 
 // PSet - pixel set in drawing color
-func (p *pixelBuffer) PSet(x0, y0 int) {
-	p.PSetWithColor(x0, y0, p.fgColor)
+func (p *pixelBuffer) PSet(x, y int) {
+	p.PSetWithColor(x, y, p.fgColor)
 }
 
 // PSetWithColor - pixel set with color
@@ -268,8 +299,14 @@ func (p *pixelBuffer) PSetWithColor(x0, y0 int, colorID Color) {
 
 // Rect - draw rectangle with drawing color
 func (p *pixelBuffer) Rect(x0, y0, x1, y1 int) {
-	rect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - x0)}
+	p.RectWithColor(x0, y0, x1, y1, p.fgColor)
+}
+
+// RectWithColor - draw rectangle with color
+func (p *pixelBuffer) RectWithColor(x0, y0, x1, y1 int, colorID Color) {
+	p.fgColor = colorID
 	rgba, _ := _console.palette.getRGBA(p.fgColor)
+	rect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - x0)}
 	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
 	p.renderer.DrawRect(rect)
 }
