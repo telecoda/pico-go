@@ -324,6 +324,16 @@ func (p *pixelBuffer) RectFillWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.pixelSurface.FillRect(fRect, color)
 }
 
+// Spriter methods
+
+func (p *pixelBuffer) Sprite(n, x, y, w, h int) {
+	sw := int32(w) * _spriteWidth
+	sh := int32(h) * _spriteHeight
+	srcRect := &sdl.Rect{X: 0, Y: 0, W: sw, H: sh}
+	screenRect := &sdl.Rect{X: int32(x), Y: int32(y), W: sw, H: sh}
+	_console.sprites.Blit(srcRect, p.pixelSurface, screenRect)
+}
+
 // Destroy cleans up any resources at end
 func (p *pixelBuffer) Destroy() {
 	p.pixelSurface.Free()

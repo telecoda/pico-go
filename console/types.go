@@ -25,9 +25,10 @@ type Color int
 type PicoGoAPI interface {
 	Flip() error // Copy graphics buffer to screen
 	Clearer
+	Drawer
 	Paletter
 	Printer
-	Drawer
+	Spriter
 }
 
 type Clearer interface {
@@ -64,6 +65,10 @@ type Printer interface {
 	PrintAt(str string, x, y int)                         // Print a string of characters to the screen at position
 	PrintAtWithColor(str string, x, y int, colorID Color) // Print a string of characters to the screen at position with color
 	ScrollUpLine()
+}
+
+type Spriter interface {
+	Sprite(n, x, y, w, h int)
 }
 
 type ModeType int

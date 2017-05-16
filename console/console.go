@@ -18,13 +18,15 @@ import (
 var _console *console
 
 const (
-	_version     = "v0.1"
-	_logoWidth   = 57
-	_logoHeight  = 24
-	_charWidth   = 4
-	_charHeight  = 6
-	_maxCmdLen   = 254
-	_cursorFlash = time.Duration(500 * time.Millisecond)
+	_version      = "v0.1"
+	_logoWidth    = 57
+	_logoHeight   = 24
+	_spriteWidth  = 8
+	_spriteHeight = 8
+	_charWidth    = 4
+	_charHeight   = 6
+	_maxCmdLen    = 254
+	_cursorFlash  = time.Duration(500 * time.Millisecond)
 )
 
 type Console interface {
@@ -53,8 +55,9 @@ type console struct {
 	renderer *sdl.Renderer
 
 	palette
-	font *ttf.Font
-	logo *sdl.Surface
+	font    *ttf.Font
+	logo    *sdl.Surface
+	sprites *sdl.Surface
 }
 
 func NewConsole(cfg Config) (Console, error) {
@@ -96,9 +99,11 @@ func NewConsole(cfg Config) (Console, error) {
 	// init palette
 	_console.palette = initPico8Palette()
 
+	goPath, _ := os.LookupEnv("GOPATH")
+
 	// init font
 	// TOOD don't load assets from relative paths
-	font, err := ttf.OpenFont("../../pico-go/fonts/PICO-8.ttf", 4)
+	font, err := ttf.OpenFont(goPath+"/src/github.com/telecoda/pico-go/fonts/PICO-8.ttf", 4)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading font:%s", err)
 	}
@@ -107,12 +112,20 @@ func NewConsole(cfg Config) (Console, error) {
 
 	// init logo
 	// TOOD don't load assets from relative paths
-	logo, err := img.Load("../../pico-go/images/pico-go-logo.png")
+	logo, err := img.Load(goPath + "/src/github.com/telecoda/pico-go/images/pico-go-logo.png")
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
 	}
 
 	_console.logo = logo
+
+	// init sprites
+	sprites, err := img.Load("./sprites/sprites.png")
+	if err != nil {
+		return nil, fmt.Errorf("Error loading image: %s\n", err)
+	}
+
+	_console.sprites = sprites
 
 	// initialise modes
 	modes, err := _console.initModes()

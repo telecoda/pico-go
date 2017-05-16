@@ -118,6 +118,12 @@ import (
 	"{{ .projectPath }}/code"
 )
 
+/*
+
+	THIS IS GENERATED CODE - DO NOT AMEND
+
+*/
+
 func main() {
 
 	flag.Parse()
