@@ -101,7 +101,7 @@ func NewConsole(cfg Config) (Console, error) {
 	// init palette
 	_console.palette = initPico8Palette()
 
-	goPath, _ := build.Default.GOPATH
+	goPath := build.Default.GOPATH
 
 	// init font
 	// TOOD don't load assets from relative paths
