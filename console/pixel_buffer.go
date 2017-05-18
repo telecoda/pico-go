@@ -306,7 +306,7 @@ func (p *pixelBuffer) Rect(x0, y0, x1, y1 int) {
 func (p *pixelBuffer) RectWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.fgColor = colorID
 	rgba, _ := _console.palette.getRGBA(p.fgColor)
-	rect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - x0)}
+	rect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - y0)}
 	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
 	p.renderer.DrawRect(rect)
 }
@@ -320,7 +320,7 @@ func (p *pixelBuffer) RectFill(x0, y0, x1, y1 int) {
 func (p *pixelBuffer) RectFillWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.fgColor = colorID
 	_, color := _console.palette.getRGBA(colorID)
-	fRect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - x0)}
+	fRect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - y0)}
 	p.pixelSurface.FillRect(fRect, color)
 }
 
