@@ -20,15 +20,16 @@ import (
 var _console *console
 
 const (
-	_version      = "v0.1"
-	_logoWidth    = 57
-	_logoHeight   = 24
-	_spriteWidth  = 8
-	_spriteHeight = 8
-	_charWidth    = 4
-	_charHeight   = 6
-	_maxCmdLen    = 254
-	_cursorFlash  = time.Duration(500 * time.Millisecond)
+	_version        = "v0.1"
+	_logoWidth      = 57
+	_logoHeight     = 24
+	_spriteWidth    = 8
+	_spriteHeight   = 8
+	_spritesPerLine = 16
+	_charWidth      = 4
+	_charHeight     = 6
+	_maxCmdLen      = 254
+	_cursorFlash    = time.Duration(500 * time.Millisecond)
 )
 
 type Console interface {

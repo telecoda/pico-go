@@ -46,10 +46,6 @@ func initPico8Palette() palette {
 		INDIGO:      rgba{131, 118, 156, 255}, // indigo
 		PINK:        rgba{255, 119, 168, 255}, // pink
 		PEACH:       rgba{255, 204, 170, 255}, //  peach
-
-		// console.rgba{R:0xff, G:0x36, B:0xe4, A:0x0}
-		// console.rgba{R:255, G:54, B:228, A:0x0}
-
 	}
 }
 

@@ -1,6 +1,8 @@
 package console
 
 import (
+	"fmt"
+
 	"github.com/veandco/go-sdl2/sdl"
 	gfx "github.com/veandco/go-sdl2/sdl_gfx"
 )
@@ -25,12 +27,13 @@ type pos struct {
 	y int
 }
 
+var rmask = uint32(0xff000000)
+var gmask = uint32(0x00ff0000)
+var bmask = uint32(0x0000ff00)
+var amask = uint32(0x000000ff)
+
 func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 	p := &pixelBuffer{}
-	rmask := uint32(0xff000000)
-	gmask := uint32(0x00ff0000)
-	bmask := uint32(0x0000ff00)
-	amask := uint32(0x000000ff)
 	ps, err := sdl.CreateRGBSurface(0, int32(cfg.ConsoleWidth), int32(cfg.ConsoleHeight), 32, rmask, gmask, bmask, amask)
 	if err != nil {
 		return nil, err
@@ -326,12 +329,64 @@ func (p *pixelBuffer) RectFillWithColor(x0, y0, x1, y1 int, colorID Color) {
 
 // Spriter methods
 
-func (p *pixelBuffer) Sprite(n, x, y, w, h int) {
+func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flipY bool) {
 	sw := int32(w) * _spriteWidth
 	sh := int32(h) * _spriteHeight
-	srcRect := &sdl.Rect{X: 0, Y: 0, W: sw, H: sh}
-	screenRect := &sdl.Rect{X: int32(x), Y: int32(y), W: sw, H: sh}
-	_console.sprites.Blit(srcRect, p.pixelSurface, screenRect)
+
+	var flip sdl.RendererFlip
+	if flipX {
+		flip = flip | sdl.FLIP_HORIZONTAL
+	}
+	if flipY {
+		flip = flip | sdl.FLIP_VERTICAL
+	}
+
+	if flip == 0 {
+		flip = sdl.FLIP_NONE
+	}
+
+	// create sprite surface, to copy a single sprite onto
+	ss, err := sdl.CreateRGBSurface(0, sw, sh, 32, rmask, gmask, bmask, amask)
+	if err != nil {
+		fmt.Printf("Failed to create surface: %s\n", err)
+		return
+	}
+	defer ss.Free()
+
+	// convert sprite number into x,y pos
+	xCell := n % _spritesPerLine
+	yCell := (n - xCell) / _spritesPerLine
+
+	xPos := int32(xCell * _spriteWidth)
+	yPos := int32(yCell * _spriteHeight)
+
+	// this is the rect to copy from sprite sheet
+	spriteSrcRect := &sdl.Rect{X: xPos, Y: yPos, W: sw, H: sh}
+	// this rect represents the size of the resulting sprite
+	spriteRect := &sdl.Rect{X: 0, Y: 0, W: sw, H: sh}
+
+	// copy sprite data from sprite sheet onto sprite surface
+	err = _console.sprites.Blit(spriteSrcRect, ss, spriteRect)
+	if err != nil {
+		fmt.Printf("Failed to blit surface: %s\n", err)
+		return
+	}
+
+	texture, err := p.renderer.CreateTextureFromSurface(ss)
+	if err != nil {
+		fmt.Printf("Failed to create texture: %s\n", err)
+		return
+	}
+	defer texture.Destroy()
+
+	centre := &sdl.Point{X: int32(dw / 2), Y: int32(dh / 2)}
+
+	screenRect := &sdl.Rect{X: int32(x), Y: int32(y), W: int32(dw), H: int32(dh)}
+	err = p.renderer.CopyEx(texture, spriteRect, screenRect, rot, centre, flip)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+	}
+
 }
 
 // Destroy cleans up any resources at end

@@ -68,7 +68,8 @@ type Printer interface {
 }
 
 type Spriter interface {
-	Sprite(n, x, y, w, h int)
+	// TODO lots of params!! needs a bit of overloading love
+	Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flipY bool)
 }
 
 type ModeType int
