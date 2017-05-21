@@ -37,7 +37,7 @@ func (c *cartridge) Init(pb console.PixelBuffer) {
 
 // Update -  called once every frame
 func (c *cartridge) Update() {
-	c.rot += -1
+	c.rot += -5
 	if c.rot > 360 {
 		c.rot = 0
 	}

@@ -13,11 +13,15 @@ repeat for SDL_Image, SDL_ttf, SDL_audio
 https://www.libsdl.org/projects/SDL_image/
 https://www.libsdl.org/projects/SDL_ttf/
 https://www.libsdl.org/projects/SDL_mixer/
+http://www.ferzkopp.net/wordpress/2016/01/02/sdl_gfx-sdl2_gfx/
+https://sourceforge.net/projects/sdl2gfx/files/SDL2_gfx-1.0.1.zip/download
+(Copy all .h files from SDL2_gfx-1.0.1 to include/SDL2 eg SDL2_framerate.h etc)
 
 
 Copy the windows dlls to
 
 C:\Users\Rob\Development\mingw\mingw64\x86_64-w64-mingw32\bin
+C:\Users\Rob\Development\mingw\mingw64\x86_64-w64-mingw32\lib
 
 
 Edit path

@@ -18,7 +18,8 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
-	"syscall"
+
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
@@ -38,6 +39,8 @@ func init() {
 	RootCmd.AddCommand(runCmd)
 }
 
+var lastBuilt time.Time
+
 func run() {
 
 	//  add a file watcher to main.go
@@ -48,7 +51,7 @@ func run() {
 	defer watcher.Close()
 
 	// initial code build
-	if output, err := buildCode(); err != nil {
+	if output, err := rebuildCode(); err != nil {
 		if err != nil {
 			fmt.Printf("Error trying to compile: %s\n", err)
 			fmt.Printf("Code does not compiled: %s\n", output)
@@ -73,7 +76,7 @@ func run() {
 			case event := <-watcher.Events:
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					fmt.Println("modified file:", event.Name)
-					if output, err := buildCode(); err != nil {
+					if output, err := rebuildCode(); err != nil {
 						if err != nil {
 							fmt.Printf("Error trying to compile: %s\n", err)
 							fmt.Printf("Code does not compiled: %s\n", output)
@@ -83,7 +86,8 @@ func run() {
 					// killCurrentProcess()
 					// code compiled - kill existing process
 					fmt.Printf("Killing process: %d\n", command.Process.Pid)
-					syscall.Kill(command.Process.Pid, syscall.SIGKILL)
+					//syscall.Kill(command.Process.Pid, syscall.SIGKILL)
+					command.Process.Kill()
 					fmt.Printf("Process killed\n")
 				}
 			case err := <-watcher.Errors:
@@ -114,8 +118,21 @@ func run() {
 	}
 }
 
-// buildCode will build a new exe
-func buildCode() ([]byte, error) {
+// rebuildCode will build a new exe
+func rebuildCode() ([]byte, error) {
+
+	// check how recently code was last built
+
+	now := time.Now()
+
+	diff := now.Sub(lastBuilt)
+
+	if diff < time.Duration(5*time.Second) {
+		fmt.Printf("Just rebuild very recently..\n")
+		return nil, nil
+	}
+
+	lastBuilt = now
 	command := exec.Command("go", "build")
 	return command.CombinedOutput()
 }
