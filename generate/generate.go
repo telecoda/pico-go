@@ -68,8 +68,8 @@ func NewProject(projectName string) error {
 		return err
 	}
 
-	// duplicate demo/code/cart.go
-	fromSourcePath := goPath + "/src/github.com/telecoda/pico-go/demo/code/cart.go"
+	// duplicate template/code/cart.go
+	fromSourcePath := goPath + "/src/github.com/telecoda/pico-go/template/code/cart.go"
 	toSourcePath := projectPath + "/code/cart.go"
 	demoSource, err := ioutil.ReadFile(fromSourcePath)
 	if err != nil {

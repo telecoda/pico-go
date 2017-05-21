@@ -4,7 +4,7 @@ import (
 	"flag"
 
 	"github.com/telecoda/pico-go/console"
-	"github.com/telecoda/pico-go/examples/sprites/code"
+	"github.com/telecoda/pico-go/examples/sprites_ex/code"
 )
 
 /*

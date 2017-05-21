@@ -164,6 +164,10 @@ func (c *console) LoadCart(cart Cartridge) error {
 		return err
 	}
 
+	if err := runtime.Init(); err != nil {
+		return err
+	}
+
 	c.modes[RUNTIME] = runtime
 	return nil
 }
@@ -176,8 +180,11 @@ var endFrame time.Time
 
 // Run is the main run loop
 func (c *console) Run() error {
-	// poll events
 
+	// // default to runtime
+	c.SetMode(RUNTIME)
+
+	// poll events
 	endFrame = time.Now() // init end frame
 	runtimeTimeBudget = time.Duration(1*time.Second).Nanoseconds() / int64(c.Config.FPS)
 	modesTimeBudget = time.Duration(1*time.Second).Nanoseconds() / 60
