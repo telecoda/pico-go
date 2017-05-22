@@ -58,6 +58,10 @@ func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 	return p, nil
 }
 
+func (p *pixelBuffer) GetFrame() *sdl.Surface {
+	return p.pixelSurface
+}
+
 func (p *pixelBuffer) Render() error {
 
 	// clear offscreen buffer

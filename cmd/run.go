@@ -21,6 +21,8 @@ import (
 
 	"time"
 
+	"os"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 )
@@ -83,10 +85,8 @@ func run() {
 						}
 						continue
 					}
-					// killCurrentProcess()
 					// code compiled - kill existing process
 					fmt.Printf("Killing process: %d\n", command.Process.Pid)
-					//syscall.Kill(command.Process.Pid, syscall.SIGKILL)
 					command.Process.Kill()
 					fmt.Printf("Process killed\n")
 				}
@@ -103,6 +103,8 @@ func run() {
 	for !hasQuit {
 		// TODO handle filename correctly hardcoded for now..
 		command = exec.Command("./sprites_ex")
+		command.Stderr = os.Stderr
+		command.Stdout = os.Stdout
 		// run compiled code
 		err = command.Run()
 		if command.ProcessState.Success() {

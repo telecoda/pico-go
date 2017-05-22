@@ -109,6 +109,7 @@ type Runtime interface {
 
 type PixelBuffer interface {
 	Destroy()
+	GetFrame() *sdl.Surface
 	PicoGoAPI
 }
 

@@ -2,6 +2,7 @@ package console
 
 import (
 	"fmt"
+	"image/color"
 	"time"
 
 	"os"
@@ -9,6 +10,10 @@ import (
 	"sync"
 
 	"go/build"
+
+	"image"
+
+	"image/png"
 
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/sdl_image"
@@ -196,13 +201,25 @@ func (c *console) Run() error {
 			// poll all events
 			for event = sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 				// this is the common event handling code
+
+				// TODO keys to implement
+				// 			F6 Save a screenshot to desktop
+				// F7 Capture cartridge label image
+				// F8 Start recording a video
+				// F9 Save GIF video to desktop (max: 8 seconds by default)
+
 				switch t := event.(type) {
 				case *sdl.QuitEvent:
 					c.hasQuit = true
 				case *sdl.KeyDownEvent:
+					fmt.Printf("TEMP key: %#v\n", t.Keysym)
 					switch t.Keysym.Sym {
 					case sdl.K_ESCAPE:
 						c.toggleCLI()
+					case sdl.K_F6:
+						if err := c.saveScreenshot(); err != nil {
+							return err
+						}
 					default:
 						// pass keydown events to mode handle
 						if err := mode.HandleEvent(event); err != nil {
@@ -281,4 +298,47 @@ func (c *console) lockFps() float64 {
 // Destroy cleans up any resources at end
 func (c *console) Destroy() {
 	c.window.Destroy()
+}
+
+// saveScreenshot - saves a screenshot of current frame
+func (c *console) saveScreenshot() error {
+
+	if mode, ok := c.modes[c.currentMode]; ok {
+		surface := mode.GetFrame()
+
+		rect := image.Rect(0, 0, 128, 128)
+
+		rgbaImage := image.NewRGBA(rect)
+
+		pixels := surface.Pixels()
+
+		w := _console.ConsoleWidth
+		// convert SDL surface to RGBA image
+		// process 4 bytes at a time
+		for i := 0; i < len(pixels); i += 4 {
+
+			// convert index i to x,y coords
+			x := (i % (w * 4)) / 4
+			y := (i - (x * 4)) / (w * 4)
+			a := pixels[i]
+			b := pixels[i+1]
+			g := pixels[i+2]
+			r := pixels[i+3]
+			c := color.RGBA{R: r, G: g, B: b, A: a}
+			rgbaImage.Set(x, y, c)
+			if i < 512 {
+				fmt.Printf("i: %d x:%d y:%d, c: %#v\n", i, x, y, c)
+			}
+		}
+
+		// save to out.gif
+		f, _ := os.OpenFile("out.png", os.O_WRONLY|os.O_CREATE, 0600)
+		defer f.Close()
+		fmt.Printf("Saving screenshot to %s\n", f.Name())
+
+		return png.Encode(f, rgbaImage)
+	} else {
+		return fmt.Errorf("Mode :%d not found in console.modes", c.currentMode)
+	}
+
 }
