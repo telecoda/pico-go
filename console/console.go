@@ -233,7 +233,6 @@ func (c *console) Run() error {
 				// this is the common event handling code
 
 				// TODO keys to implement
-				// 			F6 Save a screenshot to desktop
 				// F7 Capture cartridge label image
 				// F8 Start recording a video
 				// F9 Save GIF video to desktop (max: 8 seconds by default)
@@ -349,15 +348,30 @@ func (c *console) Destroy() {
 func (c *console) saveScreenshot() error {
 
 	if mode, ok := c.modes[c.currentMode]; ok {
-		surface := mode.GetFrame()
+		sourceSurface := mode.GetFrame()
 
-		rect := image.Rect(0, 0, 128, 128)
+		scale := int32(c.Config.ScreenshotScale)
 
-		rgbaImage := image.NewRGBA(rect)
+		srcRect := &sdl.Rect{X: 0, Y: 0, W: sourceSurface.W, H: sourceSurface.H}
+		targetRect := &sdl.Rect{X: 0, Y: 0, W: sourceSurface.W * scale, H: sourceSurface.H * scale}
 
-		pixels := surface.Pixels()
+		targetSurface, err := sdl.CreateRGBSurface(0, sourceSurface.W*int32(scale), sourceSurface.W*int32(scale), 32, rmask, gmask, bmask, amask)
+		if err != nil {
+			return err
+		}
 
-		w := _console.ConsoleWidth
+		err = sourceSurface.BlitScaled(srcRect, targetSurface, targetRect)
+		if err != nil {
+			return err
+		}
+
+		imageRect := image.Rect(0, 0, int(targetRect.W), int(targetRect.H))
+
+		rgbaImage := image.NewRGBA(imageRect)
+
+		pixels := targetSurface.Pixels()
+
+		w := _console.ConsoleWidth * int(scale)
 		// convert SDL surface to RGBA image
 		// process 4 bytes at a time
 		for i := 0; i < len(pixels); i += 4 {
@@ -371,9 +385,6 @@ func (c *console) saveScreenshot() error {
 			r := pixels[i+3]
 			c := color.RGBA{R: r, G: g, B: b, A: a}
 			rgbaImage.Set(x, y, c)
-			if i < 512 {
-				fmt.Printf("i: %d x:%d y:%d, c: %#v\n", i, x, y, c)
-			}
 		}
 
 		// save to out.gif

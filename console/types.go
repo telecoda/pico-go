@@ -4,15 +4,6 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-type Config struct {
-	ConsoleWidth  int
-	ConsoleHeight int
-	WindowWidth   int
-	WindowHeight  int
-	FPS           int
-	Verbose       bool
-}
-
 type Color int
 
 /*

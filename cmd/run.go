@@ -42,6 +42,7 @@ var runCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(runCmd)
+
 }
 
 var lastBuilt time.Time
