@@ -1,0 +1,5 @@
+# ignore executables
+sprite
+sprite.exe
+# ignore state file
+code/.pico-go-state

@@ -79,15 +79,27 @@ func NewProject(projectName string) error {
 		return err
 	}
 	// generate .gitignore
-
-	gitIgnore := fmt.Sprintf("# ignore executables\n%s\n%s.exe\n", projectName, projectName)
+	gitIgnore := fmt.Sprintf("# ignore executables\n%s\n%s.exe\n# ignore state file\ncode%s.pico-go-state", projectName, projectName, string(os.PathSeparator))
 	gitIgnorePath := projectPath + "/.gitignore"
 	if err := ioutil.WriteFile(gitIgnorePath, []byte(gitIgnore), 0666); err != nil {
 		return err
 	}
+
+	// copy sprites to local proj
+	spritesFile := goPath + "/src/github.com/telecoda/pico-go/template/sprites/sprites.png"
+	spriteBytes, err := ioutil.ReadFile(spritesFile)
+	if err != nil {
+		return err
+	}
+	localSpriteFile := fmt.Sprintf("./%s/sprites/sprites.png", projectName)
+	err = ioutil.WriteFile(localSpriteFile, spriteBytes, 0600)
+	if err != nil {
+		return err
+	}
+
 	printBanner()
 	// print statement to run code
-	fmt.Printf("Congratulations you have created your pico-go project\ncd %s\ngo run main.go\n", projectName)
+	fmt.Printf("Congratulations you have created your pico-go project\ncd %s\npico-go run\n", projectName)
 	return nil
 }
 

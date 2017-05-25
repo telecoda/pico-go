@@ -41,6 +41,7 @@ type Console interface {
 	LoadCart(cart Cartridge) error
 	Run() error
 	Destroy()
+	GetWindow() *sdl.Window
 	SetMode(newMode ModeType)
 }
 
@@ -66,6 +67,8 @@ type console struct {
 	font    *ttf.Font
 	logo    *sdl.Surface
 	sprites *sdl.Surface
+
+	state Persister
 }
 
 func NewConsole(cfg Config) (Console, error) {
@@ -76,15 +79,36 @@ func NewConsole(cfg Config) (Console, error) {
 		hasQuit:       false,
 	}
 
+	persister, err := NewStateManager()
+	if err != nil {
+		return nil, err
+	}
+
+	_console.state = persister
+
+	state, err := persister.LoadState()
+	if err != nil {
+		fmt.Printf("Error loading state: %s - using default\n", err)
+	}
 	// init SDL
 	sdl.Init(sdl.INIT_EVERYTHING)
 	sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "0")
 	ttf.Init()
 
+	if state == nil {
+		// use defaults
+		state = &ConsoleState{
+			X: sdl.WINDOWPOS_CENTERED,
+			Y: sdl.WINDOWPOS_CENTERED,
+			W: cfg.WindowWidth,
+			H: cfg.WindowWidth,
+		}
+	}
+
 	// initialise window
 	window, err := sdl.CreateWindow(
-		title, sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED,
-		int(cfg.WindowWidth), int(cfg.WindowHeight), sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
+		title, state.X, state.Y,
+		state.W, state.H, sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
 
 	if err != nil {
 		return nil, err
@@ -155,6 +179,10 @@ func NewConsole(cfg Config) (Console, error) {
 	return _console, nil
 }
 
+func (c *console) GetWindow() *sdl.Window {
+	return c.window
+}
+
 func (c *console) SetMode(newMode ModeType) {
 	c.Lock()
 	defer c.Unlock()
@@ -189,6 +217,8 @@ func (c *console) Run() error {
 	// // default to runtime
 	c.SetMode(RUNTIME)
 
+	go c.saveState()
+
 	// poll events
 	endFrame = time.Now() // init end frame
 	runtimeTimeBudget = time.Duration(1*time.Second).Nanoseconds() / int64(c.Config.FPS)
@@ -210,9 +240,9 @@ func (c *console) Run() error {
 
 				switch t := event.(type) {
 				case *sdl.QuitEvent:
+					c.state.SaveState(c)
 					c.hasQuit = true
 				case *sdl.KeyDownEvent:
-					fmt.Printf("TEMP key: %#v\n", t.Keysym)
 					switch t.Keysym.Sym {
 					case sdl.K_ESCAPE:
 						c.toggleCLI()
@@ -253,6 +283,21 @@ func (c *console) Run() error {
 	}
 
 	return nil
+}
+
+// saveState - saves console state periodically
+func (c *console) saveState() {
+
+	ticker := time.NewTicker(1 * time.Second)
+
+	for {
+		select {
+		case <-ticker.C:
+			// save state
+			c.state.SaveState(c)
+
+		}
+	}
 }
 
 func (c *console) Quit() {

@@ -213,7 +213,6 @@ func (m *mkdirCommand) Exec(pb PixelBuffer, statement string) error {
 		if err := os.Mkdir(newDir, 0700); err != nil {
 			pb.Color(WHITE)
 			pb.Print("MKDIR: FAILED")
-			fmt.Printf("TEMP: err: %s\n", err)
 			return nil
 		}
 	}
