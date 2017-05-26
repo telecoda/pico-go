@@ -2,7 +2,6 @@ package console
 
 import (
 	"fmt"
-	"image/color"
 	"time"
 
 	"os"
@@ -10,10 +9,6 @@ import (
 	"sync"
 
 	"go/build"
-
-	"image"
-
-	"image/png"
 
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/sdl_image"
@@ -68,7 +63,8 @@ type console struct {
 	logo    *sdl.Surface
 	sprites *sdl.Surface
 
-	state Persister
+	state    Persister
+	recorder Recorder
 }
 
 func NewConsole(cfg Config) (Console, error) {
@@ -104,6 +100,8 @@ func NewConsole(cfg Config) (Console, error) {
 			H: cfg.WindowWidth,
 		}
 	}
+
+	_console.recorder = NewRecorder(cfg.FPS, cfg.GifLength)
 
 	// initialise window
 	window, err := sdl.CreateWindow(
@@ -271,6 +269,9 @@ func (c *console) Run() error {
 				return err
 			}
 
+			// record frame
+			c.recorder.AddFrame(mode.GetFrame())
+
 			mode.Flip()
 
 			// lock framerate
@@ -347,54 +348,6 @@ func (c *console) Destroy() {
 // saveScreenshot - saves a screenshot of current frame
 func (c *console) saveScreenshot() error {
 
-	if mode, ok := c.modes[c.currentMode]; ok {
-		sourceSurface := mode.GetFrame()
-
-		scale := int32(c.Config.ScreenshotScale)
-
-		srcRect := &sdl.Rect{X: 0, Y: 0, W: sourceSurface.W, H: sourceSurface.H}
-		targetRect := &sdl.Rect{X: 0, Y: 0, W: sourceSurface.W * scale, H: sourceSurface.H * scale}
-
-		targetSurface, err := sdl.CreateRGBSurface(0, sourceSurface.W*int32(scale), sourceSurface.W*int32(scale), 32, rmask, gmask, bmask, amask)
-		if err != nil {
-			return err
-		}
-
-		err = sourceSurface.BlitScaled(srcRect, targetSurface, targetRect)
-		if err != nil {
-			return err
-		}
-
-		imageRect := image.Rect(0, 0, int(targetRect.W), int(targetRect.H))
-
-		rgbaImage := image.NewRGBA(imageRect)
-
-		pixels := targetSurface.Pixels()
-
-		w := _console.ConsoleWidth * int(scale)
-		// convert SDL surface to RGBA image
-		// process 4 bytes at a time
-		for i := 0; i < len(pixels); i += 4 {
-
-			// convert index i to x,y coords
-			x := (i % (w * 4)) / 4
-			y := (i - (x * 4)) / (w * 4)
-			a := pixels[i]
-			b := pixels[i+1]
-			g := pixels[i+2]
-			r := pixels[i+3]
-			c := color.RGBA{R: r, G: g, B: b, A: a}
-			rgbaImage.Set(x, y, c)
-		}
-
-		// save to out.gif
-		f, _ := os.OpenFile("out.png", os.O_WRONLY|os.O_CREATE, 0600)
-		defer f.Close()
-		fmt.Printf("Saving screenshot to %s\n", f.Name())
-
-		return png.Encode(f, rgbaImage)
-	} else {
-		return fmt.Errorf("Mode :%d not found in console.modes", c.currentMode)
-	}
+	return c.recorder.SaveScreenshot("out.png", c.Config.ScreenshotScale)
 
 }
