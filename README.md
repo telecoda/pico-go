@@ -22,6 +22,10 @@ You will also need to install the SDL2 dependencies for your platform.  See the 
 
     go run main.go
 
+or
+
+    pico-go run
+
 More docs will be added as I progress..
 
 # References
