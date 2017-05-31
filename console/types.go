@@ -74,6 +74,8 @@ const (
 	MUSIC_EDITOR
 )
 
+const TOTAL_COLORS = 256
+
 type Configger interface {
 	GetConfig() Config
 }

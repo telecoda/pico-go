@@ -155,7 +155,27 @@ func NewConsole(cfg Config) (Console, error) {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
 	}
 
-	_console.sprites = sprites
+	tempSurface, err := sdl.CreateRGBSurface(0, int32(cfg.ConsoleWidth), int32(cfg.ConsoleHeight), 8, 0, 0, 0, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := setSurfacePalette(tempSurface); err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("temp Format: %#v\n", tempSurface.Format)
+	fmt.Printf("temp Palette: %#v\n", tempSurface.Format.Palette)
+	fmt.Printf("temp colours: %#v\n", tempSurface.Format.Palette.Colors)
+	fmt.Printf("sprites Format: %#v\n", sprites.Format)
+
+	paletteSurface, err := sprites.Convert(tempSurface.Format, tempSurface.Flags)
+	if err != nil {
+		fmt.Printf("HERE!!\n")
+		return nil, err
+	}
+
+	_console.sprites = paletteSurface
 
 	// initialise modes
 	modes, err := _console.initModes()
@@ -245,6 +265,10 @@ func (c *console) Run() error {
 						c.toggleCLI()
 					case sdl.K_F6:
 						if err := c.saveScreenshot(); err != nil {
+							return err
+						}
+					case sdl.K_F9:
+						if err := c.saveVideo(); err != nil {
 							return err
 						}
 					default:
@@ -349,5 +373,12 @@ func (c *console) Destroy() {
 func (c *console) saveScreenshot() error {
 
 	return c.recorder.SaveScreenshot("out.png", c.Config.ScreenshotScale)
+
+}
+
+// saveVideo - saves a video of last x seconds
+func (c *console) saveVideo() error {
+
+	return c.recorder.SaveVideo("out.gif", c.Config.GifScale)
 
 }

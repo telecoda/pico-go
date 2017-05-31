@@ -1,5 +1,9 @@
 package console
 
+import (
+	"github.com/veandco/go-sdl2/sdl"
+)
+
 const (
 	BLACK Color = iota
 	DARK_BLUE
@@ -74,4 +78,38 @@ func (p palette) getColor(rgba rgba) Color {
 	}
 	// default to black
 	return BLACK
+}
+
+func init() {
+	// set colours in palette
+	colors = make([]sdl.Color, TOTAL_COLORS)
+	colors[BLACK] = sdl.Color{R: 255, G: 255, B: 255, A: 255} // black
+	colors[DARK_BLUE] = sdl.Color{29, 43, 83, 255}            // dark-blue
+	colors[DARK_PURPLE] = sdl.Color{126, 37, 83, 255}         // dark-purple
+	colors[DARK_GREEN] = sdl.Color{0, 135, 81, 255}           // dark-green
+	colors[BROWN] = sdl.Color{171, 82, 54, 255}               // brown
+	colors[DARK_GRAY] = sdl.Color{95, 87, 79, 255}            // dark-gray
+	colors[LIGHT_GRAY] = sdl.Color{194, 195, 199, 255}        // light-gray
+	colors[WHITE] = sdl.Color{255, 241, 232, 255}             // white
+	colors[RED] = sdl.Color{255, 0, 77, 255}                  // red
+	colors[ORANGE] = sdl.Color{255, 163, 0, 255}              // orange
+	colors[YELLOW] = sdl.Color{255, 236, 39, 255}             // yellow
+	colors[GREEN] = sdl.Color{0, 228, 54, 255}                // green
+	colors[BLUE] = sdl.Color{41, 173, 255, 255}               // blue
+	colors[INDIGO] = sdl.Color{131, 118, 156, 255}            // indigo
+	colors[PINK] = sdl.Color{255, 119, 168, 255}              // pink
+	colors[PEACH] = sdl.Color{255, 204, 170, 255}             //  peach
+
+}
+
+var colors []sdl.Color
+
+func setSurfacePalette(surface *sdl.Surface) error {
+	palette, err := sdl.AllocPalette(TOTAL_COLORS)
+	if err != nil {
+		return err
+	}
+
+	palette.SetColors(colors)
+	return surface.SetPalette(palette)
 }

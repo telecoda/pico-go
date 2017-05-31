@@ -34,8 +34,18 @@ var amask = uint32(0x000000ff)
 
 func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 	p := &pixelBuffer{}
-	ps, err := sdl.CreateRGBSurface(0, int32(cfg.ConsoleWidth), int32(cfg.ConsoleHeight), 32, rmask, gmask, bmask, amask)
+
+	//ps, err := sdl.CreateRGBSurface(0, int32(cfg.ConsoleWidth), int32(cfg.ConsoleHeight), 8, rmask, gmask, bmask, amask)
+	ps, err := sdl.CreateRGBSurface(0, int32(cfg.ConsoleWidth), int32(cfg.ConsoleHeight), 8, 0, 0, 0, 0)
 	if err != nil {
+		return nil, err
+	}
+
+	if ps == nil {
+		return nil, fmt.Errorf("Surface is nil")
+	}
+
+	if err := setSurfacePalette(ps); err != nil {
 		return nil, err
 	}
 
@@ -326,9 +336,9 @@ func (p *pixelBuffer) RectFill(x0, y0, x1, y1 int) {
 // RectFillWithColor - fill rectangle with color
 func (p *pixelBuffer) RectFillWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.fgColor = colorID
-	_, color := _console.palette.getRGBA(colorID)
+	//_, color := _console.palette.getRGBA(colorID)
 	fRect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - y0)}
-	p.pixelSurface.FillRect(fRect, color)
+	p.pixelSurface.FillRect(fRect, uint32(colorID))
 }
 
 // Spriter methods
@@ -350,12 +360,16 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 	}
 
 	// create sprite surface, to copy a single sprite onto
-	ss, err := sdl.CreateRGBSurface(0, sw, sh, 32, rmask, gmask, bmask, amask)
+	ss, err := sdl.CreateRGBSurface(0, sw, sh, 8, 0, 0, 0, 0)
 	if err != nil {
 		fmt.Printf("Failed to create surface: %s\n", err)
 		return
 	}
 	defer ss.Free()
+
+	if err := setSurfacePalette(ss); err != nil {
+		panic(err)
+	}
 
 	// convert sprite number into x,y pos
 	xCell := n % _spritesPerLine
@@ -369,6 +383,7 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 	// this rect represents the size of the resulting sprite
 	spriteRect := &sdl.Rect{X: 0, Y: 0, W: sw, H: sh}
 
+	//fmt.Printf("TEMP: %#v\n", ss.Format.Palette.Colors)
 	// copy sprite data from sprite sheet onto sprite surface
 	err = _console.sprites.Blit(spriteSrcRect, ss, spriteRect)
 	if err != nil {
@@ -386,9 +401,10 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 	centre := &sdl.Point{X: int32(dw / 2), Y: int32(dh / 2)}
 
 	screenRect := &sdl.Rect{X: int32(x), Y: int32(y), W: int32(dw), H: int32(dh)}
+
 	err = p.renderer.CopyEx(texture, spriteRect, screenRect, rot, centre, flip)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		fmt.Printf("Error: 1 %s\n", err)
 	}
 
 }

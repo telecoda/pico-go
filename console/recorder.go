@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/gif"
 	"image/png"
 	"os"
 
@@ -46,7 +47,45 @@ func (r *recorder) AddFrame(surface *sdl.Surface) {
 }
 
 func (r *recorder) SaveVideo(filename string, scale int) error {
-	return nil
+	var palette = []color.Color{
+		color.RGBA{0x00, 0x00, 0x00, 0xff},
+		color.RGBA{0x00, 0x00, 0xff, 0xff},
+		color.RGBA{0x00, 0xff, 0x00, 0xff},
+		color.RGBA{0x00, 0xff, 0xff, 0xff},
+		color.RGBA{0xff, 0x00, 0x00, 0xff},
+		color.RGBA{0xff, 0x00, 0xff, 0xff},
+		color.RGBA{0xff, 0xff, 0x00, 0xff},
+		color.RGBA{0xff, 0xff, 0xff, 0xff},
+	}
+
+	// count used frames
+	totalFrames := 0
+	for i := 0; i < len(r.frames); i++ {
+		if r.frames[i] != nil {
+			totalFrames++
+		}
+	}
+
+	images := make([]*image.Paletted, totalFrames, totalFrames)
+	delays := make([]int, totalFrames, totalFrames)
+
+	delay := 1000 / r.fps
+
+	for i := 0; i < totalFrames; i++ {
+		delays[i] = delay
+		frame := r.frames[i]
+		img := image.NewPaletted(image.Rect(0, 0, int(frame.W), int(frame.H)), palette)
+		images[i] = img
+
+		// drawing code (too long)
+	}
+
+	f, _ := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0600)
+	defer f.Close()
+	return gif.EncodeAll(f, &gif.GIF{
+		Image: images,
+		Delay: delays,
+	})
 }
 
 func (r *recorder) SaveScreenshot(filename string, scale int) error {
@@ -62,7 +101,7 @@ func (r *recorder) SaveScreenshot(filename string, scale int) error {
 	srcRect := &sdl.Rect{X: 0, Y: 0, W: sourceSurface.W, H: sourceSurface.H}
 	targetRect := &sdl.Rect{X: 0, Y: 0, W: sourceSurface.W * int32(scale), H: sourceSurface.H * int32(scale)}
 
-	targetSurface, err := sdl.CreateRGBSurface(0, sourceSurface.W*int32(scale), sourceSurface.W*int32(scale), 32, rmask, gmask, bmask, amask)
+	targetSurface, err := sdl.CreateRGBSurface(0, sourceSurface.W*int32(scale), sourceSurface.H*int32(scale), 4, 0, 0, 0, 0)
 	if err != nil {
 		return err
 	}
