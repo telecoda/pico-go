@@ -100,8 +100,9 @@ func (p *pixelBuffer) Render() error {
 
 // Cls - clears pixel buffer
 func (p *pixelBuffer) Cls() {
-	_, color := _console.palette.getRGBA(p.bgColor)
-	p.pixelSurface.FillRect(p.psRect, color)
+	//_, color := _console.palette.getRGBA(p.bgColor)
+	//sdl.MapRGBA(p.pixelSurface.Format,p.B)
+	p.pixelSurface.FillRect(p.psRect, uint32(p.bgColor))
 }
 
 // ClsWithColor - fill pixel buffer with a set color
@@ -223,9 +224,9 @@ func (p *pixelBuffer) PrintAt(str string, x, y int) {
 func (p *pixelBuffer) PrintAtWithColor(str string, x, y int, colorID Color) {
 	p.fgColor = colorID
 	if str != "" {
-		rgba, _ := _console.palette.getRGBA(colorID)
-		sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
-		textSurface, err := _console.font.RenderUTF8_Blended(str, sColor)
+		rgbaFg, _ := _console.palette.getRGBA(colorID)
+		fgColor := sdl.Color{R: rgbaFg.R, G: rgbaFg.G, B: rgbaFg.B, A: rgbaFg.A}
+		textSurface, err := _console.font.RenderUTF8_Blended(str, fgColor)
 		if err != nil {
 			panic(err)
 		}
@@ -234,7 +235,6 @@ func (p *pixelBuffer) PrintAtWithColor(str string, x, y int, colorID Color) {
 		// copy text surface to offscreen buffer
 		tRect := &sdl.Rect{X: 0, Y: 0, W: textSurface.W, H: textSurface.H}
 		posRect := &sdl.Rect{X: int32(x), Y: int32(y), W: textSurface.W, H: textSurface.H}
-
 		textSurface.Blit(tRect, p.pixelSurface, posRect)
 	}
 	// save print pos
@@ -360,16 +360,16 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 	}
 
 	// create sprite surface, to copy a single sprite onto
-	ss, err := sdl.CreateRGBSurface(0, sw, sh, 8, 0, 0, 0, 0)
+	ss1, err := sdl.CreateRGBSurface(0, int32(sw), int32(sh), 32, 0, 0, 0, 0)
 	if err != nil {
-		fmt.Printf("Failed to create surface: %s\n", err)
+		fmt.Printf("Failed to create surface1: %s\n", err)
 		return
 	}
-	defer ss.Free()
+	defer ss1.Free()
 
-	if err := setSurfacePalette(ss); err != nil {
-		panic(err)
-	}
+	// if err := setSurfacePalette(ss); err != nil {
+	// 	panic(err)
+	// }
 
 	// convert sprite number into x,y pos
 	xCell := n % _spritesPerLine
@@ -381,17 +381,33 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 	// this is the rect to copy from sprite sheet
 	spriteSrcRect := &sdl.Rect{X: xPos, Y: yPos, W: sw, H: sh}
 	// this rect represents the size of the resulting sprite
-	spriteRect := &sdl.Rect{X: 0, Y: 0, W: sw, H: sh}
+	ss1Rect := &sdl.Rect{X: 0, Y: 0, W: ss1.W, H: ss1.H}
 
-	//fmt.Printf("TEMP: %#v\n", ss.Format.Palette.Colors)
 	// copy sprite data from sprite sheet onto sprite surface
-	err = _console.sprites.Blit(spriteSrcRect, ss, spriteRect)
+	err = _console.sprites.Blit(spriteSrcRect, ss1, ss1Rect)
 	if err != nil {
-		fmt.Printf("Failed to blit surface: %s\n", err)
+		fmt.Printf("Failed to blit surface1: %s\n", err)
 		return
 	}
 
-	texture, err := p.renderer.CreateTextureFromSurface(ss)
+	// create 2nd sprite for blitscaling
+	ss2, err := sdl.CreateRGBSurface(0, int32(dw), int32(dh), 32, 0, 0, 0, 0)
+	if err != nil {
+		fmt.Printf("Failed to create surface2: %s\n", err)
+		return
+	}
+	defer ss2.Free()
+
+	ss2Rect := &sdl.Rect{X: 0, Y: 0, W: ss2.W, H: ss2.H}
+
+	// copy sprite data from sprite sheet onto sprite surface
+	err = ss1.BlitScaled(ss1Rect, ss2, ss2Rect)
+	if err != nil {
+		fmt.Printf("Failed to blit surface2: %s\n", err)
+		return
+	}
+
+	texture, err := p.renderer.CreateTextureFromSurface(ss2)
 	if err != nil {
 		fmt.Printf("Failed to create texture: %s\n", err)
 		return
@@ -402,7 +418,7 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 
 	screenRect := &sdl.Rect{X: int32(x), Y: int32(y), W: int32(dw), H: int32(dh)}
 
-	err = p.renderer.CopyEx(texture, spriteRect, screenRect, rot, centre, flip)
+	err = p.renderer.CopyEx(texture, ss2Rect, screenRect, rot, centre, flip)
 	if err != nil {
 		fmt.Printf("Error: 1 %s\n", err)
 	}

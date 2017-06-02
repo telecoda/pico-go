@@ -164,14 +164,8 @@ func NewConsole(cfg Config) (Console, error) {
 		return nil, err
 	}
 
-	fmt.Printf("temp Format: %#v\n", tempSurface.Format)
-	fmt.Printf("temp Palette: %#v\n", tempSurface.Format.Palette)
-	fmt.Printf("temp colours: %#v\n", tempSurface.Format.Palette.Colors)
-	fmt.Printf("sprites Format: %#v\n", sprites.Format)
-
 	paletteSurface, err := sprites.Convert(tempSurface.Format, tempSurface.Flags)
 	if err != nil {
-		fmt.Printf("HERE!!\n")
 		return nil, err
 	}
 
