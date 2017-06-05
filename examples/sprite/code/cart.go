@@ -45,6 +45,7 @@ func (c *cartridge) Update() {
 
 // Render - called once every frame
 func (c *cartridge) Render() {
+	c.MapColor(7, 8)
 	c.ClsWithColor(console.WHITE)
 	c.Cls()
 	c.PrintAtWithColor("SPRITES:", 50, 5, console.BLACK)

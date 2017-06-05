@@ -4,7 +4,7 @@ import (
 	"flag"
 
 	"github.com/telecoda/pico-go/console"
-	"github.com/telecoda/pico-go/demo/code"
+	"github.com/telecoda/pico-go/template/code"
 )
 
 func main() {

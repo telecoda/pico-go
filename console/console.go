@@ -58,7 +58,7 @@ type console struct {
 	window   *sdl.Window
 	renderer *sdl.Renderer
 
-	palette
+	palette Paletter
 	font    *ttf.Font
 	logo    *sdl.Surface
 	sprites *sdl.Surface
@@ -127,7 +127,7 @@ func NewConsole(cfg Config) (Console, error) {
 	_console.renderer = r
 
 	// init palette
-	_console.palette = initPico8Palette()
+	_console.palette = NewPalette()
 
 	goPath := build.Default.GOPATH
 

@@ -74,25 +74,27 @@ func (p *pixelBuffer) GetFrame() *sdl.Surface {
 
 func (p *pixelBuffer) Render() error {
 
-	// clear offscreen buffer
-	p.ClsWithColor(3)
+	// // clear offscreen buffer
+	// p.ClsWithColor(3)
 
-	// draw to offscreen surface
-	rect := sdl.Rect{X: 0, Y: 0, W: 64, H: 64}
+	// // draw to offscreen surface
+	// rect := sdl.Rect{X: 0, Y: 0, W: 64, H: 64}
 
-	// draw white rect top corner
-	p.pixelSurface.FillRect(&rect, 0xffffffff)
+	// // draw white rect top corner
+	// p.pixelSurface.FillRect(&rect, 0xffffffff)
 
-	pixels := p.pixelSurface.Pixels()
-	// update specific pixel
-	x := 50
-	y := 50
-	w := 128
-	pixels[4*(y*w+x)+0] = 255 // r
-	pixels[4*(y*w+x)+1] = 0   // g
-	pixels[4*(y*w+x)+2] = 0   // b
+	// pixels := p.pixelSurface.Pixels()
+	// // update specific pixel
+	// x := 50
+	// y := 50
+	// w := 128
+	// pixels[4*(y*w+x)+0] = 255 // r
+	// pixels[4*(y*w+x)+1] = 0   // g
+	// pixels[4*(y*w+x)+2] = 0   // b
 
-	return p.Flip()
+	// return p.Flip()
+
+	return nil
 
 }
 
@@ -100,19 +102,14 @@ func (p *pixelBuffer) Render() error {
 
 // Cls - clears pixel buffer
 func (p *pixelBuffer) Cls() {
-	//_, color := _console.palette.getRGBA(p.bgColor)
-	//sdl.MapRGBA(p.pixelSurface.Format,p.B)
 	p.pixelSurface.FillRect(p.psRect, uint32(p.bgColor))
 }
 
 // ClsWithColor - fill pixel buffer with a set color
 func (p *pixelBuffer) ClsWithColor(colorID Color) {
 	p.bgColor = colorID
+	fmt.Printf("bg 1 colour: %d\n", p.bgColor)
 	p.Cls()
-}
-
-func (p *pixelBuffer) Color(colorID Color) {
-	p.fgColor = colorID
 }
 
 func (p *pixelBuffer) Cursor(x, y int) {
@@ -224,7 +221,7 @@ func (p *pixelBuffer) PrintAt(str string, x, y int) {
 func (p *pixelBuffer) PrintAtWithColor(str string, x, y int, colorID Color) {
 	p.fgColor = colorID
 	if str != "" {
-		rgbaFg, _ := _console.palette.getRGBA(colorID)
+		rgbaFg, _ := _console.palette.GetRGBA(colorID)
 		fgColor := sdl.Color{R: rgbaFg.R, G: rgbaFg.G, B: rgbaFg.B, A: rgbaFg.A}
 		textSurface, err := _console.font.RenderUTF8_Blended(str, fgColor)
 		if err != nil {
@@ -252,8 +249,7 @@ func (p *pixelBuffer) Circle(x, y, r int) {
 // CircleWithColor - draw circle with color
 func (p *pixelBuffer) CircleWithColor(x, y, r int, colorID Color) {
 	p.fgColor = colorID
-	rgba, _ := _console.palette.getRGBA(p.fgColor)
-	//	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
+	rgba, _ := _console.palette.GetRGBA(p.fgColor)
 	sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
 	gfx.CircleColor(p.renderer, x, y, r, sColor)
 }
@@ -266,7 +262,7 @@ func (p *pixelBuffer) CircleFill(x, y, r int) {
 // CircleFillWithColor - fill circle with color
 func (p *pixelBuffer) CircleFillWithColor(x, y, r int, colorID Color) {
 	p.fgColor = colorID
-	rgba, _ := _console.palette.getRGBA(p.fgColor)
+	rgba, _ := _console.palette.GetRGBA(p.fgColor)
 	//	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
 	sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
 	gfx.FilledCircleColor(p.renderer, x, y, r, sColor)
@@ -280,7 +276,7 @@ func (p *pixelBuffer) Line(x0, y0, x1, y1 int) {
 // LineWithColor - line with color
 func (p *pixelBuffer) LineWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.fgColor = colorID
-	rgba, _ := _console.palette.getRGBA(p.fgColor)
+	rgba, _ := _console.palette.GetRGBA(p.fgColor)
 	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
 	p.renderer.DrawLine(x0, y0, x1, y1)
 }
@@ -298,7 +294,7 @@ func (p *pixelBuffer) PGet(x, y int) Color {
 
 	rgba := rgba{R: r, G: g, B: b, A: a}
 
-	return _console.palette.getColor(rgba)
+	return _console.palette.GetColorID(rgba)
 }
 
 // PSet - pixel set in drawing color
@@ -309,7 +305,7 @@ func (p *pixelBuffer) PSet(x, y int) {
 // PSetWithColor - pixel set with color
 func (p *pixelBuffer) PSetWithColor(x0, y0 int, colorID Color) {
 	p.fgColor = colorID
-	rgba, _ := _console.palette.getRGBA(p.fgColor)
+	rgba, _ := _console.palette.GetRGBA(p.fgColor)
 	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
 	p.renderer.DrawPoint(x0, y0)
 }
@@ -322,7 +318,7 @@ func (p *pixelBuffer) Rect(x0, y0, x1, y1 int) {
 // RectWithColor - draw rectangle with color
 func (p *pixelBuffer) RectWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.fgColor = colorID
-	rgba, _ := _console.palette.getRGBA(p.fgColor)
+	rgba, _ := _console.palette.GetRGBA(p.fgColor)
 	rect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - y0)}
 	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
 	p.renderer.DrawRect(rect)
@@ -336,7 +332,6 @@ func (p *pixelBuffer) RectFill(x0, y0, x1, y1 int) {
 // RectFillWithColor - fill rectangle with color
 func (p *pixelBuffer) RectFillWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.fgColor = colorID
-	//_, color := _console.palette.getRGBA(colorID)
 	fRect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - y0)}
 	p.pixelSurface.FillRect(fRect, uint32(colorID))
 }
@@ -423,6 +418,36 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 		fmt.Printf("Error: 1 %s\n", err)
 	}
 
+}
+
+// Paletter methods
+
+// Color - Set current drawing color
+func (p *pixelBuffer) Color(colorID Color) {
+	p.fgColor = colorID
+}
+
+func (p *pixelBuffer) GetColorID(rgba rgba) Color {
+	return _console.palette.GetColorID(rgba)
+}
+
+func (p *pixelBuffer) GetRGBA(color Color) (rgba, uint32) {
+	return _console.palette.GetRGBA(color)
+}
+
+func (p *pixelBuffer) PaletteReset() {
+	_console.palette = NewPalette()
+}
+
+func (p *pixelBuffer) GetSDLColors() []sdl.Color {
+	return _console.palette.GetSDLColors()
+}
+
+func (p *pixelBuffer) MapColor(fromColor Color, toColor Color) error {
+	if err := _console.palette.MapColor(fromColor, toColor); err != nil {
+		return err
+	}
+	return setSurfacePalette(p.pixelSurface)
 }
 
 // Destroy cleans up any resources at end

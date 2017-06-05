@@ -30,7 +30,7 @@ func (c *cartridge) Init(pb console.PixelBuffer) {
 	// hold onto this reference, this is the display that
 	// your code will be drawing onto each frame
 	c.PixelBuffer = pb
-	c.ClsWithColor(console.RED)
+	//c.ClsWithColor(console.RED)
 }
 
 // Update -  called once every frame
