@@ -445,6 +445,10 @@ func (p *pixelBuffer) GetColorID(rgba rgba) Color {
 
 func (p *pixelBuffer) PaletteReset() {
 	p.palette.PaletteReset()
+	// reset palette on sprites
+	setSurfacePalette(p.palette, _console.sprites)
+	// reset palette on pixel buffer
+	setSurfacePalette(p.palette, p.pixelSurface)
 }
 
 func (p *pixelBuffer) GetSDLColors() []sdl.Color {

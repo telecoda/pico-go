@@ -112,7 +112,9 @@ func setSurfacePalette(palette Paletter, surface *sdl.Surface) error {
 }
 
 func (p *palette) PaletteReset() {
-	p = newPalette()
+	p2 := newPalette()
+	p.colorMap = p2.colorMap
+	p.colors = p2.colors
 }
 
 func (p *palette) GetSDLColors() []sdl.Color {
