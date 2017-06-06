@@ -33,8 +33,9 @@ type rgba struct {
 }
 
 type palette struct {
-	colorMap map[Color]rgba
-	colors   []sdl.Color
+	colorMap       map[Color]rgba
+	colors         []sdl.Color
+	originalColors []sdl.Color
 }
 
 func newPalette() *palette {
@@ -42,22 +43,28 @@ func newPalette() *palette {
 	p := &palette{}
 	// set colours in palette
 	p.colors = make([]sdl.Color, TOTAL_COLORS)
-	p.colors[BLACK] = sdl.Color{R: 0, G: 0, B: 0, A: 255} // black
-	p.colors[DARK_BLUE] = sdl.Color{29, 43, 83, 255}      // dark-blue
-	p.colors[DARK_PURPLE] = sdl.Color{126, 37, 83, 255}   // dark-purple
-	p.colors[DARK_GREEN] = sdl.Color{0, 135, 81, 255}     // dark-green
-	p.colors[BROWN] = sdl.Color{171, 82, 54, 255}         // brown
-	p.colors[DARK_GRAY] = sdl.Color{95, 87, 79, 255}      // dark-gray
-	p.colors[LIGHT_GRAY] = sdl.Color{194, 195, 199, 255}  // light-gray
-	p.colors[WHITE] = sdl.Color{255, 241, 232, 255}       // white
-	p.colors[RED] = sdl.Color{255, 0, 77, 255}            // red
-	p.colors[ORANGE] = sdl.Color{255, 163, 0, 255}        // orange
-	p.colors[YELLOW] = sdl.Color{255, 236, 39, 255}       // yellow
-	p.colors[GREEN] = sdl.Color{0, 228, 54, 255}          // green
-	p.colors[BLUE] = sdl.Color{41, 173, 255, 255}         // blue
-	p.colors[INDIGO] = sdl.Color{131, 118, 156, 255}      // indigo
-	p.colors[PINK] = sdl.Color{255, 119, 168, 255}        // pink
-	p.colors[PEACH] = sdl.Color{255, 204, 170, 255}       //  peach
+	p.originalColors = make([]sdl.Color, TOTAL_COLORS)
+	p.originalColors[BLACK] = sdl.Color{R: 0, G: 0, B: 0, A: 255} // black
+	p.originalColors[DARK_BLUE] = sdl.Color{29, 43, 83, 255}      // dark-blue
+	p.originalColors[DARK_PURPLE] = sdl.Color{126, 37, 83, 255}   // dark-purple
+	p.originalColors[DARK_GREEN] = sdl.Color{0, 135, 81, 255}     // dark-green
+	p.originalColors[BROWN] = sdl.Color{171, 82, 54, 255}         // brown
+	p.originalColors[DARK_GRAY] = sdl.Color{95, 87, 79, 255}      // dark-gray
+	p.originalColors[LIGHT_GRAY] = sdl.Color{194, 195, 199, 255}  // light-gray
+	p.originalColors[WHITE] = sdl.Color{255, 241, 232, 255}       // white
+	p.originalColors[RED] = sdl.Color{255, 0, 77, 255}            // red
+	p.originalColors[ORANGE] = sdl.Color{255, 163, 0, 255}        // orange
+	p.originalColors[YELLOW] = sdl.Color{255, 236, 39, 255}       // yellow
+	p.originalColors[GREEN] = sdl.Color{0, 228, 54, 255}          // green
+	p.originalColors[BLUE] = sdl.Color{41, 173, 255, 255}         // blue
+	p.originalColors[INDIGO] = sdl.Color{131, 118, 156, 255}      // indigo
+	p.originalColors[PINK] = sdl.Color{255, 119, 168, 255}        // pink
+	p.originalColors[PEACH] = sdl.Color{255, 204, 170, 255}       //  peach
+
+	// copy to working colors
+	for i := range p.originalColors {
+		p.colors[i] = p.originalColors[i]
+	}
 
 	p.updateColorMap()
 
@@ -133,7 +140,7 @@ func (p *palette) MapColor(fromColor Color, toColor Color) error {
 	// update color
 	fromIdx := int(fromColor)
 	toIdx := int(toColor)
-	p.colors[int(fromIdx)] = p.colors[int(toIdx)]
+	p.colors[int(fromIdx)] = p.originalColors[int(toIdx)]
 	p.updateColorMap()
 	return nil
 }
