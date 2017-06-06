@@ -32,6 +32,7 @@ func (c *cartridge) Init(pb console.PixelBuffer) {
 	// hold onto this reference, this is the display that
 	// your code will be drawing onto each frame
 	c.PixelBuffer = pb
+	c.MapColor(console.BLUE, console.WHITE)
 	c.ClsWithColor(console.BLACK)
 }
 
@@ -45,7 +46,6 @@ func (c *cartridge) Update() {
 
 // Render - called once every frame
 func (c *cartridge) Render() {
-	c.MapColor(7, 8)
 	c.ClsWithColor(console.WHITE)
 	c.Cls()
 	c.PrintAtWithColor("SPRITES:", 50, 5, console.BLACK)

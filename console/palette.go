@@ -37,7 +37,7 @@ type palette struct {
 	colors   []sdl.Color
 }
 
-func NewPalette() *palette {
+func newPalette() *palette {
 
 	p := &palette{}
 	// set colours in palette
@@ -101,18 +101,18 @@ func (p *palette) GetColorID(rgba rgba) Color {
 	return BLACK
 }
 
-func setSurfacePalette(surface *sdl.Surface) error {
-	palette, err := sdl.AllocPalette(TOTAL_COLORS)
+func setSurfacePalette(palette Paletter, surface *sdl.Surface) error {
+	p, err := sdl.AllocPalette(TOTAL_COLORS)
 	if err != nil {
 		return err
 	}
 
-	palette.SetColors(_console.palette.GetSDLColors())
-	return surface.SetPalette(palette)
+	p.SetColors(palette.GetSDLColors())
+	return surface.SetPalette(p)
 }
 
 func (p *palette) PaletteReset() {
-	p = NewPalette()
+	p = newPalette()
 }
 
 func (p *palette) GetSDLColors() []sdl.Color {

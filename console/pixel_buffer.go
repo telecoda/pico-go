@@ -15,6 +15,7 @@ type pixelBuffer struct {
 	textCursor   pos // note print pos in char/line pos not pixel pos
 	fgColor      Color
 	bgColor      Color
+	palette      *palette
 	charCols     int
 	charRows     int
 	pixelSurface *sdl.Surface // offscreen pixel buffer
@@ -45,7 +46,10 @@ func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 		return nil, fmt.Errorf("Surface is nil")
 	}
 
-	if err := setSurfacePalette(ps); err != nil {
+	palette := newPalette()
+	p.palette = palette
+
+	if err := setSurfacePalette(p.palette, ps); err != nil {
 		return nil, err
 	}
 
@@ -108,7 +112,6 @@ func (p *pixelBuffer) Cls() {
 // ClsWithColor - fill pixel buffer with a set color
 func (p *pixelBuffer) ClsWithColor(colorID Color) {
 	p.bgColor = colorID
-	fmt.Printf("bg 1 colour: %d\n", p.bgColor)
 	p.Cls()
 }
 
@@ -221,7 +224,7 @@ func (p *pixelBuffer) PrintAt(str string, x, y int) {
 func (p *pixelBuffer) PrintAtWithColor(str string, x, y int, colorID Color) {
 	p.fgColor = colorID
 	if str != "" {
-		rgbaFg, _ := _console.palette.GetRGBA(colorID)
+		rgbaFg, _ := p.palette.GetRGBA(colorID)
 		fgColor := sdl.Color{R: rgbaFg.R, G: rgbaFg.G, B: rgbaFg.B, A: rgbaFg.A}
 		textSurface, err := _console.font.RenderUTF8_Blended(str, fgColor)
 		if err != nil {
@@ -249,7 +252,7 @@ func (p *pixelBuffer) Circle(x, y, r int) {
 // CircleWithColor - draw circle with color
 func (p *pixelBuffer) CircleWithColor(x, y, r int, colorID Color) {
 	p.fgColor = colorID
-	rgba, _ := _console.palette.GetRGBA(p.fgColor)
+	rgba, _ := p.palette.GetRGBA(p.fgColor)
 	sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
 	gfx.CircleColor(p.renderer, x, y, r, sColor)
 }
@@ -262,7 +265,7 @@ func (p *pixelBuffer) CircleFill(x, y, r int) {
 // CircleFillWithColor - fill circle with color
 func (p *pixelBuffer) CircleFillWithColor(x, y, r int, colorID Color) {
 	p.fgColor = colorID
-	rgba, _ := _console.palette.GetRGBA(p.fgColor)
+	rgba, _ := p.palette.GetRGBA(p.fgColor)
 	//	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
 	sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
 	gfx.FilledCircleColor(p.renderer, x, y, r, sColor)
@@ -276,7 +279,7 @@ func (p *pixelBuffer) Line(x0, y0, x1, y1 int) {
 // LineWithColor - line with color
 func (p *pixelBuffer) LineWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.fgColor = colorID
-	rgba, _ := _console.palette.GetRGBA(p.fgColor)
+	rgba, _ := p.palette.GetRGBA(p.fgColor)
 	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
 	p.renderer.DrawLine(x0, y0, x1, y1)
 }
@@ -294,7 +297,7 @@ func (p *pixelBuffer) PGet(x, y int) Color {
 
 	rgba := rgba{R: r, G: g, B: b, A: a}
 
-	return _console.palette.GetColorID(rgba)
+	return p.palette.GetColorID(rgba)
 }
 
 // PSet - pixel set in drawing color
@@ -305,7 +308,7 @@ func (p *pixelBuffer) PSet(x, y int) {
 // PSetWithColor - pixel set with color
 func (p *pixelBuffer) PSetWithColor(x0, y0 int, colorID Color) {
 	p.fgColor = colorID
-	rgba, _ := _console.palette.GetRGBA(p.fgColor)
+	rgba, _ := p.palette.GetRGBA(p.fgColor)
 	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
 	p.renderer.DrawPoint(x0, y0)
 }
@@ -318,7 +321,7 @@ func (p *pixelBuffer) Rect(x0, y0, x1, y1 int) {
 // RectWithColor - draw rectangle with color
 func (p *pixelBuffer) RectWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.fgColor = colorID
-	rgba, _ := _console.palette.GetRGBA(p.fgColor)
+	rgba, _ := p.palette.GetRGBA(p.fgColor)
 	rect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - y0)}
 	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
 	p.renderer.DrawRect(rect)
@@ -362,10 +365,6 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 	}
 	defer ss1.Free()
 
-	// if err := setSurfacePalette(ss); err != nil {
-	// 	panic(err)
-	// }
-
 	// convert sprite number into x,y pos
 	xCell := n % _spritesPerLine
 	yCell := (n - xCell) / _spritesPerLine
@@ -377,6 +376,12 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 	spriteSrcRect := &sdl.Rect{X: xPos, Y: yPos, W: sw, H: sh}
 	// this rect represents the size of the resulting sprite
 	ss1Rect := &sdl.Rect{X: 0, Y: 0, W: ss1.W, H: ss1.H}
+
+	// set palette for sprites based on current palette
+	if err := setSurfacePalette(p.palette, _console.sprites); err != nil {
+		fmt.Printf("Failed to update sprite surface palette: %s\n", err)
+		return
+	}
 
 	// copy sprite data from sprite sheet onto sprite surface
 	err = _console.sprites.Blit(spriteSrcRect, ss1, ss1Rect)
@@ -420,34 +425,38 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 
 }
 
-// Paletter methods
-
 // Color - Set current drawing color
 func (p *pixelBuffer) Color(colorID Color) {
 	p.fgColor = colorID
 }
 
-func (p *pixelBuffer) GetColorID(rgba rgba) Color {
-	return _console.palette.GetColorID(rgba)
+// Paletter methods
+
+// getRGBA - returns color as Color and uint32
+func (p *pixelBuffer) GetRGBA(color Color) (rgba, uint32) {
+	return p.palette.GetRGBA(color)
+
 }
 
-func (p *pixelBuffer) GetRGBA(color Color) (rgba, uint32) {
-	return _console.palette.GetRGBA(color)
+// GetColorID - find color from rgba
+func (p *pixelBuffer) GetColorID(rgba rgba) Color {
+	return p.palette.GetColorID(rgba)
 }
 
 func (p *pixelBuffer) PaletteReset() {
-	_console.palette = NewPalette()
+	p.palette.PaletteReset()
 }
 
 func (p *pixelBuffer) GetSDLColors() []sdl.Color {
-	return _console.palette.GetSDLColors()
+	return p.palette.GetSDLColors()
 }
 
 func (p *pixelBuffer) MapColor(fromColor Color, toColor Color) error {
-	if err := _console.palette.MapColor(fromColor, toColor); err != nil {
+	if err := p.palette.MapColor(fromColor, toColor); err != nil {
 		return err
 	}
-	return setSurfacePalette(p.pixelSurface)
+	// update palette for surface
+	return setSurfacePalette(p.palette, p.pixelSurface)
 }
 
 // Destroy cleans up any resources at end

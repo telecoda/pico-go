@@ -58,7 +58,6 @@ type console struct {
 	window   *sdl.Window
 	renderer *sdl.Renderer
 
-	palette Paletter
 	font    *ttf.Font
 	logo    *sdl.Surface
 	sprites *sdl.Surface
@@ -126,9 +125,6 @@ func NewConsole(cfg Config) (Console, error) {
 
 	_console.renderer = r
 
-	// init palette
-	_console.palette = NewPalette()
-
 	goPath := build.Default.GOPATH
 
 	// init font
@@ -160,7 +156,9 @@ func NewConsole(cfg Config) (Console, error) {
 		return nil, err
 	}
 
-	if err := setSurfacePalette(tempSurface); err != nil {
+	tempPalette := newPalette()
+
+	if err := setSurfacePalette(tempPalette, tempSurface); err != nil {
 		return nil, err
 	}
 
