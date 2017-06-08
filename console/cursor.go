@@ -44,8 +44,6 @@ func (c *cursor) render() {
 	// draw at pos
 	dRect := &sdl.Rect{X: (int32(c.pos.x) * _charWidth), Y: (int32(c.pos.y) * _charHeight), W: _charWidth, H: _charHeight - 1}
 	if c.on {
-		// TODO_, color = _console.palette.GetRGBA(c.color)
-		//c.surface.FillRect(dRect, color)
 		c.surface.FillRect(dRect, uint32(RED))
 	}
 }
