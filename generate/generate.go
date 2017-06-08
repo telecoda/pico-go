@@ -79,7 +79,7 @@ func NewProject(projectName string) error {
 		return err
 	}
 	// generate .gitignore
-	gitIgnore := fmt.Sprintf("# ignore executables\n%s\n%s.exe\n# ignore state file\ncode%s.pico-go-state", projectName, projectName, string(os.PathSeparator))
+	gitIgnore := fmt.Sprintf("# ignore executables\n%s\n%s.exe\n# ignore state file\n.pico-go-state", projectName, string(os.PathSeparator))
 	gitIgnorePath := projectPath + "/.gitignore"
 	if err := ioutil.WriteFile(gitIgnorePath, []byte(gitIgnore), 0666); err != nil {
 		return err

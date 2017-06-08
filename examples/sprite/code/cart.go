@@ -32,6 +32,9 @@ func (c *cartridge) Init(pb console.PixelBuffer) {
 	// hold onto this reference, this is the display that
 	// your code will be drawing onto each frame
 	c.PixelBuffer = pb
+	c.MapColor(console.BLUE, console.RED)
+	c.MapColor(console.BLUE, console.BLUE)
+	//c.PaletteReset()
 	c.ClsWithColor(console.BLACK)
 }
 

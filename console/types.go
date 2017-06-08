@@ -28,6 +28,7 @@ type Clearer interface {
 }
 
 type Drawer interface {
+	Color(colorID Color) // Set drawing color (colour!!!)
 	// drawing primatives
 	Circle(x, y, r int)
 	CircleWithColor(x, y, r int, colorID Color)
@@ -45,7 +46,11 @@ type Drawer interface {
 }
 
 type Paletter interface {
-	Color(colorID Color) // Set drawing color (colour!!!)
+	PaletteReset()
+	GetColorID(rgba rgba) Color
+	GetRGBA(color Color) (rgba, uint32)
+	GetSDLColors() []sdl.Color
+	MapColor(fromColor Color, toColor Color) error
 }
 
 type Printer interface {
@@ -73,6 +78,8 @@ const (
 	SFX_EDITOR
 	MUSIC_EDITOR
 )
+
+const TOTAL_COLORS = 256
 
 type Configger interface {
 	GetConfig() Config

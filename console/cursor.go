@@ -41,11 +41,9 @@ func (c *cursor) cursorFlasher(ticker *time.Ticker) {
 
 // draw cursor on surface
 func (c *cursor) render() {
-	var color uint32
 	// draw at pos
 	dRect := &sdl.Rect{X: (int32(c.pos.x) * _charWidth), Y: (int32(c.pos.y) * _charHeight), W: _charWidth, H: _charHeight - 1}
 	if c.on {
-		_, color = _console.palette.getRGBA(c.color)
-		c.surface.FillRect(dRect, color)
+		c.surface.FillRect(dRect, uint32(RED))
 	}
 }

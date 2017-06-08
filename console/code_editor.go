@@ -16,6 +16,7 @@ func newCodeEditorMode(c *console) Mode {
 	pb, _ := newPixelBuffer(c.Config)
 
 	codeEditor.PixelBuffer = pb
+
 	return codeEditor
 }
 

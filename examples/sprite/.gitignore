@@ -2,4 +2,4 @@
 sprite
 sprite.exe
 # ignore state file
-code/.pico-go-state
+.pico-go-state

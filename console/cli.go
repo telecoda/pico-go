@@ -26,7 +26,10 @@ func newCLIMode(c *console) Mode {
 
 		console: c,
 	}
-	pb, _ := newPixelBuffer(c.Config)
+	pb, err := newPixelBuffer(c.Config)
+	if err != nil {
+		panic(err)
+	}
 	cursor := newCursor(pb, RED)
 
 	cli.PixelBuffer = pb
@@ -37,6 +40,7 @@ func newCLIMode(c *console) Mode {
 	// calc max line width
 	cli.maxLineLen = (int(c.Config.ConsoleWidth) / _charWidth) - 2
 	cli.lastLine = c.Config.ConsoleWidth / _charHeight
+
 	return cli
 }
 
