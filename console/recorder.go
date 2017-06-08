@@ -21,7 +21,7 @@ type recorder struct {
 
 type Recorder interface {
 	AddFrame(surface *sdl.Surface)
-	SaveVideo(filename string, scale int) error
+	SaveVideo(filename string, scale int, colors []sdl.Color) error
 	SaveScreenshot(filename string, scale int) error
 }
 
@@ -38,7 +38,11 @@ func NewRecorder(fps, secondsToRecord int) Recorder {
 }
 
 func (r *recorder) AddFrame(surface *sdl.Surface) {
-	r.frames[r.current] = surface
+	// save copy of current frame
+
+	newSurface, _ := surface.Convert(surface.Format, 0)
+
+	r.frames[r.current] = newSurface
 
 	r.current++
 	if r.current > r.totalFrames-1 {
@@ -46,17 +50,7 @@ func (r *recorder) AddFrame(surface *sdl.Surface) {
 	}
 }
 
-func (r *recorder) SaveVideo(filename string, scale int) error {
-	var palette = []color.Color{
-		color.RGBA{0x00, 0x00, 0x00, 0xff},
-		color.RGBA{0x00, 0x00, 0xff, 0xff},
-		color.RGBA{0x00, 0xff, 0x00, 0xff},
-		color.RGBA{0x00, 0xff, 0xff, 0xff},
-		color.RGBA{0xff, 0x00, 0x00, 0xff},
-		color.RGBA{0xff, 0x00, 0xff, 0xff},
-		color.RGBA{0xff, 0xff, 0x00, 0xff},
-		color.RGBA{0xff, 0xff, 0xff, 0xff},
-	}
+func (r *recorder) SaveVideo(filename string, scale int, frameColors []sdl.Color) error {
 
 	// count used frames
 	totalFrames := 0
@@ -66,22 +60,57 @@ func (r *recorder) SaveVideo(filename string, scale int) error {
 		}
 	}
 
-	images := make([]*image.Paletted, totalFrames, totalFrames)
-	delays := make([]int, totalFrames, totalFrames)
+	if totalFrames == 0 {
+		return fmt.Errorf("No frames to save to video")
+	}
 
-	delay := 1000 / r.fps
+	sampledFrames := totalFrames / 3
 
-	for i := 0; i < totalFrames; i++ {
+	palette := make([]color.Color, len(frameColors))
+	for i, c := range frameColors {
+		palette[i] = color.RGBA{R: c.R, G: c.G, B: c.B, A: c.A}
+	}
+
+	images := make([]*image.Paletted, sampledFrames, sampledFrames)
+	delays := make([]int, sampledFrames, sampledFrames)
+
+	//Delay Time (1/100ths of a second)
+
+	// Sampling at 60 fps
+	// - one frame every 16.666 milliseconds
+	// - one frame every 1.6666 1/100th of a second
+	// all good... except delays can only be an int in 1/100ths of a second..
+	// so we either delay to 1/100th and be too quick or 2/100th and be too slow
+
+	// Convert to a 20 fps GIF?
+	// Select every 3rd frame
+	// Delay = 5/100th :)
+
+	// TODO - handle different frame rates..
+
+	delay := 5
+
+	for i := 0; i < sampledFrames; i++ {
 		delays[i] = delay
-		frame := r.frames[i]
+		frame := r.frames[i*3]
 		img := image.NewPaletted(image.Rect(0, 0, int(frame.W), int(frame.H)), palette)
+		// copy framePixels to image pixels
+		pixels := frame.Pixels()
+		for i := 0; i < len(pixels); i++ {
+
+			// convert index i to x,y coords
+			x := i % int(frame.W)
+			y := (i - x) / int(frame.W)
+			img.SetColorIndex(x, y, pixels[i])
+		}
+
 		images[i] = img
 
-		// drawing code (too long)
 	}
 
 	f, _ := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0600)
 	defer f.Close()
+	fmt.Printf("Saving video to %s\n", f.Name())
 	return gif.EncodeAll(f, &gif.GIF{
 		Image: images,
 		Delay: delays,
@@ -99,23 +128,34 @@ func (r *recorder) SaveScreenshot(filename string, scale int) error {
 	sourceSurface := r.frames[lastFrame]
 
 	srcRect := &sdl.Rect{X: 0, Y: 0, W: sourceSurface.W, H: sourceSurface.H}
-	targetRect := &sdl.Rect{X: 0, Y: 0, W: sourceSurface.W * int32(scale), H: sourceSurface.H * int32(scale)}
-
-	targetSurface, err := sdl.CreateRGBSurface(0, sourceSurface.W*int32(scale), sourceSurface.H*int32(scale), 4, 0, 0, 0, 0)
+	target32Surface, err := sdl.CreateRGBSurface(0, sourceSurface.W, sourceSurface.H, 32, rmask, gmask, bmask, amask)
 	if err != nil {
 		return err
 	}
 
-	err = sourceSurface.BlitScaled(srcRect, targetSurface, targetRect)
+	// convert 8 bit palette image to 32 bit RGBA
+	err = sourceSurface.Blit(srcRect, target32Surface, srcRect)
 	if err != nil {
 		return err
 	}
 
-	imageRect := image.Rect(0, 0, int(targetRect.W), int(targetRect.H))
+	// convert 32 bit RGBA to scaled 32 bit RGBA
+	target32ScaledRect := &sdl.Rect{X: 0, Y: 0, W: sourceSurface.W * int32(scale), H: sourceSurface.H * int32(scale)}
+	target32ScaledSurface, err := sdl.CreateRGBSurface(0, sourceSurface.W*int32(scale), sourceSurface.H*int32(scale), 32, rmask, gmask, bmask, amask)
+	if err != nil {
+		return err
+	}
+
+	err = target32Surface.BlitScaled(srcRect, target32ScaledSurface, target32ScaledRect)
+	if err != nil {
+		return err
+	}
+
+	imageRect := image.Rect(0, 0, int(target32ScaledRect.W), int(target32ScaledRect.H))
 
 	rgbaImage := image.NewRGBA(imageRect)
 
-	pixels := targetSurface.Pixels()
+	pixels := target32ScaledSurface.Pixels()
 
 	w := int(sourceSurface.W) * scale
 	// convert SDL surface to RGBA image

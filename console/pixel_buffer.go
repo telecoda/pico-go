@@ -36,7 +36,6 @@ var amask = uint32(0x000000ff)
 func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 	p := &pixelBuffer{}
 
-	//ps, err := sdl.CreateRGBSurface(0, int32(cfg.ConsoleWidth), int32(cfg.ConsoleHeight), 8, rmask, gmask, bmask, amask)
 	ps, err := sdl.CreateRGBSurface(0, int32(cfg.ConsoleWidth), int32(cfg.ConsoleHeight), 8, 0, 0, 0, 0)
 	if err != nil {
 		return nil, err
@@ -78,25 +77,7 @@ func (p *pixelBuffer) GetFrame() *sdl.Surface {
 
 func (p *pixelBuffer) Render() error {
 
-	// // clear offscreen buffer
-	// p.ClsWithColor(3)
-
-	// // draw to offscreen surface
-	// rect := sdl.Rect{X: 0, Y: 0, W: 64, H: 64}
-
-	// // draw white rect top corner
-	// p.pixelSurface.FillRect(&rect, 0xffffffff)
-
-	// pixels := p.pixelSurface.Pixels()
-	// // update specific pixel
-	// x := 50
-	// y := 50
-	// w := 128
-	// pixels[4*(y*w+x)+0] = 255 // r
-	// pixels[4*(y*w+x)+1] = 0   // g
-	// pixels[4*(y*w+x)+2] = 0   // b
-
-	// return p.Flip()
+	// this is never called, always locally implemented
 
 	return nil
 
