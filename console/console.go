@@ -372,7 +372,7 @@ func (c *console) saveScreenshot() error {
 func (c *console) saveVideo() error {
 
 	if mode, ok := c.modes[c.currentMode]; ok {
-		return c.recorder.SaveVideo("out.gif", c.Config.GifScale, mode.GetSDLColors())
+		return c.recorder.SaveVideo("out.gif", c.Config.GifScale, mode)
 	}
 
 	return fmt.Errorf("Mode not available")

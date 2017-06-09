@@ -21,7 +21,7 @@ type recorder struct {
 
 type Recorder interface {
 	AddFrame(surface *sdl.Surface)
-	SaveVideo(filename string, scale int, colors []sdl.Color) error
+	SaveVideo(filename string, scale int, palette Paletter) error
 	SaveScreenshot(filename string, scale int) error
 }
 
@@ -50,7 +50,7 @@ func (r *recorder) AddFrame(surface *sdl.Surface) {
 	}
 }
 
-func (r *recorder) SaveVideo(filename string, scale int, frameColors []sdl.Color) error {
+func (r *recorder) SaveVideo(filename string, scale int, palette Paletter) error {
 
 	// count used frames
 	totalFrames := 0
@@ -66,9 +66,9 @@ func (r *recorder) SaveVideo(filename string, scale int, frameColors []sdl.Color
 
 	sampledFrames := totalFrames / 3
 
-	palette := make([]color.Color, len(frameColors))
-	for i, c := range frameColors {
-		palette[i] = color.RGBA{R: c.R, G: c.G, B: c.B, A: c.A}
+	colors := make([]color.Color, len(palette.GetSDLColors()))
+	for i, c := range palette.GetSDLColors() {
+		colors[i] = color.RGBA{R: c.R, G: c.G, B: c.B, A: c.A}
 	}
 
 	images := make([]*image.Paletted, sampledFrames, sampledFrames)
@@ -90,18 +90,53 @@ func (r *recorder) SaveVideo(filename string, scale int, frameColors []sdl.Color
 
 	delay := 5
 
+	srcRect := &sdl.Rect{X: 0, Y: 0, W: r.frames[0].W, H: r.frames[0].H}
+	targetRect := &sdl.Rect{X: 0, Y: 0, W: r.frames[0].W * int32(scale), H: r.frames[0].H * int32(scale)}
+
+	target32Surface, err := sdl.CreateRGBSurface(0, srcRect.W, srcRect.H, 32, rmask, gmask, bmask, amask)
+	if err != nil {
+		return err
+	}
+
+	target32ScaledSurface, err := sdl.CreateRGBSurface(0, targetRect.W, targetRect.H, 32, rmask, gmask, bmask, amask)
+	if err != nil {
+		return err
+	}
+
 	for i := 0; i < sampledFrames; i++ {
 		delays[i] = delay
 		frame := r.frames[i*3]
-		img := image.NewPaletted(image.Rect(0, 0, int(frame.W), int(frame.H)), palette)
+
+		// scale original frame to video size
+		err = frame.Blit(srcRect, target32Surface, srcRect)
+		if err != nil {
+			return err
+		}
+
+		err = target32Surface.BlitScaled(srcRect, target32ScaledSurface, targetRect)
+		if err != nil {
+			return err
+		}
+
+		img := image.NewPaletted(image.Rect(0, 0, int(target32ScaledSurface.W), int(target32ScaledSurface.H)), colors)
 		// copy framePixels to image pixels
-		pixels := frame.Pixels()
-		for i := 0; i < len(pixels); i++ {
+		pixels := target32ScaledSurface.Pixels()
+		w := int(target32ScaledSurface.W)
+		for i := 0; i < len(pixels); i += 4 {
 
 			// convert index i to x,y coords
-			x := i % int(frame.W)
-			y := (i - x) / int(frame.W)
-			img.SetColorIndex(x, y, pixels[i])
+			x := (i % (w * 4)) / 4
+			y := (i - (x * 4)) / (w * 4)
+			a := pixels[i]
+			b := pixels[i+1]
+			g := pixels[i+2]
+			r := pixels[i+3]
+
+			// lookup color index
+			pixelColor := rgba{R: r, G: g, B: b, A: a}
+			colorID := palette.GetColorID(pixelColor)
+
+			img.SetColorIndex(x, y, uint8(colorID))
 		}
 
 		images[i] = img
@@ -132,6 +167,7 @@ func (r *recorder) SaveScreenshot(filename string, scale int) error {
 	if err != nil {
 		return err
 	}
+	defer target32Surface.Free()
 
 	// convert 8 bit palette image to 32 bit RGBA
 	err = sourceSurface.Blit(srcRect, target32Surface, srcRect)
