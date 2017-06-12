@@ -20,13 +20,44 @@ First fetch all the dependencies:
 
 You will also need to install the SDL2 dependencies for your platform.  See the [go-sdl README](https://github.com/telecoda/go-sdl2/blob/master/README.md) for details
 
-    go run main.go
-
-or
-
-    pico-go run
+    go install
 
 More docs will be added as I progress..
+
+## Dependencies
+
+This project is dependent on the [github.com/veandco/go-sdl2](http://github.com/veandco/go-sdl2) project for SDL support.
+
+TODO: document installation options thoroughly
+
+## Getting started
+
+This section describes how to get started using pico-go
+
+### Creating a new project
+To create a new project
+
+    pico-go new <project-name>
+
+Run this command in the directory where you would like your new project created.  The command will create a new directory matching your project name containing all the required asset.
+
+![New project output][NewProject]
+[NewProject]: ./docs/images/new-project.png "New project output"
+
+
+### Running the project
+
+Once you have created your pico-go project you can run the code immediately.
+
+    cd <project-name>
+    pico-go run
+
+The generated project contains a simple code example that renders animated text on the screen.
+
+### Hot reloading
+The `pico-go run` command monitors the filesystem for file changes.  If you amend any files in the code directory your project will be restarted. (Only if the code compiles successfully)
+
+You can also run the project by directly calling the `go run main.go` command but the code will not be automatically restarted.
 
 # References
 
