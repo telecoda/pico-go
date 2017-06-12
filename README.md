@@ -9,6 +9,8 @@ The plan is to build something similar to pico8 but where the games can be coded
 <font color="red">**
 Note: this project is very much work in progress at the moment, watch this space..**</font>
 
+See [TODO](TODO.md) for current implementation status.
+
 
 ## Building
 
