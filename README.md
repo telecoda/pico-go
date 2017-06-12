@@ -20,7 +20,7 @@ First fetch all the dependencies:
 
     go get -u -v
 
-You will also need to install the SDL2 dependencies for your platform.  See the [go-sdl README](https://github.com/telecoda/go-sdl2/blob/master/README.md) for details
+You will also need to install the SDL2 dependencies for your platform.  See the [go-sdl README](https://github.com/veandco/go-sdl2/blob/master/README.md) for details
 
     go install
 
@@ -28,7 +28,7 @@ More docs will be added as I progress..
 
 ## Dependencies
 
-This project is dependent on the [github.com/veandco/go-sdl2](http://github.com/veandco/go-sdl2) project for SDL support.
+This project is dependent on the [github.com/veandco/go-sdl2](https://github.com/veandco/go-sdl2) project for SDL support.
 
 TODO: document installation options thoroughly
 
