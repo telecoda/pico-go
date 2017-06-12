@@ -83,7 +83,7 @@ func NewConsole(cfg Config) (Console, error) {
 
 	state, err := persister.LoadState()
 	if err != nil {
-		fmt.Printf("Error loading state: %s - using default\n", err)
+		fmt.Printf("Warning loading state: %s - using default\n", err)
 	}
 	// init SDL
 	sdl.Init(sdl.INIT_EVERYTHING)
