@@ -122,6 +122,10 @@ func (r *recorder) SaveVideo(filename string, scale int, palette Paletter) error
 		// copy framePixels to image pixels
 		pixels := target32ScaledSurface.Pixels()
 		w := int(target32ScaledSurface.W)
+
+		// TODO - improve perf
+		// this works but could be much faster
+
 		for i := 0; i < len(pixels); i += 4 {
 
 			// convert index i to x,y coords
