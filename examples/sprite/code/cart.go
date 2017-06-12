@@ -45,7 +45,6 @@ func (c *cartridge) Update() {
 // Render - called once every frame
 func (c *cartridge) Render() {
 	c.ClsWithColor(console.WHITE)
-	c.Cls()
 	c.PrintAtWithColor("SPRITES:", 50, 5, console.BLACK)
 	c.Line(0, 12, 128, 12)
 	c.PrintAtWithColor("FLIPX: false", 10, 18, console.BLACK)

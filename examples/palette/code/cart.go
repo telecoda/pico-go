@@ -62,6 +62,9 @@ func (c *cartridge) Update() {
 
 // Render - called once every frame
 func (c *cartridge) Render() {
-	c.Cls()
+	c.ClsWithColor(console.BLACK)
+	c.PrintAtWithColor("PALETTE:", 46, 5, console.WHITE)
+	c.Line(0, 12, 128, 12)
+
 	c.PrintAtWithColor(fmt.Sprintf("counter:%d", c.counter), c.x, c.y, console.WHITE)
 }

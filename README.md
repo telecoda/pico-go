@@ -43,8 +43,7 @@ To create a new project
 
 Run this command in the directory where you would like your new project created.  The command will create a new directory matching your project name containing all the required asset.
 
-![New project output][NewProject]
-[NewProject]: ./docs/images/new-project.png "New project output"
+![image](/docs/images/new-project.png)
 
 
 ### Running the project
