@@ -34,6 +34,7 @@ type rgba struct {
 
 type palette struct {
 	colorMap       map[Color]rgba
+	rgbaMap        map[uint32]Color
 	colors         []sdl.Color
 	originalColors []sdl.Color
 }
@@ -66,17 +67,23 @@ func newPalette() *palette {
 		p.colors[i] = p.originalColors[i]
 	}
 
-	p.updateColorMap()
+	p.updateColorMaps()
 
 	return p
 }
 
-func (p *palette) updateColorMap() {
+func (r rgba) toIndex() uint32 {
+	return uint32(uint32(r.R)<<24 | uint32(r.G)<<16 | uint32(r.B)<<8 | uint32(r.A))
+}
+
+func (p *palette) updateColorMaps() {
 	// create a mpa of the colors
 	p.colorMap = make(map[Color]rgba, len(p.colors))
-
+	p.rgbaMap = make(map[uint32]Color, len(p.colors))
 	for i, c := range p.colors {
-		p.colorMap[Color(i)] = rgba{R: c.R, G: c.G, B: c.B, A: c.A}
+		color := rgba{R: c.R, G: c.G, B: c.B, A: c.A}
+		p.colorMap[Color(i)] = color
+		p.rgbaMap[color.toIndex()] = Color(i)
 	}
 
 }
@@ -91,7 +98,7 @@ func (p *palette) GetRGBA(color Color) (rgba, uint32) {
 		// if not found default to color 0
 		c = p.colorMap[0]
 	}
-	rgbaCombined := uint32(c.R)<<24 | uint32(c.G)<<16 | uint32(c.B)<<8 | uint32(c.A)
+	rgbaCombined := c.toIndex()
 	return c, rgbaCombined
 
 }
@@ -99,10 +106,8 @@ func (p *palette) GetRGBA(color Color) (rgba, uint32) {
 // GetColorID - find color from rgba
 func (p *palette) GetColorID(rgba rgba) Color {
 	// lookup color using rgba
-	for color, attrs := range p.colorMap {
-		if rgba.R == attrs.R && rgba.G == attrs.G && rgba.B == attrs.B && rgba.A == attrs.A {
-			return color
-		}
+	if colorID, ok := p.rgbaMap[rgba.toIndex()]; ok {
+		return colorID
 	}
 	// default to black
 	return BLACK
@@ -113,7 +118,6 @@ func setSurfacePalette(palette Paletter, surface *sdl.Surface) error {
 	if err != nil {
 		return err
 	}
-
 	p.SetColors(palette.GetSDLColors())
 	return surface.SetPalette(p)
 }
@@ -122,6 +126,15 @@ func (p *palette) PaletteReset() {
 	p2 := newPalette()
 	p.colorMap = p2.colorMap
 	p.colors = p2.colors
+}
+
+func (p *palette) PaletteCopy() Paletter {
+	p2 := newPalette()
+	for i, c := range p.colors {
+		p2.colors[i] = c
+	}
+	p2.updateColorMaps()
+	return p2
 }
 
 func (p *palette) GetSDLColors() []sdl.Color {
@@ -141,6 +154,22 @@ func (p *palette) MapColor(fromColor Color, toColor Color) error {
 	fromIdx := int(fromColor)
 	toIdx := int(toColor)
 	p.colors[int(fromIdx)] = p.originalColors[int(toIdx)]
-	p.updateColorMap()
+	p.updateColorMaps()
+	return nil
+}
+
+func (p *palette) SetTransparent(color Color, enabled bool) error {
+
+	fromIdx := int(color)
+
+	if enabled {
+		if err := p.MapColor(color, 0); err != nil {
+			return err
+		}
+	} else {
+		p.colors[int(fromIdx)] = p.originalColors[int(fromIdx)]
+	}
+
+	p.updateColorMaps()
 	return nil
 }

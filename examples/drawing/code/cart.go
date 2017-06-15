@@ -9,7 +9,6 @@ import (
 type cartridge struct {
 	cfg                 console.Config // holds details of console config
 	console.PixelBuffer                // ref to console display
-
 }
 
 // NewCart - initialise a struct implementing Cartridge interface

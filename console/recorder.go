@@ -13,15 +13,17 @@ import (
 
 type recorder struct {
 	frames      []*sdl.Surface
+	palettes    []Paletter
 	current     int
+	frameSkip   int
 	fps         int
 	seconds     int
 	totalFrames int
 }
 
 type Recorder interface {
-	AddFrame(surface *sdl.Surface)
-	SaveVideo(filename string, scale int, palette Paletter) error
+	AddFrame(surface *sdl.Surface, palette Paletter)
+	SaveVideo(filename string, scale int) error
 	SaveScreenshot(filename string, scale int) error
 }
 
@@ -33,25 +35,34 @@ func NewRecorder(fps, secondsToRecord int) Recorder {
 	}
 
 	r.frames = make([]*sdl.Surface, r.totalFrames, r.totalFrames)
+	r.palettes = make([]Paletter, r.totalFrames, r.totalFrames)
 
 	return r
 }
 
-func (r *recorder) AddFrame(surface *sdl.Surface) {
-	// save copy of current frame
+func (r *recorder) AddFrame(surface *sdl.Surface, palette Paletter) {
+	r.frameSkip++
 
-	newSurface, _ := surface.Convert(surface.Format, 0)
+	// only save every 3rd frame
+	// 20 frames at 60 fps
+	if r.frameSkip%3 == 0 {
+		// save copy of current frame
+		newSurface, _ := surface.Convert(surface.Format, 0)
 
-	r.frames[r.current] = newSurface
+		r.frames[r.current] = newSurface
+		// take a copy of the palette
 
-	r.current++
-	if r.current > r.totalFrames-1 {
-		r.current = 0
+		r.palettes[r.current] = palette.PaletteCopy()
+		r.current++
+		if r.current > r.totalFrames-1 {
+			r.current = 0
+		}
 	}
 }
 
-func (r *recorder) SaveVideo(filename string, scale int, palette Paletter) error {
+func (r *recorder) SaveVideo(filename string, scale int) error {
 
+	fmt.Printf("Please wait, saving video\n")
 	// count used frames
 	totalFrames := 0
 	for i := 0; i < len(r.frames); i++ {
@@ -64,12 +75,19 @@ func (r *recorder) SaveVideo(filename string, scale int, palette Paletter) error
 		return fmt.Errorf("No frames to save to video")
 	}
 
-	sampledFrames := totalFrames / 3
-
-	colors := make([]color.Color, len(palette.GetSDLColors()))
-	for i, c := range palette.GetSDLColors() {
-		colors[i] = color.RGBA{R: c.R, G: c.G, B: c.B, A: c.A}
+	var startFrame int
+	// if recording has never looped - start from first frame
+	if totalFrames < len(r.frames) {
+		startFrame = 0
+	} else {
+		// recording has looped so start from NEXT frame
+		startFrame = r.current + 1
+		if startFrame > len(r.frames)-1 {
+			startFrame = 0
+		}
 	}
+
+	sampledFrames := totalFrames
 
 	images := make([]*image.Paletted, sampledFrames, sampledFrames)
 	delays := make([]int, sampledFrames, sampledFrames)
@@ -103,9 +121,17 @@ func (r *recorder) SaveVideo(filename string, scale int, palette Paletter) error
 		return err
 	}
 
-	for i := 0; i < sampledFrames; i++ {
-		delays[i] = delay
-		frame := r.frames[i*3]
+	framesProcessed := totalFrames
+	fr := startFrame
+	for framesProcessed > 0 {
+		delays[fr] = delay
+		frame := r.frames[fr]
+		palette := r.palettes[fr]
+
+		colors := make([]color.Color, len(palette.GetSDLColors()))
+		for i, c := range palette.GetSDLColors() {
+			colors[i] = color.RGBA{R: c.R, G: c.G, B: c.B, A: c.A}
+		}
 
 		// scale original frame to video size
 		err = frame.Blit(srcRect, target32Surface, srcRect)
@@ -143,7 +169,14 @@ func (r *recorder) SaveVideo(filename string, scale int, palette Paletter) error
 			img.SetColorIndex(x, y, uint8(colorID))
 		}
 
-		images[i] = img
+		images[fr] = img
+
+		// increment index
+		fr++
+		framesProcessed--
+		if fr > totalFrames-1 {
+			fr = 0
+		}
 
 	}
 

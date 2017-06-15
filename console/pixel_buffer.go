@@ -207,12 +207,11 @@ func (p *pixelBuffer) PrintAtWithColor(str string, x, y int, colorID Color) {
 	if str != "" {
 		rgbaFg, _ := p.palette.GetRGBA(colorID)
 		fgColor := sdl.Color{R: rgbaFg.R, G: rgbaFg.G, B: rgbaFg.B, A: rgbaFg.A}
-		textSurface, err := _console.font.RenderUTF8_Blended(str, fgColor)
+		textSurface, err := _console.font.RenderUTF8_Solid(str, fgColor)
 		if err != nil {
 			panic(err)
 		}
 		defer textSurface.Free()
-
 		// copy text surface to offscreen buffer
 		tRect := &sdl.Rect{X: 0, Y: 0, W: textSurface.W, H: textSurface.H}
 		posRect := &sdl.Rect{X: int32(x), Y: int32(y), W: textSurface.W, H: textSurface.H}
@@ -432,12 +431,24 @@ func (p *pixelBuffer) PaletteReset() {
 	setSurfacePalette(p.palette, p.pixelSurface)
 }
 
+func (p *pixelBuffer) PaletteCopy() Paletter {
+	return p.palette.PaletteCopy()
+}
+
 func (p *pixelBuffer) GetSDLColors() []sdl.Color {
 	return p.palette.GetSDLColors()
 }
 
 func (p *pixelBuffer) MapColor(fromColor Color, toColor Color) error {
 	if err := p.palette.MapColor(fromColor, toColor); err != nil {
+		return err
+	}
+	// update palette for surface
+	return setSurfacePalette(p.palette, p.pixelSurface)
+}
+
+func (p *pixelBuffer) SetTransparent(color Color, enabled bool) error {
+	if err := p.palette.SetTransparent(color, enabled); err != nil {
 		return err
 	}
 	// update palette for surface

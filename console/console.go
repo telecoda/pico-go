@@ -286,7 +286,7 @@ func (c *console) Run() error {
 			}
 
 			// record frame
-			c.recorder.AddFrame(mode.GetFrame())
+			c.recorder.AddFrame(mode.GetFrame(), mode)
 
 			mode.Flip()
 
@@ -370,10 +370,5 @@ func (c *console) saveScreenshot() error {
 
 // saveVideo - saves a video of last x seconds
 func (c *console) saveVideo() error {
-
-	if mode, ok := c.modes[c.currentMode]; ok {
-		return c.recorder.SaveVideo("out.gif", c.Config.GifScale, mode)
-	}
-
-	return fmt.Errorf("Mode not available")
+	return c.recorder.SaveVideo("out.gif", c.Config.GifScale)
 }

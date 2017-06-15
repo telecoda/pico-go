@@ -47,10 +47,12 @@ type Drawer interface {
 
 type Paletter interface {
 	PaletteReset()
+	PaletteCopy() Paletter
 	GetColorID(rgba rgba) Color
 	GetRGBA(color Color) (rgba, uint32)
 	GetSDLColors() []sdl.Color
 	MapColor(fromColor Color, toColor Color) error
+	SetTransparent(color Color, enabled bool) error
 }
 
 type Printer interface {
