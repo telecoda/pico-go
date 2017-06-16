@@ -6,7 +6,7 @@ When developing in pico8 you use `Lua` whereas pico-go uses `Go`. The Lua langua
 
 Watch this space as I may amend this in the future to use a different style (I'm not entirely happy with too many params for a function).
 
-##API Comparison
+## API Comparison
 This is a side by side comparison of pico8 functions vs the equivalent pico-go functions
 
 
