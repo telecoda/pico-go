@@ -1,7 +1,6 @@
 package code
 
 import (
-	"fmt"
 	"math/rand"
 
 	"github.com/telecoda/pico-go/console"
@@ -99,6 +98,4 @@ func (c *cartridge) Render() {
 	} else {
 		c.PrintAtWithColor("COLORS CAN BE TRANSPARENT.", 12, 20, 15)
 	}
-	c.PrintAtWithColor(fmt.Sprintf("COUNT:%d", c.frameCount), 46, 100, 15)
-
 }
