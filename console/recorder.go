@@ -43,9 +43,15 @@ func NewRecorder(fps, secondsToRecord int) Recorder {
 func (r *recorder) AddFrame(surface *sdl.Surface, palette Paletter) {
 	r.frameSkip++
 
-	// only save every 3rd frame
+	// only save every 3rd frame @ 60fps
 	// 20 frames at 60 fps
-	if r.frameSkip%3 == 0 {
+	// save every frame @ 30fps
+	saveEvery := 3
+	if r.fps == 30 {
+		saveEvery = 1
+	}
+
+	if r.frameSkip%saveEvery == 0 {
 		// save copy of current frame
 		newSurface, _ := surface.Convert(surface.Format, 0)
 
@@ -58,6 +64,7 @@ func (r *recorder) AddFrame(surface *sdl.Surface, palette Paletter) {
 			r.current = 0
 		}
 	}
+
 }
 
 func (r *recorder) SaveVideo(filename string, scale int) error {
@@ -104,9 +111,20 @@ func (r *recorder) SaveVideo(filename string, scale int) error {
 	// Select every 3rd frame
 	// Delay = 5/100th :)
 
-	// TODO - handle different frame rates..
+	// Sampling at 30 fps
+	// - one frame every 33.333 milliseconds
+	// - one frame every 3.3333 1/100th of a second
+	// all good... except delays can only be an int in 1/100ths of a second..
+	// so we either delay to 1/100th and be too quick or 2/100th and be too slow
+
+	// Convert to a 30 fps GIF?
+	// Select every  frame
+	// Delay = 3/100th :) (Close enough..)
 
 	delay := 5
+	if r.fps == 30 {
+		delay = 3
+	}
 
 	srcRect := &sdl.Rect{X: 0, Y: 0, W: r.frames[0].W, H: r.frames[0].H}
 	targetRect := &sdl.Rect{X: 0, Y: 0, W: r.frames[0].W * int32(scale), H: r.frames[0].H * int32(scale)}
