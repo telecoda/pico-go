@@ -229,8 +229,8 @@ func (c *console) Run() error {
 
 	// poll events
 	endFrame = time.Now() // init end frame
+	startFrame = time.Now()
 	for !c.hasQuit {
-		startFrame = time.Now() // used for framerate timing
 
 		if mode, ok := c.modes[c.currentMode]; ok {
 

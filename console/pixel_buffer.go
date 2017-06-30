@@ -111,8 +111,6 @@ func (p *pixelBuffer) Cursor(x, y int) {
 // Flip - copy offscreen buffer to onscreen buffer
 func (p *pixelBuffer) Flip() error {
 
-	p.lockFps()
-
 	tex, err := _console.renderer.CreateTextureFromSurface(p.pixelSurface)
 	if err != nil {
 		return err
@@ -162,6 +160,11 @@ func (p *pixelBuffer) Flip() error {
 	_console.renderer.Copy(tex, p.psRect, &winRect)
 
 	_console.renderer.Present()
+
+	p.lockFps()
+
+	// at end of frame delay start timing for next one
+	startFrame = time.Now()
 
 	return nil
 }
