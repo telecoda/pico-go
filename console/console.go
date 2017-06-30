@@ -215,8 +215,6 @@ func (c *console) LoadCart(cart Cartridge) error {
 	return nil
 }
 
-var runtimeTimeBudget int64
-var modesTimeBudget int64
 var lastFrame time.Time
 var startFrame time.Time
 var endFrame time.Time
@@ -231,8 +229,6 @@ func (c *console) Run() error {
 
 	// poll events
 	endFrame = time.Now() // init end frame
-	runtimeTimeBudget = time.Duration(1*time.Second).Nanoseconds() / int64(c.Config.FPS)
-	modesTimeBudget = time.Duration(1*time.Second).Nanoseconds() / 60
 	for !c.hasQuit {
 		startFrame = time.Now() // used for framerate timing
 
@@ -290,8 +286,6 @@ func (c *console) Run() error {
 
 			mode.Flip()
 
-			// lock framerate
-			c.lockFps()
 		} else {
 			return fmt.Errorf("Mode :%d not found in console.modes", c.currentMode)
 		}
@@ -328,32 +322,6 @@ func (c *console) toggleCLI() {
 		c.secondaryMode = c.currentMode
 		c.SetMode(CLI)
 	}
-}
-
-// lockFps - locks rendering to a steady framerate
-func (c *console) lockFps() float64 {
-
-	var timeBudget = runtimeTimeBudget
-	if c.currentMode != RUNTIME {
-		timeBudget = modesTimeBudget
-	}
-	now := time.Now()
-	// calc time to process frame so since start
-	procTime := now.Sub(startFrame)
-
-	// delay for remainder of time budget (based on fps)
-	delay := time.Duration(timeBudget - procTime.Nanoseconds())
-	if delay > 0 {
-		sdl.Delay(uint32(delay / 1000000))
-	}
-
-	// calc actual fps being achieved
-	endFrame = time.Now()
-	frameTime := endFrame.Sub(startFrame)
-
-	endFrame = time.Now()
-
-	return float64(time.Second) / float64(frameTime.Nanoseconds())
 }
 
 // Destroy cleans up any resources at end

@@ -2,6 +2,7 @@ package console
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
 	gfx "github.com/veandco/go-sdl2/sdl_gfx"
@@ -21,6 +22,8 @@ type pixelBuffer struct {
 	pixelSurface *sdl.Surface // offscreen pixel buffer
 	psRect       *sdl.Rect    // rect of pixelSurface
 	renderer     *sdl.Renderer
+	fps          int
+	timeBudget   int64
 }
 
 type pos struct {
@@ -34,7 +37,11 @@ var bmask = uint32(0x0000ff00)
 var amask = uint32(0x000000ff)
 
 func newPixelBuffer(cfg Config) (PixelBuffer, error) {
-	p := &pixelBuffer{}
+	p := &pixelBuffer{
+		fps: cfg.FPS,
+	}
+
+	p.timeBudget = time.Duration(1*time.Second).Nanoseconds() / int64(p.fps)
 
 	ps, err := sdl.CreateRGBSurface(0, int32(cfg.ConsoleWidth), int32(cfg.ConsoleHeight), 8, 0, 0, 0, 0)
 	if err != nil {
@@ -103,6 +110,9 @@ func (p *pixelBuffer) Cursor(x, y int) {
 
 // Flip - copy offscreen buffer to onscreen buffer
 func (p *pixelBuffer) Flip() error {
+
+	p.lockFps()
+
 	tex, err := _console.renderer.CreateTextureFromSurface(p.pixelSurface)
 	if err != nil {
 		return err
@@ -154,6 +164,29 @@ func (p *pixelBuffer) Flip() error {
 	_console.renderer.Present()
 
 	return nil
+}
+
+// lockFps - locks rendering to a steady framerate
+func (p *pixelBuffer) lockFps() float64 {
+
+	var timeBudget = p.timeBudget
+	now := time.Now()
+	// calc time to process frame so since start
+	procTime := now.Sub(startFrame)
+
+	// delay for remainder of time budget (based on fps)
+	delay := time.Duration(timeBudget - procTime.Nanoseconds())
+	if delay > 0 {
+		sdl.Delay(uint32(delay / 1000000))
+	}
+
+	// calc actual fps being achieved
+	endFrame = time.Now()
+	frameTime := endFrame.Sub(startFrame)
+
+	endFrame = time.Now()
+
+	return float64(time.Second) / float64(frameTime.Nanoseconds())
 }
 
 func (p *pixelBuffer) GetCursor() pos {

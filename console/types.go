@@ -14,7 +14,6 @@ type Color int
 */
 
 type PicoGoAPI interface {
-	Flip() error // Copy graphics buffer to screen
 	Clearer
 	Drawer
 	Paletter
@@ -108,6 +107,7 @@ type Runtime interface {
 }
 
 type PixelBuffer interface {
+	Flip() error // Copy graphics buffer to screen
 	Destroy()
 	GetFrame() *sdl.Surface
 	PicoGoAPI
