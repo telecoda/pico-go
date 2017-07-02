@@ -6,6 +6,7 @@ import (
 
 type runtime struct {
 	console *console
+	running bool
 	PixelBuffer
 	Cartridge
 }

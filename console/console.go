@@ -223,7 +223,7 @@ var endFrame time.Time
 func (c *console) Run() error {
 
 	// // default to runtime
-	c.SetMode(RUNTIME)
+	c.SetMode(CLI)
 
 	go c.saveState()
 
@@ -234,45 +234,6 @@ func (c *console) Run() error {
 
 		if mode, ok := c.modes[c.currentMode]; ok {
 
-			// poll all events
-			for event = sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-				// this is the common event handling code
-
-				// TODO keys to implement
-				// F7 Capture cartridge label image
-				// F8 Start recording a video
-				// F9 Save GIF video to desktop (max: 8 seconds by default)
-
-				switch t := event.(type) {
-				case *sdl.QuitEvent:
-					c.state.SaveState(c)
-					c.hasQuit = true
-				case *sdl.KeyDownEvent:
-					switch t.Keysym.Sym {
-					case sdl.K_ESCAPE:
-						c.toggleCLI()
-					case sdl.K_F6:
-						if err := c.saveScreenshot(); err != nil {
-							return err
-						}
-					case sdl.K_F9:
-						if err := c.saveVideo(); err != nil {
-							return err
-						}
-					default:
-						// pass keydown events to mode handle
-						if err := mode.HandleEvent(event); err != nil {
-							return err
-						}
-					}
-				default:
-					// if not handled pass event to mode event handler
-					if err := mode.HandleEvent(event); err != nil {
-						return err
-					}
-				}
-			}
-
 			if err := mode.Update(); err != nil {
 				return err
 			}
@@ -282,7 +243,7 @@ func (c *console) Run() error {
 			}
 
 			// record frame
-			c.recorder.AddFrame(mode.GetFrame(), mode)
+			//			c.recorder.AddFrame(mode.GetFrame(), mode)
 
 			mode.Flip()
 
@@ -292,6 +253,54 @@ func (c *console) Run() error {
 
 	}
 
+	return nil
+}
+
+func (c *console) handleEvents() error {
+	if mode, ok := c.modes[c.currentMode]; ok {
+
+		// poll all events
+		for event = sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+
+			// this is the common event handling code
+
+			// TODO keys to implement
+			// F7 Capture cartridge label image
+			// F8 Start recording a video
+			// F9 Save GIF video to desktop (max: 8 seconds by default)
+
+			switch t := event.(type) {
+			case *sdl.QuitEvent:
+				fmt.Printf("Quit event..\n")
+				c.state.SaveState(c)
+				c.hasQuit = true
+			case *sdl.KeyDownEvent:
+				switch t.Keysym.Sym {
+				case sdl.K_ESCAPE:
+					c.toggleCLI()
+				case sdl.K_F6:
+					if err := c.saveScreenshot(); err != nil {
+						return err
+					}
+				case sdl.K_F9:
+					if err := c.saveVideo(); err != nil {
+						return err
+					}
+				default:
+					// pass keydown events to mode handle
+					if err := mode.HandleEvent(event); err != nil {
+						return err
+					}
+				}
+			default:
+				// if not handled pass event to mode event handler
+				if err := mode.HandleEvent(event); err != nil {
+					return err
+				}
+			}
+		}
+
+	}
 	return nil
 }
 
@@ -316,12 +325,26 @@ func (c *console) Quit() {
 
 // toggleCLI - toggle between CLI and secondary mode
 func (c *console) toggleCLI() {
-	if c.currentMode == CLI {
+	switch c.currentMode {
+	case CLI:
 		c.SetMode(c.secondaryMode)
-	} else {
+	case RUNTIME:
+		if mode, ok := c.modes[c.currentMode]; ok {
+			runtime := mode.(*runtime)
+			runtime.Stop()
+			c.SetMode(CLI)
+		}
+
+	default:
 		c.secondaryMode = c.currentMode
 		c.SetMode(CLI)
 	}
+	// if c.currentMode == CLI {
+	// 	c.SetMode(c.secondaryMode)
+	// } else {
+	// 	c.secondaryMode = c.currentMode
+	// 	c.SetMode(CLI)
+	// }
 }
 
 // Destroy cleans up any resources at end

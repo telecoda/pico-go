@@ -163,8 +163,14 @@ func (p *pixelBuffer) Flip() error {
 
 	p.lockFps()
 
+	// record frame
+	_console.recorder.AddFrame(p.GetFrame(), p)
+
 	// at end of frame delay start timing for next one
 	startFrame = time.Now()
+
+	// handle events
+	_console.handleEvents()
 
 	return nil
 }

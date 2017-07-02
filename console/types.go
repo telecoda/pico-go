@@ -91,6 +91,9 @@ type Cartridge interface {
 	Init(pb PixelBuffer)
 	Render()
 	Update()
+	//
+	IsRunning() bool
+	Stop()
 }
 
 type Mode interface {
