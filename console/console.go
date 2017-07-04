@@ -38,6 +38,7 @@ type Console interface {
 	Destroy()
 	GetWindow() *sdl.Window
 	SetMode(newMode ModeType)
+	Inputter
 }
 
 type console struct {
@@ -64,6 +65,7 @@ type console struct {
 
 	state    Persister
 	recorder Recorder
+	Inputter
 }
 
 func NewConsole(cfg Config) (Console, error) {
@@ -101,6 +103,7 @@ func NewConsole(cfg Config) (Console, error) {
 	}
 
 	_console.recorder = NewRecorder(cfg.FPS, cfg.GifLength)
+	_console.Inputter = NewInputter()
 
 	// initialise window
 	window, err := sdl.CreateWindow(

@@ -22,7 +22,7 @@ type PicoGraphicsAPI interface {
 }
 
 type PicoInputAPI interface {
-	Btn(index int, player int)
+	Btn(id int) bool
 }
 
 type Clearer interface {
@@ -96,6 +96,7 @@ type Cartridge interface {
 	initPb(pb PixelBuffer)
 	IsRunning() bool
 	Stop()
+	PicoInputAPI
 	// User implemented methods below
 	Init()
 	Render()

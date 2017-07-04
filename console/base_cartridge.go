@@ -3,7 +3,8 @@ package console
 type BaseCartridge struct {
 	cfg         Config // holds details of console config
 	PixelBuffer        // ref to console display
-	running     bool
+	PicoInputAPI
+	running bool
 }
 
 // NewBaseCart - initialise a struct implementing Cartridge interface
@@ -35,4 +36,9 @@ func (bc *BaseCartridge) IsRunning() bool {
 
 func (bc *BaseCartridge) Stop() {
 	bc.running = false
+}
+
+func (bc *BaseCartridge) Btn(id int) bool {
+	// access runtime button mappings
+	return _console.Btn(id)
 }

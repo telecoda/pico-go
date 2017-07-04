@@ -11,6 +11,20 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+const (
+	P1_BUTT_RIGHT = 0x4f
+	P1_BUTT_LEFT  = 0x50
+	P1_BUTT_DOWN  = 0x51
+	P1_BUTT_UP    = 0x52
+	//Z,X / C,V / N,M
+	P1_BUTT_01 = 0x1d // Z
+	P1_BUTT_02 = 0x1b // X
+	P1_BUTT_03 = 0x6  // C
+	P1_BUTT_04 = 0x19 // V
+	P1_BUTT_05 = 0x11 // N
+	P1_BUTT_06 = 0x10 // M
+)
+
 type recorder struct {
 	frames      []*sdl.Surface
 	palettes    []Paletter
