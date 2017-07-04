@@ -1,0 +1,5 @@
+# ignore executables
+tweetjam
+tweetjam.exe
+# ignore state file
+code/.pico-go-state

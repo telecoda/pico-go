@@ -4,6 +4,14 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+type Mode interface {
+	Init() error
+	Render() error
+	Update() error
+	HandleEvent(event sdl.Event) error
+	PixelBuffer
+}
+
 func (c *console) initModes() (map[ModeType]Mode, error) {
 	modes := map[ModeType]Mode{
 		CLI:         newCLIMode(c),

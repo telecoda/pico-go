@@ -13,12 +13,16 @@ type Color int
 	Documented extensively here http://pico-8.wikia.com/wiki/Category:API
 */
 
-type PicoGoAPI interface {
+type PicoGraphicsAPI interface {
 	Clearer
 	Drawer
 	Paletter
 	Printer
 	Spriter
+}
+
+type PicoInputAPI interface {
+	Btn(index int, player int)
 }
 
 type Clearer interface {
@@ -87,25 +91,20 @@ type Configger interface {
 }
 
 type Cartridge interface {
+	// BaseCartridge methods already implemented
 	Configger
-	Init(pb PixelBuffer)
-	Render()
-	Update()
-	//
+	initPb(pb PixelBuffer)
 	IsRunning() bool
 	Stop()
-}
-
-type Mode interface {
-	Init() error
-	Render() error
-	Update() error
-	HandleEvent(event sdl.Event) error
-	PixelBuffer
+	// User implemented methods below
+	Init()
+	Render()
+	Update()
 }
 
 type Runtime interface {
 	Mode
+	PicoInputAPI
 	LoadCart(cart Cartridge) error
 }
 
@@ -113,7 +112,7 @@ type PixelBuffer interface {
 	Flip() error // Copy graphics buffer to screen
 	Destroy()
 	GetFrame() *sdl.Surface
-	PicoGoAPI
+	PicoGraphicsAPI
 }
 
 var title = "pico-go virtual games console"

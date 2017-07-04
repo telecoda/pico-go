@@ -339,12 +339,6 @@ func (c *console) toggleCLI() {
 		c.secondaryMode = c.currentMode
 		c.SetMode(CLI)
 	}
-	// if c.currentMode == CLI {
-	// 	c.SetMode(c.secondaryMode)
-	// } else {
-	// 	c.secondaryMode = c.currentMode
-	// 	c.SetMode(CLI)
-	// }
 }
 
 // Destroy cleans up any resources at end

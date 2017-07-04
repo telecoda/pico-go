@@ -9,25 +9,16 @@ import (
 // Code must implement console.Cartridge interface
 
 type cartridge struct {
-	cfg                 console.Config // holds details of console config
-	console.PixelBuffer                // ref to console display
-	running             bool
+	*console.BaseCartridge
 }
 
 // NewCart - initialise a struct implementing Cartridge interface
 func NewCart() console.Cartridge {
 	cart := &cartridge{
-		cfg: console.DefaultConfig(),
+		BaseCartridge: console.NewBaseCart(),
 	}
 
-	cart.cfg.FPS = 30
-
 	return cart
-}
-
-// GetConfig - return config need for Cart to run
-func (c *cartridge) GetConfig() console.Config {
-	return c.cfg
 }
 
 /* This is the original tweetcart code
@@ -35,12 +26,7 @@ s={}w=128 r=rnd for i=1,w do s[i]={}p=s[i]p[1]=r(w)end::a::cls()for i=1,w do p=s
 */
 
 // Init - called once when cart is initialised
-func (c *cartridge) Init(pb console.PixelBuffer) {
-	// the Init method receives a PixelBuffer reference
-	// hold onto this reference, this is the display that
-	// your code will be drawing onto each frame
-	c.PixelBuffer = pb
-	c.running = true
+func (c *cartridge) Init() {
 }
 
 // Update -  called once every frame
@@ -89,12 +75,4 @@ func (c *cartridge) Render() {
 		c.Flip()
 	}
 
-}
-
-func (c *cartridge) IsRunning() bool {
-	return c.running
-}
-
-func (c *cartridge) Stop() {
-	c.running = false
 }

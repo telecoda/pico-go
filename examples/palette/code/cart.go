@@ -9,8 +9,7 @@ import (
 // Code must implement console.Cartridge interface
 
 type cartridge struct {
-	cfg                 console.Config // holds details of console config
-	console.PixelBuffer                // ref to console display
+	*console.BaseCartridge
 
 	// example vars below
 	mapAnim      bool
@@ -22,21 +21,15 @@ type cartridge struct {
 // NewCart - initialise a struct implementing Cartridge interface
 func NewCart() console.Cartridge {
 	return &cartridge{
-		cfg: console.DefaultConfig(),
+		BaseCartridge: console.NewBaseCart(),
 	}
 }
 
-// GetConfig - return config need for Cart to run
-func (c *cartridge) GetConfig() console.Config {
-	return c.cfg
-}
-
 // Init - called once when cart is initialised
-func (c *cartridge) Init(pb console.PixelBuffer) {
+func (c *cartridge) Init() {
 	// the Init method receives a PixelBuffer reference
 	// hold onto this reference, this is the display that
 	// your code will be drawing onto each frame
-	c.PixelBuffer = pb
 	c.frameCount = 0
 	c.totalFrames = 25
 	c.currentColor = 0

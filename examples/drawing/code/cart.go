@@ -7,28 +7,18 @@ import (
 // This example demonstrates the drawing primatives
 
 type cartridge struct {
-	cfg                 console.Config // holds details of console config
-	console.PixelBuffer                // ref to console display
+	*console.BaseCartridge
 }
 
 // NewCart - initialise a struct implementing Cartridge interface
 func NewCart() console.Cartridge {
 	return &cartridge{
-		cfg: console.DefaultConfig(),
+		BaseCartridge: console.NewBaseCart(),
 	}
 }
 
-// GetConfig - return config need for Cart to run
-func (c *cartridge) GetConfig() console.Config {
-	return c.cfg
-}
-
 // Init - called once when cart is initialised
-func (c *cartridge) Init(pb console.PixelBuffer) {
-	// the Init method receives a PixelBuffer reference
-	// hold onto this reference, this is the display that
-	// your code will be drawing onto each frame
-	c.PixelBuffer = pb
+func (c *cartridge) Init() {
 }
 
 // Update -  called once every frame
