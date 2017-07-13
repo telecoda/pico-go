@@ -1,0 +1,57 @@
+package code
+
+import (
+	"fmt"
+
+	"github.com/telecoda/pico-go/console"
+)
+
+// Code must implement console.Cartridge interface
+
+type cartridge struct {
+	*console.BaseCartridge
+
+	counter int // just used in demo code
+	x       int
+	y       int
+	speedY  int
+}
+
+// NewCart - initialise a struct implementing Cartridge interface
+func NewCart() console.Cartridge {
+	return &cartridge{
+		BaseCartridge: console.NewBaseCart(console.Tic80Config()),
+	}
+}
+
+// Init - called once when cart is initialised
+func (c *cartridge) Init() {
+	c.ClsWithColor(console.TIC80_LIGHT_BLUE)
+
+	c.counter = 0
+	c.x = 40
+	c.y = 0
+	c.speedY = 2
+}
+
+// Update -  called once every frame
+func (c *cartridge) Update() {
+	c.y += c.speedY
+	if c.y < 0 {
+		c.y = 0
+		c.speedY = -c.speedY
+	}
+
+	if c.y > c.GetConfig().ConsoleHeight {
+		c.y = c.GetConfig().ConsoleHeight
+		c.speedY = -c.speedY
+	}
+
+	c.counter++
+}
+
+// Render - called once every frame
+func (c *cartridge) Render() {
+	c.Cls()
+	c.PrintAtWithColor(fmt.Sprintf("TIC80:%d", c.counter), c.x, c.y, console.TIC80_WHITE)
+}

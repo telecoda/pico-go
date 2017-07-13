@@ -57,7 +57,6 @@ func NewProject(projectName string) error {
 
 	// create sub directories
 	os.MkdirAll(projectPath+"/code", 0777)
-	os.MkdirAll(projectPath+"/fonts", 0777)
 	os.MkdirAll(projectPath+"/sprites", 0777)
 	os.MkdirAll(projectPath+"/audio", 0777)
 
@@ -93,18 +92,6 @@ func NewProject(projectName string) error {
 	}
 	localSpriteFile := fmt.Sprintf("./%s/sprites/sprites.png", projectName)
 	err = ioutil.WriteFile(localSpriteFile, spriteBytes, 0600)
-	if err != nil {
-		return err
-	}
-
-	// copy font to local proj
-	fontFile := goPath + "/src/github.com/telecoda/pico-go/fonts/PICO-8.ttf"
-	fontBytes, err := ioutil.ReadFile(fontFile)
-	if err != nil {
-		return err
-	}
-	localFontFile := fmt.Sprintf("./%s/fonts/font.ttf", projectName)
-	err = ioutil.WriteFile(localFontFile, fontBytes, 0600)
 	if err != nil {
 		return err
 	}

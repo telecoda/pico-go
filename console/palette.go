@@ -80,6 +80,21 @@ type palette struct {
 	originalColors []sdl.Color
 }
 
+func newPalette(consoleType ConsoleType) (*palette, error) {
+	switch consoleType {
+	case PICO8:
+		return newPico8Palette(), nil
+	case TIC80:
+		return newTic80Palette(), nil
+	case ZX_SPECTRUM:
+		return newZXSpectrumPalette(), nil
+	case CBM64:
+		return newCBM64Palette(), nil
+	}
+
+	return nil, fmt.Errorf("Console type: %s not supported", consoleType)
+}
+
 func newPico8Palette() *palette {
 
 	p := &palette{}
@@ -147,6 +162,39 @@ func newTic80Palette() *palette {
 }
 
 func newZXSpectrumPalette() *palette {
+
+	p := &palette{}
+	// set colours in palette
+	p.colors = make([]sdl.Color, TOTAL_COLORS)
+	p.originalColors = make([]sdl.Color, TOTAL_COLORS)
+	p.originalColors[ZX_BLACK] = sdl.Color{R: 0, G: 0, B: 0, A: 255}
+	p.originalColors[ZX_BLUE] = sdl.Color{R: 0, G: 41, B: 197, A: 255}
+	p.originalColors[ZX_RED] = sdl.Color{R: 213, G: 39, B: 30, A: 255}
+	p.originalColors[ZX_MAGENTA] = sdl.Color{R: 211, G: 58, B: 199, A: 255}
+	p.originalColors[ZX_GREEN] = sdl.Color{R: 0, G: 197, B: 49, A: 255}
+	p.originalColors[ZX_CYAN] = sdl.Color{R: 0, G: 200, B: 201, A: 255}
+	p.originalColors[ZX_YELLOW] = sdl.Color{R: 205, G: 200, B: 59, A: 255}
+	p.originalColors[ZX_WHITE] = sdl.Color{R: 203, G: 203, B: 203, A: 255}
+	p.originalColors[ZX_BRIGHT_BLACK] = sdl.Color{R: 0, G: 0, B: 0, A: 255}
+	p.originalColors[ZX_BRIGHT_BLUE] = sdl.Color{R: 0, G: 54, B: 247, A: 255}
+	p.originalColors[ZX_BRIGHT_RED] = sdl.Color{R: 255, G: 52, B: 40, A: 255}
+	p.originalColors[ZX_BRIGHT_MAGENTA] = sdl.Color{R: 255, G: 75, B: 250, A: 255}
+	p.originalColors[ZX_BRIGHT_GREEN] = sdl.Color{R: 0, G: 247, B: 63, A: 255}
+	p.originalColors[ZX_BRIGHT_CYAN] = sdl.Color{R: 0, G: 252, B: 253, A: 255}
+	p.originalColors[ZX_BRIGHT_YELLOW] = sdl.Color{R: 255, G: 251, B: 76, A: 255}
+	p.originalColors[ZX_BRIGHT_WHITE] = sdl.Color{R: 255, G: 255, B: 255, A: 255}
+
+	// copy to working colors
+	for i := range p.originalColors {
+		p.colors[i] = p.originalColors[i]
+	}
+
+	p.updateColorMaps()
+
+	return p
+}
+
+func newCBM64Palette() *palette {
 
 	p := &palette{}
 	// set colours in palette

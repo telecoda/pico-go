@@ -132,9 +132,8 @@ func NewConsole(cfg Config) (Console, error) {
 	goPath := build.Default.GOPATH
 
 	// init font
-	// TOOD don't load assets from relative paths
-	//font, err := ttf.OpenFont(goPath+"/src/github.com/telecoda/pico-go/fonts/PICO-8.ttf", 4)
-	font, err := ttf.OpenFont("./fonts/font.ttf", _console.Config.fontWidth)
+	fontPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/font.ttf", goPath, _console.consoleType)
+	font, err := ttf.OpenFont(fontPath, _console.Config.fontWidth)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading font:%s", err)
 	}
@@ -143,7 +142,8 @@ func NewConsole(cfg Config) (Console, error) {
 
 	// init logo
 	// TOOD don't load assets from relative paths
-	logo, err := img.Load(goPath + "/src/github.com/telecoda/pico-go/images/pico-go-logo.png")
+	logoPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/logo.png", goPath, _console.consoleType)
+	logo, err := img.Load(logoPath)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
 	}
@@ -161,7 +161,12 @@ func NewConsole(cfg Config) (Console, error) {
 		return nil, err
 	}
 
-	_console.originalPalette = newPico8Palette()
+	_console.palette, err = newPalette(cfg.consoleType)
+	if err != nil {
+		return nil, err
+	}
+
+	_console.originalPalette, _ = newPalette(cfg.consoleType)
 
 	if err := setSurfacePalette(_console.originalPalette, tempSurface); err != nil {
 		return nil, err

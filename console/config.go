@@ -16,6 +16,7 @@ type Config struct {
 	GifLength       int
 	// private vars
 	palette     *palette
+	consoleType ConsoleType
 	fontWidth   int
 	fontHeight  int
 	bgColor     Color
@@ -51,7 +52,7 @@ func Pico8Config() Config {
 		ScreenshotScale: screenshotScale,
 		GifScale:        gifScale,
 		GifLength:       gifLength,
-		palette:         newPico8Palette(),
+		consoleType:     PICO8,
 		fontWidth:       4,
 		fontHeight:      8,
 		bgColor:         PICO8_BLACK,
@@ -74,7 +75,7 @@ func Tic80Config() Config {
 		ScreenshotScale: screenshotScale,
 		GifScale:        gifScale,
 		GifLength:       gifLength,
-		palette:         newTic80Palette(),
+		consoleType:     TIC80,
 		fontWidth:       8,
 		fontHeight:      8,
 		bgColor:         TIC80_BLACK,
@@ -97,7 +98,7 @@ func ZXSpectrumConfig() Config {
 		ScreenshotScale: screenshotScale,
 		GifScale:        gifScale,
 		GifLength:       gifLength,
-		palette:         newZXSpectrumPalette(),
+		consoleType:     ZX_SPECTRUM,
 		fontWidth:       8,
 		fontHeight:      8,
 		bgColor:         ZX_WHITE,

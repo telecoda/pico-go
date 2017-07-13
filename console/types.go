@@ -84,6 +84,15 @@ const (
 	MUSIC_EDITOR
 )
 
+type ConsoleType string
+
+const (
+	PICO8       = "pico8"
+	TIC80       = "tic80"
+	ZX_SPECTRUM = "zxspectrum"
+	CBM64       = "cbm64"
+)
+
 const TOTAL_COLORS = 256
 
 type Configger interface {
