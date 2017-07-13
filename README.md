@@ -63,3 +63,6 @@ You can also run the project by directly calling the `go run main.go` command bu
 # References
 
 [PICO8 font](https://drive.google.com/file/d/0B97Um39fHXlcWUFRZlBqUndhbXM/view) by RhythmLynx
+[TIC-80 font](https://fontstruct.com/fontstructions/show/1388526/tic-80-wide-font) by nesbox
+[ZX Spectrum font](https://fonts2u.com/zx-spectrum.font)
+http://style64.org/release/c64-truetype-v1.2-style#attachments

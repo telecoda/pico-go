@@ -30,7 +30,7 @@ func newCLIMode(c *console) Mode {
 	if err != nil {
 		panic(err)
 	}
-	cursor := newCursor(pb, RED)
+	cursor := newCursor(pb, c.Config.cursorColor)
 
 	cli.PixelBuffer = pb
 	cli.cursor = cursor
@@ -38,8 +38,8 @@ func newCLIMode(c *console) Mode {
 	cursor.y = 8
 	cli.cmdPos = cursor.pos
 	// calc max line width
-	cli.maxLineLen = (int(c.Config.ConsoleWidth) / _charWidth) - 2
-	cli.lastLine = c.Config.ConsoleWidth / _charHeight
+	cli.maxLineLen = (int(c.Config.ConsoleWidth) / _console.Config.fontWidth) - 2
+	cli.lastLine = c.Config.ConsoleWidth / _console.Config.fontHeight
 
 	return cli
 }
@@ -152,7 +152,7 @@ func (c *cli) cmdEnter() {
 	c.renderCmd(lines, false)
 	err := c.cmdExec(c.cmd)
 	if err != nil {
-		c.Color(PINK)
+		c.Color(c.console.errColor)
 		c.Print("")
 		c.Print(err.Error())
 	}
@@ -222,7 +222,7 @@ func (c *cli) cursorRight() {
 
 func (c *cli) Init() error {
 	// get native pixel buffer
-	c.PixelBuffer.ClsWithColor(BLACK)
+	c.PixelBuffer.ClsWithColor(c.console.bgColor)
 	pb := c.PixelBuffer.(*pixelBuffer)
 
 	logoRect := &sdl.Rect{X: 0, Y: 0, W: _logoWidth, H: _logoHeight}
@@ -231,7 +231,7 @@ func (c *cli) Init() error {
 
 	title := fmt.Sprintf("PICO-GO %s", _version)
 	c.Cursor(0, 4)
-	c.Color(LIGHT_GRAY)
+	c.Color(c.console.fgColor)
 	c.PixelBuffer.Print(title)
 
 	c.PixelBuffer.Print("(C) 2017 @TELECODA")
@@ -297,27 +297,27 @@ func (c *cli) getCmdLines() []string {
 // clearCmd - clears screen where command will be rendered
 func (c *cli) clearCmd(count int) {
 	x0 := 0
-	y0 := c.cmdPos.y * int(_charHeight)
+	y0 := c.cmdPos.y * int(_console.Config.fontHeight)
 	x1 := c.console.ConsoleWidth
-	y1 := y0 + (count)*int(_charHeight)
-	c.RectFillWithColor(x0, y0, x1, y1, BLACK)
+	y1 := y0 + (count)*int(_console.Config.fontHeight)
+	c.RectFillWithColor(x0, y0, x1, y1, c.console.bgColor)
 }
 
 // renderCmd - renders command string across multiple lines
 func (c *cli) renderCmd(lines []string, resetCursor bool) {
-	c.PixelBuffer.Color(WHITE)
+	c.PixelBuffer.Color(c.console.fgColor)
 
 	// set print color
 	currentPos := c.cmdPos
-	c.Color(WHITE)
+	c.Color(c.console.fgColor)
 	c.Cursor(0, currentPos.y)
-	c.PrintAtWithColor(">", 0, currentPos.y*_charHeight, WHITE)
+	c.PrintAtWithColor(">", 0, currentPos.y*_console.Config.fontHeight, c.console.fgColor)
 	c.Cursor(2, currentPos.y)
 	for i := range lines {
 		if currentPos.y < c.lastLine {
-			c.PrintAtWithColor(lines[i], 2*_charWidth, (currentPos.y+i)*_charHeight, WHITE)
+			c.PrintAtWithColor(lines[i], 2*_console.Config.fontWidth, (currentPos.y+i)*_console.Config.fontHeight, c.console.fgColor)
 		} else {
-			c.PrintAtWithColor(lines[i], 2*_charWidth, c.lastLine*_charHeight, WHITE)
+			c.PrintAtWithColor(lines[i], 2*_console.Config.fontWidth, c.lastLine*_console.Config.fontHeight, c.console.fgColor)
 		}
 	}
 	if resetCursor {

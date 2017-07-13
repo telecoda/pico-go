@@ -52,8 +52,7 @@ func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 		return nil, fmt.Errorf("Surface is nil")
 	}
 
-	palette := newPalette()
-	p.palette = palette
+	p.palette = cfg.palette
 
 	if err := setSurfacePalette(p.palette, ps); err != nil {
 		return nil, err
@@ -65,11 +64,11 @@ func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 
 	p.textCursor.x = 0
 	p.textCursor.y = 0
-	p.fgColor = WHITE
-	p.bgColor = BLACK
+	p.fgColor = 7
+	p.bgColor = 0
 
-	p.charCols = int(int32(cfg.ConsoleWidth) / _charWidth)
-	p.charRows = int(int32(cfg.ConsoleHeight) / _charHeight)
+	p.charCols = cfg.ConsoleWidth / _console.Config.fontWidth
+	p.charRows = cfg.ConsoleHeight / _console.Config.fontHeight
 
 	p.renderer, err = sdl.CreateSoftwareRenderer(p.pixelSurface)
 	if err != nil {
@@ -117,10 +116,15 @@ func (p *pixelBuffer) Flip() error {
 	}
 	defer tex.Destroy()
 
-	// clear window
-	_console.renderer.Clear()
 	// calc how big to render on window
 	winW, winH := _console.window.GetSize()
+
+	// clear window
+	fullRect := &sdl.Rect{X: 0, Y: 0, W: int32(winW), H: int32(winH)}
+	rgba, _ := p.palette.GetRGBA(_console.borderColor)
+	_console.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
+	_console.renderer.FillRect(fullRect)
+
 	var winRect sdl.Rect
 	x1 := int32(0)
 	y1 := int32(0)
@@ -129,29 +133,44 @@ func (p *pixelBuffer) Flip() error {
 	sW := int32(winW)
 	sH := int32(winH)
 
+	// aspect ratio
+	ratio := float64(_console.ConsoleHeight) / float64(_console.ConsoleWidth)
+
 	// maintain aspect ratio even on resize
 	if winW == winH {
 		// same dimensions (no padding)
 		sW = int32(winW)
-		sH = int32(winH)
-	}
-
-	if winW > winH {
-		// wider (use full height)
-		y1 = 0
-		sH = int32(winH)
-		sW = int32(winH)
-		diff := (winW - winH) / 2
-		x1 = int32(diff)
+		sH = int32(float64(winH) * ratio)
 	}
 
 	if winW < winH {
-		// taller (use full width)
-		x1 = 0
-		sH = int32(winW)
+		y1 = 0
+		sH = int32(float64(winW) * ratio)
 		sW = int32(winW)
-		diff := (winH - winW) / 2
+		diff := (winH - int(sH)) / 2
 		y1 = int32(diff)
+		if diff < 0 {
+			y1 = 0
+			sW = int32(float64(winH) * ratio)
+			sH = int32(winH)
+			diff := (winW - int(sW)) / 2
+			x1 = int32(diff)
+		}
+	}
+
+	if winW > winH {
+		x1 = 0
+		sH = int32(winH)
+		sW = int32(float64(winH) / ratio)
+		diff := (winW - int(sW)) / 2
+		x1 = int32(diff)
+		if diff < 0 {
+			x1 = 0
+			sW = int32(winW)
+			sH = int32(float64(winW) * ratio)
+			diff := (winH - int(sH)) / 2
+			y1 = int32(diff)
+		}
 	}
 
 	winRect = sdl.Rect{X: x1, Y: y1, W: sW, H: sH}
@@ -204,22 +223,22 @@ func (p *pixelBuffer) GetCursor() pos {
 
 func charToPixel(charPos pos) pos {
 	return pos{
-		x: charPos.x * _charWidth,
-		y: charPos.y * _charHeight,
+		x: charPos.x * _console.Config.fontWidth,
+		y: charPos.y * _console.Config.fontHeight,
 	}
 }
 
 func pixelToChar(pixelPos pos) pos {
 	return pos{
-		x: pixelPos.x / _charWidth,
-		y: pixelPos.y / _charHeight,
+		x: pixelPos.x / _console.Config.fontWidth,
+		y: pixelPos.y / _console.Config.fontHeight,
 	}
 }
 
 // ScrolUpLLine - scrolls display up a single line
 func (p *pixelBuffer) ScrollUpLine() {
-	fromRect := &sdl.Rect{X: 0, Y: _charHeight, W: p.pixelSurface.W, H: p.pixelSurface.H - _charHeight}
-	toRect := &sdl.Rect{X: 0, Y: 0, W: p.pixelSurface.W, H: p.pixelSurface.H - _charHeight}
+	fromRect := &sdl.Rect{X: 0, Y: int32(_console.Config.fontHeight), W: p.pixelSurface.W, H: p.pixelSurface.H - int32(_console.Config.fontHeight)}
+	toRect := &sdl.Rect{X: 0, Y: 0, W: p.pixelSurface.W, H: p.pixelSurface.H - int32(_console.Config.fontHeight)}
 	p.pixelSurface.Blit(fromRect, p.pixelSurface, toRect)
 	p.textCursor.y = p.charRows - 2
 }

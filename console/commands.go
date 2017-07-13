@@ -63,24 +63,24 @@ func NewHelpCommand() Command {
 }
 
 func (h *helpCommand) Exec(pb PixelBuffer, statement string) error {
-	pb.Color(BLUE)
+	pb.Color(PICO8_BLUE)
 	pb.Print("COMMANDS")
 	pb.Print("")
-	pb.Color(LIGHT_GRAY)
+	pb.Color(PICO8_LIGHT_GRAY)
 	pb.Print("LOAD <FILENAME>  SAVE <FILENAME>")
 	pb.Print("RUN              RESUME")
 	pb.Print("SHUTDOWN         REBOOT")
 	pb.Print("CD <DIRNAME>     MKDIR <DIRNAME>")
 	pb.Print("CD ..      TO GO UP A DIRECTORY")
 	pb.Print("KEYCONFIG  TO CHOOSE BUTTONS")
-	pb.Color(PINK)
+	pb.Color(PICO8_PINK)
 	pb.Print("SPLORE     TO EXPLORE CARTRIGDES")
 	pb.Print("")
-	pb.Color(LIGHT_GRAY)
+	pb.Color(PICO8_LIGHT_GRAY)
 	pb.Print("PRESS ESC TO TOGGLE EDITOR VIEW")
 	pb.Print("ALT+ENTER TO TOGGLE FULLSCREEN")
 	pb.Print("CTRL-Q TO FASTQUIT")
-	pb.Color(BLUE)
+	pb.Color(PICO8_BLUE)
 	pb.Print("SEE PICOGO.TXT FOR MORE INFO")
 	pb.Print("OR VISIT WWW.??????.COM")
 	return nil
@@ -98,7 +98,7 @@ func NewDirCommand() Command {
 }
 
 func pwd(pb PixelBuffer) {
-	pb.Color(BLUE)
+	pb.Color(PICO8_BLUE)
 	dirStr := fmt.Sprintf("DIRECTORY: %s", _console.currentDir)
 	pb.Print(dirStr)
 }
@@ -116,10 +116,10 @@ func (d *dirCommand) Exec(pb PixelBuffer, statement string) error {
 	for _, file := range files {
 		name := strings.ToUpper(file.Name())
 		if file.IsDir() {
-			pb.Color(PINK)
+			pb.Color(PICO8_PINK)
 			pb.Print(name)
 		} else {
-			pb.Color(BLUE)
+			pb.Color(PICO8_BLUE)
 			pb.Print(name)
 		}
 
@@ -151,7 +151,7 @@ func (c *cdCommand) Exec(pb PixelBuffer, statement string) error {
 		newDir = _console.currentDir + "/" + newDir + "/"
 		// TODO get code working for case insensitive dir names
 		if err := os.Chdir(_console.baseDir + newDir); err != nil {
-			pb.Color(WHITE)
+			pb.Color(PICO8_WHITE)
 			pb.Print("DIRECTORY NOT FOUND")
 			return nil
 		}
@@ -165,7 +165,7 @@ func (c *cdCommand) Exec(pb PixelBuffer, statement string) error {
 		if len(fullDir) < len(_console.baseDir) {
 			// you can't cd .. above starting dir
 			os.Chdir(_console.baseDir + _console.currentDir)
-			pb.Color(WHITE)
+			pb.Color(PICO8_WHITE)
 			pb.Print("CD: FAILED")
 			return nil
 
@@ -202,7 +202,7 @@ func (m *mkdirCommand) Exec(pb PixelBuffer, statement string) error {
 	// split statement into tokens
 	tokens := strings.Split(statement, " ")
 	if len(tokens) < 2 {
-		pb.Color(LIGHT_GRAY)
+		pb.Color(PICO8_LIGHT_GRAY)
 		pb.Print(m.Help)
 		return nil
 	} else {
@@ -211,7 +211,7 @@ func (m *mkdirCommand) Exec(pb PixelBuffer, statement string) error {
 		newDir = _console.baseDir + _console.currentDir + newDir
 		// TODO get code working for case insensitive dir names
 		if err := os.Mkdir(newDir, 0700); err != nil {
-			pb.Color(WHITE)
+			pb.Color(PICO8_WHITE)
 			pb.Print("MKDIR: FAILED")
 			return nil
 		}
@@ -232,7 +232,7 @@ func NewRunCommand() Command {
 }
 
 func (r *runCommand) Exec(pb PixelBuffer, statement string) error {
-	pb.Color(GREEN)
+	pb.Color(PICO8_GREEN)
 	pb.Print("RUNNING...")
 
 	if runMode, ok := _console.modes[RUNTIME]; ok {

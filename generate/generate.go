@@ -97,6 +97,18 @@ func NewProject(projectName string) error {
 		return err
 	}
 
+	// copy font to local proj
+	fontFile := goPath + "/src/github.com/telecoda/pico-go/fonts/PICO-8.ttf"
+	fontBytes, err := ioutil.ReadFile(fontFile)
+	if err != nil {
+		return err
+	}
+	localFontFile := fmt.Sprintf("./%s/fonts/font.ttf", projectName)
+	err = ioutil.WriteFile(localFontFile, fontBytes, 0600)
+	if err != nil {
+		return err
+	}
+
 	printBanner()
 	// print statement to run code
 	fmt.Printf("Congratulations you have created your pico-go project\ncd %s\npico-go run\n", projectName)

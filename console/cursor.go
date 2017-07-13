@@ -19,7 +19,7 @@ func newCursor(pb PixelBuffer, color Color) *cursor {
 	c := &cursor{
 		color:   color,
 		surface: pb.(*pixelBuffer).pixelSurface,
-		rect:    &sdl.Rect{X: 0, Y: 0, W: _charWidth, H: _charHeight},
+		rect:    &sdl.Rect{X: 0, Y: 0, W: int32(_console.Config.fontWidth), H: int32(_console.Config.fontHeight)},
 		on:      true,
 	}
 
@@ -42,8 +42,8 @@ func (c *cursor) cursorFlasher(ticker *time.Ticker) {
 // draw cursor on surface
 func (c *cursor) render() {
 	// draw at pos
-	dRect := &sdl.Rect{X: (int32(c.pos.x) * _charWidth), Y: (int32(c.pos.y) * _charHeight), W: _charWidth, H: _charHeight - 1}
+	dRect := &sdl.Rect{X: (int32(c.pos.x * _console.Config.fontWidth)), Y: (int32(c.pos.y * _console.Config.fontHeight)), W: int32(_console.Config.fontWidth), H: int32(_console.Config.fontHeight - 1)}
 	if c.on {
-		c.surface.FillRect(dRect, uint32(RED))
+		c.surface.FillRect(dRect, uint32(c.color))
 	}
 }

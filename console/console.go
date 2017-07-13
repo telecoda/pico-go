@@ -26,10 +26,10 @@ const (
 	_spriteWidth    = 8
 	_spriteHeight   = 8
 	_spritesPerLine = 16
-	_charWidth      = 4
-	_charHeight     = 6
-	_maxCmdLen      = 254
-	_cursorFlash    = time.Duration(500 * time.Millisecond)
+	//_charWidth      = 4
+	//_charHeight     = 6
+	_maxCmdLen   = 254
+	_cursorFlash = time.Duration(500 * time.Millisecond)
 )
 
 type Console interface {
@@ -59,9 +59,10 @@ type console struct {
 	window   *sdl.Window
 	renderer *sdl.Renderer
 
-	font    *ttf.Font
-	logo    *sdl.Surface
-	sprites *sdl.Surface
+	font            *ttf.Font
+	logo            *sdl.Surface
+	sprites         *sdl.Surface
+	originalPalette *palette
 
 	state    Persister
 	recorder Recorder
@@ -98,7 +99,7 @@ func NewConsole(cfg Config) (Console, error) {
 			X: sdl.WINDOWPOS_CENTERED,
 			Y: sdl.WINDOWPOS_CENTERED,
 			W: cfg.WindowWidth,
-			H: cfg.WindowWidth,
+			H: cfg.WindowHeight,
 		}
 	}
 
@@ -132,7 +133,8 @@ func NewConsole(cfg Config) (Console, error) {
 
 	// init font
 	// TOOD don't load assets from relative paths
-	font, err := ttf.OpenFont(goPath+"/src/github.com/telecoda/pico-go/fonts/PICO-8.ttf", 4)
+	//font, err := ttf.OpenFont(goPath+"/src/github.com/telecoda/pico-go/fonts/PICO-8.ttf", 4)
+	font, err := ttf.OpenFont("./fonts/font.ttf", _console.Config.fontWidth)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading font:%s", err)
 	}
@@ -159,9 +161,9 @@ func NewConsole(cfg Config) (Console, error) {
 		return nil, err
 	}
 
-	tempPalette := newPalette()
+	_console.originalPalette = newPico8Palette()
 
-	if err := setSurfacePalette(tempPalette, tempSurface); err != nil {
+	if err := setSurfacePalette(_console.originalPalette, tempSurface); err != nil {
 		return nil, err
 	}
 

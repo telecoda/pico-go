@@ -8,9 +8,9 @@ type BaseCartridge struct {
 }
 
 // NewBaseCart - initialise a struct implementing Cartridge interface
-func NewBaseCart() *BaseCartridge {
+func NewBaseCart(cfg Config) *BaseCartridge {
 	cart := &BaseCartridge{
-		cfg: DefaultConfig(),
+		cfg: cfg,
 	}
 
 	return cart
