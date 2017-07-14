@@ -5,6 +5,7 @@ import (
 )
 
 type Config struct {
+	BorderWidth     int
 	ConsoleWidth    int
 	ConsoleHeight   int
 	WindowWidth     int
@@ -102,6 +103,7 @@ func newTic80Config() Config {
 
 func newZXSpectrumConfig() Config {
 	config := Config{
+		BorderWidth:     25,
 		ConsoleWidth:    256,
 		ConsoleHeight:   192,
 		WindowWidth:     512,
@@ -125,6 +127,7 @@ func newZXSpectrumConfig() Config {
 
 func newCBM64Config() Config {
 	config := Config{
+		BorderWidth:     25,
 		ConsoleWidth:    320,
 		ConsoleHeight:   200,
 		WindowWidth:     640,

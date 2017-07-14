@@ -173,6 +173,11 @@ func (p *pixelBuffer) Flip() error {
 		}
 	}
 
+	x1 += int32(_console.BorderWidth)
+	y1 += int32(_console.BorderWidth)
+	sH -= int32(_console.BorderWidth * 2)
+	sW -= int32(_console.BorderWidth * 2)
+
 	winRect = sdl.Rect{X: x1, Y: y1, W: sW, H: sH}
 
 	// copy and scale offscreen buffer
