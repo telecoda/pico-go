@@ -66,6 +66,26 @@ const (
 	ZX_BRIGHT_WHITE
 )
 
+// Commodore 64 - colors
+const (
+	C64_BLACK Color = iota
+	C64_WHITE
+	C64_RED
+	C64_CYAN
+	C64_PURPLE
+	C64_GREEN
+	C64_BLUE
+	C64_YELLOW
+	C64_ORANGE
+	C64_BROWN
+	C64_LIGHT_RED
+	C64_DARK_GREY
+	C64_GREY
+	C64_LIGHT_GREEN
+	C64_LIGHT_BLUE
+	C64_LIGHT_GREY
+)
+
 type rgba struct {
 	R uint8
 	G uint8
@@ -199,22 +219,22 @@ func newCBM64Palette() *palette {
 	// set colours in palette
 	p.colors = make([]sdl.Color, TOTAL_COLORS)
 	p.originalColors = make([]sdl.Color, TOTAL_COLORS)
-	p.originalColors[ZX_BLACK] = sdl.Color{R: 0, G: 0, B: 0, A: 255}
-	p.originalColors[ZX_BLUE] = sdl.Color{R: 0, G: 41, B: 197, A: 255}
-	p.originalColors[ZX_RED] = sdl.Color{R: 213, G: 39, B: 30, A: 255}
-	p.originalColors[ZX_MAGENTA] = sdl.Color{R: 211, G: 58, B: 199, A: 255}
-	p.originalColors[ZX_GREEN] = sdl.Color{R: 0, G: 197, B: 49, A: 255}
-	p.originalColors[ZX_CYAN] = sdl.Color{R: 0, G: 200, B: 201, A: 255}
-	p.originalColors[ZX_YELLOW] = sdl.Color{R: 205, G: 200, B: 59, A: 255}
-	p.originalColors[ZX_WHITE] = sdl.Color{R: 203, G: 203, B: 203, A: 255}
-	p.originalColors[ZX_BRIGHT_BLACK] = sdl.Color{R: 0, G: 0, B: 0, A: 255}
-	p.originalColors[ZX_BRIGHT_BLUE] = sdl.Color{R: 0, G: 54, B: 247, A: 255}
-	p.originalColors[ZX_BRIGHT_RED] = sdl.Color{R: 255, G: 52, B: 40, A: 255}
-	p.originalColors[ZX_BRIGHT_MAGENTA] = sdl.Color{R: 255, G: 75, B: 250, A: 255}
-	p.originalColors[ZX_BRIGHT_GREEN] = sdl.Color{R: 0, G: 247, B: 63, A: 255}
-	p.originalColors[ZX_BRIGHT_CYAN] = sdl.Color{R: 0, G: 252, B: 253, A: 255}
-	p.originalColors[ZX_BRIGHT_YELLOW] = sdl.Color{R: 255, G: 251, B: 76, A: 255}
-	p.originalColors[ZX_BRIGHT_WHITE] = sdl.Color{R: 255, G: 255, B: 255, A: 255}
+	p.originalColors[C64_BLACK] = sdl.Color{R: 0, G: 0, B: 0, A: 255}
+	p.originalColors[C64_WHITE] = sdl.Color{R: 255, G: 255, B: 255, A: 255}
+	p.originalColors[C64_RED] = sdl.Color{R: 160, G: 78, B: 70, A: 255}
+	p.originalColors[C64_CYAN] = sdl.Color{R: 110, G: 193, B: 199, A: 255}
+	p.originalColors[C64_PURPLE] = sdl.Color{R: 161, G: 89, B: 163, A: 255}
+	p.originalColors[C64_GREEN] = sdl.Color{R: 95, G: 171, B: 98, A: 255}
+	p.originalColors[C64_BLUE] = sdl.Color{R: 80, G: 71, B: 154, A: 255}
+	p.originalColors[C64_YELLOW] = sdl.Color{R: 202, G: 212, B: 140, A: 255}
+	p.originalColors[C64_ORANGE] = sdl.Color{R: 161, G: 104, B: 63, A: 255}
+	p.originalColors[C64_BROWN] = sdl.Color{R: 109, G: 83, B: 21, A: 255}
+	p.originalColors[C64_LIGHT_RED] = sdl.Color{R: 202, G: 127, B: 120, A: 255}
+	p.originalColors[C64_DARK_GREY] = sdl.Color{R: 99, G: 99, B: 99, A: 255}
+	p.originalColors[C64_GREY] = sdl.Color{R: 139, G: 139, B: 139, A: 255}
+	p.originalColors[C64_LIGHT_GREEN] = sdl.Color{R: 157, G: 226, B: 160, A: 255}
+	p.originalColors[C64_LIGHT_BLUE] = sdl.Color{R: 138, G: 129, B: 202, A: 255}
+	p.originalColors[C64_LIGHT_GREY] = sdl.Color{R: 174, G: 174, B: 174, A: 255}
 
 	// copy to working colors
 	for i := range p.originalColors {

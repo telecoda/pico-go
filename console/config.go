@@ -125,10 +125,10 @@ func newZXSpectrumConfig() Config {
 
 func newCBM64Config() Config {
 	config := Config{
-		ConsoleWidth:    256,
-		ConsoleHeight:   192,
-		WindowWidth:     512,
-		WindowHeight:    384,
+		ConsoleWidth:    320,
+		ConsoleHeight:   200,
+		WindowWidth:     640,
+		WindowHeight:    400,
 		FPS:             60,
 		Verbose:         optVerbose,
 		ScreenshotScale: screenshotScale,
@@ -137,11 +137,11 @@ func newCBM64Config() Config {
 		consoleType:     CBM64,
 		fontWidth:       8,
 		fontHeight:      8,
-		bgColor:         ZX_WHITE,
-		fgColor:         ZX_BLACK,
-		errColor:        ZX_BLUE,
-		borderColor:     ZX_WHITE,
-		cursorColor:     ZX_RED,
+		bgColor:         C64_BLUE,
+		fgColor:         C64_LIGHT_BLUE,
+		errColor:        C64_WHITE,
+		borderColor:     C64_LIGHT_BLUE,
+		cursorColor:     C64_LIGHT_BLUE,
 	}
 	return config
 }
