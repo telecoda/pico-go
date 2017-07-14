@@ -17,15 +17,14 @@ func main() {
 
 	flag.Parse()
 
-	cart := code.NewCart()
-
 	// Create virtual console - based on cart config
-	con, err := console.NewConsole(cart.GetConfig())
+	con, err := console.NewConsole(console.ZX_SPECTRUM)
 	if err != nil {
 		panic(err)
 	}
-
 	defer con.Destroy()
+
+	cart := code.NewCart()
 
 	if err := con.LoadCart(cart); err != nil {
 		panic(err)

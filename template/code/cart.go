@@ -20,14 +20,12 @@ type cartridge struct {
 // NewCart - initialise a struct implementing Cartridge interface
 func NewCart() console.Cartridge {
 	return &cartridge{
-		BaseCartridge: console.NewBaseCart(console.Pico8Config()),
+		BaseCartridge: console.NewBaseCart(),
 	}
 }
 
 // Init - called once when cart is initialised
 func (c *cartridge) Init() {
-	c.ClsWithColor(console.BLUE)
-
 	c.counter = 0
 	c.x = 40
 	c.y = 0
@@ -53,5 +51,5 @@ func (c *cartridge) Update() {
 // Render - called once every frame
 func (c *cartridge) Render() {
 	c.Cls()
-	c.PrintAtWithColor(fmt.Sprintf("counter:%d", c.counter), c.x, c.y, console.WHITE)
+	c.PrintAt(fmt.Sprintf("counter:%d", c.counter), c.x, c.y)
 }

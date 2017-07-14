@@ -39,9 +39,22 @@ func init() {
 	flag.Parse()
 }
 
-// Default configs for different console types
+func NewConfig(consoleType ConsoleType) Config {
+	switch consoleType {
+	case PICO8:
+		return newPico8Config()
+	case TIC80:
+		return newTic80Config()
+	case ZX_SPECTRUM:
+		return newZXSpectrumConfig()
+	case CBM64:
+		return newCBM64Config()
+	}
+	return newPico8Config() // always default to PICO8
+}
 
-func Pico8Config() Config {
+// Default configs for different console types
+func newPico8Config() Config {
 	config := Config{
 		ConsoleWidth:    128,
 		ConsoleHeight:   128,
@@ -64,7 +77,7 @@ func Pico8Config() Config {
 	return config
 }
 
-func Tic80Config() Config {
+func newTic80Config() Config {
 	config := Config{
 		ConsoleWidth:    240,
 		ConsoleHeight:   136,
@@ -87,7 +100,7 @@ func Tic80Config() Config {
 	return config
 }
 
-func ZXSpectrumConfig() Config {
+func newZXSpectrumConfig() Config {
 	config := Config{
 		ConsoleWidth:    256,
 		ConsoleHeight:   192,
@@ -99,6 +112,29 @@ func ZXSpectrumConfig() Config {
 		GifScale:        gifScale,
 		GifLength:       gifLength,
 		consoleType:     ZX_SPECTRUM,
+		fontWidth:       8,
+		fontHeight:      8,
+		bgColor:         ZX_WHITE,
+		fgColor:         ZX_BLACK,
+		errColor:        ZX_BLUE,
+		borderColor:     ZX_WHITE,
+		cursorColor:     ZX_RED,
+	}
+	return config
+}
+
+func newCBM64Config() Config {
+	config := Config{
+		ConsoleWidth:    256,
+		ConsoleHeight:   192,
+		WindowWidth:     512,
+		WindowHeight:    384,
+		FPS:             60,
+		Verbose:         optVerbose,
+		ScreenshotScale: screenshotScale,
+		GifScale:        gifScale,
+		GifLength:       gifLength,
+		consoleType:     CBM64,
 		fontWidth:       8,
 		fontHeight:      8,
 		bgColor:         ZX_WHITE,

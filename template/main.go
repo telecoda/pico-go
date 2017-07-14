@@ -7,19 +7,24 @@ import (
 	"github.com/telecoda/pico-go/template/code"
 )
 
+/*
+
+	THIS IS GENERATED CODE - DO NOT AMEND
+
+*/
+
 func main() {
 
 	flag.Parse()
 
-	cart := code.NewCart()
-
 	// Create virtual console - based on cart config
-	con, err := console.NewConsole(cart.GetConfig())
+	con, err := console.NewConsole(console.PICO8)
 	if err != nil {
 		panic(err)
 	}
-
 	defer con.Destroy()
+
+	cart := code.NewCart()
 
 	if err := con.LoadCart(cart); err != nil {
 		panic(err)

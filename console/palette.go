@@ -80,19 +80,18 @@ type palette struct {
 	originalColors []sdl.Color
 }
 
-func newPalette(consoleType ConsoleType) (*palette, error) {
+func newPalette(consoleType ConsoleType) *palette {
 	switch consoleType {
 	case PICO8:
-		return newPico8Palette(), nil
+		return newPico8Palette()
 	case TIC80:
-		return newTic80Palette(), nil
+		return newTic80Palette()
 	case ZX_SPECTRUM:
-		return newZXSpectrumPalette(), nil
+		return newZXSpectrumPalette()
 	case CBM64:
-		return newCBM64Palette(), nil
+		return newCBM64Palette()
 	}
-
-	return nil, fmt.Errorf("Console type: %s not supported", consoleType)
+	return newPico8Palette() // always default to PICO8
 }
 
 func newPico8Palette() *palette {

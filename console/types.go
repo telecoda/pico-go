@@ -93,6 +93,13 @@ const (
 	CBM64       = "cbm64"
 )
 
+var ConsoleTypes = map[ConsoleType]string{
+	PICO8:       "PICO8",
+	TIC80:       "TIC80",
+	ZX_SPECTRUM: "ZX_SPECTRUM",
+	CBM64:       "CBM64",
+}
+
 const TOTAL_COLORS = 256
 
 type Configger interface {

@@ -9,14 +9,27 @@ import (
 	"os"
 	"strings"
 	"text/template"
+
+	"github.com/telecoda/pico-go/console"
 )
 
-func NewProject(projectName string) error {
+func NewProject(projectName, consoleType string) error {
 	fmt.Print("Creating new project\n")
 
 	currDir, err := os.Getwd()
 	if err != nil {
 		return err
+	}
+
+	consoleTypeStr, ok := console.ConsoleTypes[console.ConsoleType(consoleType)]
+	if !ok {
+		consoleTypes := make([]console.ConsoleType, len(console.ConsoleTypes))
+		i := 0
+		for t := range console.ConsoleTypes {
+			consoleTypes[i] = t
+			i++
+		}
+		return fmt.Errorf("Console type: %s not supported.  Options are %v", consoleType, consoleTypes)
 	}
 
 	projectPath := currDir + string(os.PathSeparator) + projectName
@@ -63,7 +76,7 @@ func NewProject(projectName string) error {
 	filePath := projectPath + "/main.go"
 
 	// generate main.go
-	if err := generateMain(repoPath, filePath); err != nil {
+	if err := generateMain(repoPath, filePath, consoleTypeStr); err != nil {
 		return err
 	}
 
@@ -102,12 +115,13 @@ func NewProject(projectName string) error {
 	return nil
 }
 
-func generateMain(projectPath, filePath string) error {
+func generateMain(projectPath, filePath, consoleType string) error {
 
 	var data map[string]interface{}
 	data = make(map[string]interface{})
 
 	data["projectPath"] = projectPath
+	data["consoleType"] = consoleType
 
 	tmpl := template.New("")
 	tmpl, err := tmpl.Parse(mainCodeTmpl)
@@ -140,15 +154,14 @@ func main() {
 
 	flag.Parse()
 
-	cart := code.NewCart()
-
 	// Create virtual console - based on cart config
-	con, err := console.NewConsole(cart.GetConfig())
+	con, err := console.NewConsole(console.{{ .consoleType }})
 	if err != nil {
 		panic(err)
 	}
-
 	defer con.Destroy()
+
+	cart := code.NewCart()
 
 	if err := con.LoadCart(cart); err != nil {
 		panic(err)
@@ -157,4 +170,5 @@ func main() {
 	if err := con.Run(); err != nil {
 		panic(err)
 	}
-}`
+}
+`

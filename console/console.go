@@ -69,7 +69,15 @@ type console struct {
 	Inputter
 }
 
-func NewConsole(cfg Config) (Console, error) {
+func NewConsole(consoleType ConsoleType) (Console, error) {
+
+	// validate type
+	if _, ok := ConsoleTypes[consoleType]; !ok {
+		return nil, fmt.Errorf("Console type: %s not supported", consoleType)
+	}
+
+	cfg := NewConfig(consoleType)
+
 	_console = &console{
 		Config:        cfg,
 		currentMode:   CLI,
@@ -161,12 +169,8 @@ func NewConsole(cfg Config) (Console, error) {
 		return nil, err
 	}
 
-	_console.palette, err = newPalette(cfg.consoleType)
-	if err != nil {
-		return nil, err
-	}
-
-	_console.originalPalette, _ = newPalette(cfg.consoleType)
+	_console.palette = newPalette(cfg.consoleType)
+	_console.originalPalette = newPalette(cfg.consoleType)
 
 	if err := setSurfacePalette(_console.originalPalette, tempSurface); err != nil {
 		return nil, err

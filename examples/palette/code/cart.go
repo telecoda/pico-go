@@ -21,7 +21,7 @@ type cartridge struct {
 // NewCart - initialise a struct implementing Cartridge interface
 func NewCart() console.Cartridge {
 	return &cartridge{
-		BaseCartridge: console.NewBaseCart(console.Pico8Config()),
+		BaseCartridge: console.NewBaseCart(),
 	}
 }
 
