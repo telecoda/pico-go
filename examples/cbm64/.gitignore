@@ -1,0 +1,5 @@
+# ignore executables
+cbm64
+/.exe
+# ignore state file
+.pico-go-state

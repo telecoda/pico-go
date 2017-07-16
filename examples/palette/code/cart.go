@@ -43,7 +43,7 @@ func (c *cartridge) Update() {
 		// trigger update
 
 		if c.mapAnim {
-			c.MapColor(console.Color(c.currentColor), console.RED)
+			c.MapColor(console.Color(c.currentColor), console.PICO8_RED)
 			c.MapColor(console.Color(15), console.Color(rand.Intn(16)))
 		} else {
 			c.SetTransparent(console.Color(c.currentColor), true)

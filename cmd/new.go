@@ -20,6 +20,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"github.com/telecoda/pico-go/console"
 	"github.com/telecoda/pico-go/generate"
 )
 
@@ -30,6 +31,7 @@ func er(err interface{}) {
 }
 
 var projectName string
+var consoleType string
 
 // newCmd represents the new command
 var newCmd = &cobra.Command{
@@ -49,7 +51,8 @@ This will generate all the scaffolding files to run your project with pico-go.
 		if len(args) != 1 {
 			er("`new` command needs a name for the project")
 		}
-		if err := generate.NewProject(args[0]); err != nil {
+
+		if err := generate.NewProject(args[0], consoleType); err != nil {
 			fmt.Printf("Failed to create new pico project: %s\n", err)
 		}
 	},
@@ -57,6 +60,6 @@ This will generate all the scaffolding files to run your project with pico-go.
 
 func init() {
 	RootCmd.AddCommand(newCmd)
-	newCmd.Flags().StringVar(&projectName, "dir", "pico-gen", "default project directory")
+	newCmd.Flags().StringVar(&consoleType, "type", console.PICO8, "default console type")
 
 }

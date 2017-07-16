@@ -3,8 +3,6 @@
 ## To be added
 This is a non-exhaustive list of features which still need to be added to pico-go.
 
-* palette support
-* keybord input
 * playing music
 * playing sound effects
 * rendering maps

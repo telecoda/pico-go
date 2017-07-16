@@ -26,10 +26,10 @@ const (
 	_spriteWidth    = 8
 	_spriteHeight   = 8
 	_spritesPerLine = 16
-	_charWidth      = 4
-	_charHeight     = 6
-	_maxCmdLen      = 254
-	_cursorFlash    = time.Duration(500 * time.Millisecond)
+	//_charWidth      = 4
+	//_charHeight     = 6
+	_maxCmdLen   = 254
+	_cursorFlash = time.Duration(500 * time.Millisecond)
 )
 
 type Console interface {
@@ -59,16 +59,25 @@ type console struct {
 	window   *sdl.Window
 	renderer *sdl.Renderer
 
-	font    *ttf.Font
-	logo    *sdl.Surface
-	sprites *sdl.Surface
+	font            *ttf.Font
+	logo            *sdl.Surface
+	sprites         *sdl.Surface
+	originalPalette *palette
 
 	state    Persister
 	recorder Recorder
 	Inputter
 }
 
-func NewConsole(cfg Config) (Console, error) {
+func NewConsole(consoleType ConsoleType) (Console, error) {
+
+	// validate type
+	if _, ok := ConsoleTypes[consoleType]; !ok {
+		return nil, fmt.Errorf("Console type: %s not supported", consoleType)
+	}
+
+	cfg := NewConfig(consoleType)
+
 	_console = &console{
 		Config:        cfg,
 		currentMode:   CLI,
@@ -98,7 +107,7 @@ func NewConsole(cfg Config) (Console, error) {
 			X: sdl.WINDOWPOS_CENTERED,
 			Y: sdl.WINDOWPOS_CENTERED,
 			W: cfg.WindowWidth,
-			H: cfg.WindowWidth,
+			H: cfg.WindowHeight,
 		}
 	}
 
@@ -131,8 +140,8 @@ func NewConsole(cfg Config) (Console, error) {
 	goPath := build.Default.GOPATH
 
 	// init font
-	// TOOD don't load assets from relative paths
-	font, err := ttf.OpenFont(goPath+"/src/github.com/telecoda/pico-go/fonts/PICO-8.ttf", 4)
+	fontPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/font.ttf", goPath, _console.consoleType)
+	font, err := ttf.OpenFont(fontPath, _console.Config.fontWidth)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading font:%s", err)
 	}
@@ -141,7 +150,8 @@ func NewConsole(cfg Config) (Console, error) {
 
 	// init logo
 	// TOOD don't load assets from relative paths
-	logo, err := img.Load(goPath + "/src/github.com/telecoda/pico-go/images/pico-go-logo.png")
+	logoPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/logo.png", goPath, _console.consoleType)
+	logo, err := img.Load(logoPath)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
 	}
@@ -159,9 +169,10 @@ func NewConsole(cfg Config) (Console, error) {
 		return nil, err
 	}
 
-	tempPalette := newPalette()
+	_console.palette = newPalette(cfg.consoleType)
+	_console.originalPalette = newPalette(cfg.consoleType)
 
-	if err := setSurfacePalette(tempPalette, tempSurface); err != nil {
+	if err := setSurfacePalette(_console.originalPalette, tempSurface); err != nil {
 		return nil, err
 	}
 

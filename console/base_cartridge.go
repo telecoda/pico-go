@@ -10,7 +10,7 @@ type BaseCartridge struct {
 // NewBaseCart - initialise a struct implementing Cartridge interface
 func NewBaseCart() *BaseCartridge {
 	cart := &BaseCartridge{
-		cfg: DefaultConfig(),
+		cfg: _console.Config,
 	}
 
 	return cart

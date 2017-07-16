@@ -84,6 +84,22 @@ const (
 	MUSIC_EDITOR
 )
 
+type ConsoleType string
+
+const (
+	PICO8       = "pico8"
+	TIC80       = "tic80"
+	ZX_SPECTRUM = "zxspectrum"
+	CBM64       = "cbm64"
+)
+
+var ConsoleTypes = map[ConsoleType]string{
+	PICO8:       "PICO8",
+	TIC80:       "TIC80",
+	ZX_SPECTRUM: "ZX_SPECTRUM",
+	CBM64:       "CBM64",
+}
+
 const TOTAL_COLORS = 256
 
 type Configger interface {

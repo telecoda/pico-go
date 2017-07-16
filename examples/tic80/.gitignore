@@ -1,0 +1,5 @@
+# ignore executables
+fonttest
+/.exe
+# ignore state file
+.pico-go-state

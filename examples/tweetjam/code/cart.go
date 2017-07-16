@@ -14,11 +14,9 @@ type cartridge struct {
 
 // NewCart - initialise a struct implementing Cartridge interface
 func NewCart() console.Cartridge {
-	cart := &cartridge{
+	return &cartridge{
 		BaseCartridge: console.NewBaseCart(),
 	}
-
-	return cart
 }
 
 /* This is the original tweetcart code
@@ -35,7 +33,7 @@ func (c *cartridge) Update() {
 
 // Render - called once every frame
 func (c *cartridge) Render() {
-	c.ClsWithColor(console.BLACK)
+	c.ClsWithColor(console.PICO8_BLACK)
 
 	// init stars
 	/*
