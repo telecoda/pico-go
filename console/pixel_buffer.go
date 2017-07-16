@@ -121,7 +121,7 @@ func (p *pixelBuffer) Flip() error {
 
 	// clear window
 	fullRect := &sdl.Rect{X: 0, Y: 0, W: int32(winW), H: int32(winH)}
-	rgba, _ := p.palette.GetRGBA(_console.borderColor)
+	rgba, _ := p.palette.GetRGBA(_console.BorderColor)
 	_console.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
 	_console.renderer.FillRect(fullRect)
 

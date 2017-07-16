@@ -20,10 +20,10 @@ type Config struct {
 	consoleType ConsoleType
 	fontWidth   int
 	fontHeight  int
-	bgColor     Color
-	fgColor     Color
+	BgColor     Color
+	FgColor     Color
+	BorderColor Color
 	errColor    Color
-	borderColor Color
 	cursorColor Color
 }
 
@@ -69,10 +69,10 @@ func newPico8Config() Config {
 		consoleType:     PICO8,
 		fontWidth:       4,
 		fontHeight:      8,
-		bgColor:         PICO8_BLACK,
-		fgColor:         PICO8_WHITE,
+		BgColor:         PICO8_BLACK,
+		FgColor:         PICO8_WHITE,
 		errColor:        PICO8_PINK,
-		borderColor:     PICO8_BLACK,
+		BorderColor:     PICO8_BLACK,
 		cursorColor:     PICO8_RED,
 	}
 	return config
@@ -92,10 +92,10 @@ func newTic80Config() Config {
 		consoleType:     TIC80,
 		fontWidth:       8,
 		fontHeight:      8,
-		bgColor:         TIC80_BLACK,
-		fgColor:         TIC80_WHITE,
+		BgColor:         TIC80_BLACK,
+		FgColor:         TIC80_WHITE,
 		errColor:        TIC80_YELLOW,
-		borderColor:     TIC80_BLACK,
+		BorderColor:     TIC80_BLACK,
 		cursorColor:     TIC80_RED,
 	}
 	return config
@@ -116,10 +116,10 @@ func newZXSpectrumConfig() Config {
 		consoleType:     ZX_SPECTRUM,
 		fontWidth:       8,
 		fontHeight:      8,
-		bgColor:         ZX_WHITE,
-		fgColor:         ZX_BLACK,
+		BgColor:         ZX_WHITE,
+		FgColor:         ZX_BLACK,
 		errColor:        ZX_BLUE,
-		borderColor:     ZX_WHITE,
+		BorderColor:     ZX_WHITE,
 		cursorColor:     ZX_RED,
 	}
 	return config
@@ -140,10 +140,10 @@ func newCBM64Config() Config {
 		consoleType:     CBM64,
 		fontWidth:       8,
 		fontHeight:      8,
-		bgColor:         C64_BLUE,
-		fgColor:         C64_LIGHT_BLUE,
+		BgColor:         C64_BLUE,
+		FgColor:         C64_LIGHT_BLUE,
 		errColor:        C64_WHITE,
-		borderColor:     C64_LIGHT_BLUE,
+		BorderColor:     C64_LIGHT_BLUE,
 		cursorColor:     C64_LIGHT_BLUE,
 	}
 	return config

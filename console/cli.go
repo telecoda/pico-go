@@ -222,7 +222,7 @@ func (c *cli) cursorRight() {
 
 func (c *cli) Init() error {
 	// get native pixel buffer
-	c.PixelBuffer.ClsWithColor(c.console.bgColor)
+	c.PixelBuffer.ClsWithColor(c.console.BgColor)
 	pb := c.PixelBuffer.(*pixelBuffer)
 
 	logoRect := &sdl.Rect{X: 0, Y: 0, W: _logoWidth, H: _logoHeight}
@@ -231,7 +231,7 @@ func (c *cli) Init() error {
 
 	title := fmt.Sprintf("PICO-GO %s", _version)
 	c.Cursor(0, 4)
-	c.Color(c.console.fgColor)
+	c.Color(c.console.FgColor)
 	c.PixelBuffer.Print(title)
 
 	c.PixelBuffer.Print("(C) 2017 @TELECODA")
@@ -300,24 +300,24 @@ func (c *cli) clearCmd(count int) {
 	y0 := c.cmdPos.y * int(_console.Config.fontHeight)
 	x1 := c.console.ConsoleWidth
 	y1 := y0 + (count)*int(_console.Config.fontHeight)
-	c.RectFillWithColor(x0, y0, x1, y1, c.console.bgColor)
+	c.RectFillWithColor(x0, y0, x1, y1, c.console.BgColor)
 }
 
 // renderCmd - renders command string across multiple lines
 func (c *cli) renderCmd(lines []string, resetCursor bool) {
-	c.PixelBuffer.Color(c.console.fgColor)
+	c.PixelBuffer.Color(c.console.FgColor)
 
 	// set print color
 	currentPos := c.cmdPos
-	c.Color(c.console.fgColor)
+	c.Color(c.console.FgColor)
 	c.Cursor(0, currentPos.y)
-	c.PrintAtWithColor(">", 0, currentPos.y*_console.Config.fontHeight, c.console.fgColor)
+	c.PrintAtWithColor(">", 0, currentPos.y*_console.Config.fontHeight, c.console.FgColor)
 	c.Cursor(2, currentPos.y)
 	for i := range lines {
 		if currentPos.y < c.lastLine {
-			c.PrintAtWithColor(lines[i], 2*_console.Config.fontWidth, (currentPos.y+i)*_console.Config.fontHeight, c.console.fgColor)
+			c.PrintAtWithColor(lines[i], 2*_console.Config.fontWidth, (currentPos.y+i)*_console.Config.fontHeight, c.console.FgColor)
 		} else {
-			c.PrintAtWithColor(lines[i], 2*_console.Config.fontWidth, c.lastLine*_console.Config.fontHeight, c.console.fgColor)
+			c.PrintAtWithColor(lines[i], 2*_console.Config.fontWidth, c.lastLine*_console.Config.fontHeight, c.console.FgColor)
 		}
 	}
 	if resetCursor {
