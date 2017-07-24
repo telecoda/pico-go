@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/sdl"
-	gfx "github.com/veandco/go-sdl2/sdl_gfx"
 )
 
 type mode struct {
@@ -387,7 +387,19 @@ func (p *pixelBuffer) RectFillWithColor(x0, y0, x1, y1 int, colorID Color) {
 
 // Spriter methods
 
+func (p *pixelBuffer) systemSprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flipY bool) {
+	_console.currentSpriteBank = systemSpriteBank
+	p.sprite(n, x, y, w, h, dw, dh, rot, flipX, flipY)
+}
+
 func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flipY bool) {
+	_console.currentSpriteBank = userSpriteBank1
+	p.sprite(n, x, y, w, h, dw, dh, rot, flipX, flipY)
+
+}
+
+func (p *pixelBuffer) sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flipY bool) {
+
 	sw := int32(w) * _spriteWidth
 	sh := int32(h) * _spriteHeight
 
@@ -401,6 +413,13 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 
 	if flip == 0 {
 		flip = sdl.FLIP_NONE
+	}
+
+	if int(rot)%360 == 0 {
+		// this is a dirty hack to make sure transparency is still respected at 0 degrees
+		// weirdly when rendering at exactly 0 degrees with no flipping the background is
+		// rendered as black
+		rot = 0.0000000000001
 	}
 
 	// create sprite surface, to copy a single sprite onto
@@ -424,13 +443,14 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 	ss1Rect := &sdl.Rect{X: 0, Y: 0, W: ss1.W, H: ss1.H}
 
 	// set palette for sprites based on current palette
-	if err := setSurfacePalette(p.palette, _console.sprites); err != nil {
+	sprites := _console.sprites[_console.currentSpriteBank]
+	if err := setSurfacePalette(p.palette, sprites); err != nil {
 		fmt.Printf("Failed to update sprite surface palette: %s\n", err)
 		return
 	}
 
 	// copy sprite data from sprite sheet onto sprite surface
-	err = _console.sprites.Blit(spriteSrcRect, ss1, ss1Rect)
+	err = sprites.Blit(spriteSrcRect, ss1, ss1Rect)
 	if err != nil {
 		fmt.Printf("Failed to blit surface1: %s\n", err)
 		return
@@ -448,11 +468,12 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 
 	// copy sprite data from sprite sheet onto sprite surface
 	err = ss1.BlitScaled(ss1Rect, ss2, ss2Rect)
+	// err = ss1.Blit(ss1Rect, ss2, ss2Rect)
 	if err != nil {
 		fmt.Printf("Failed to blit surface2: %s\n", err)
 		return
 	}
-
+	//	ss2.SetColorKey(1, 0)
 	texture, err := p.renderer.CreateTextureFromSurface(ss2)
 	if err != nil {
 		fmt.Printf("Failed to create texture: %s\n", err)
@@ -492,7 +513,8 @@ func (p *pixelBuffer) GetColorID(rgba rgba) Color {
 func (p *pixelBuffer) PaletteReset() {
 	p.palette.PaletteReset()
 	// reset palette on sprites
-	setSurfacePalette(p.palette, _console.sprites)
+	setSurfacePalette(p.palette, _console.sprites[systemSpriteBank])
+	setSurfacePalette(p.palette, _console.sprites[userSpriteBank1])
 	// reset palette on pixel buffer
 	setSurfacePalette(p.palette, p.pixelSurface)
 }

@@ -71,6 +71,7 @@ type Printer interface {
 type Spriter interface {
 	// TODO lots of params!! needs a bit of overloading love
 	Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flipY bool)
+	systemSprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flipY bool)
 }
 
 type ModeType int
@@ -78,10 +79,11 @@ type ModeType int
 const (
 	CLI ModeType = iota
 	CODE_EDITOR
-	RUNTIME
+	SPRITE_EDITOR
 	MAP_EDITOR
 	SFX_EDITOR
 	MUSIC_EDITOR
+	RUNTIME
 )
 
 type ConsoleType string

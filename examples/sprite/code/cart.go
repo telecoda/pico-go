@@ -29,10 +29,7 @@ func (c *cartridge) Init() {
 
 // Update -  called once every frame
 func (c *cartridge) Update() {
-	c.rot += -4
-	if c.rot > 360 {
-		c.rot = 0
-	}
+	c.rot -= 4
 }
 
 // Render - called once every frame

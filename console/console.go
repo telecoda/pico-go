@@ -10,9 +10,9 @@ import (
 
 	"go/build"
 
+	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
-	"github.com/veandco/go-sdl2/sdl_image"
-	ttf "github.com/veandco/go-sdl2/sdl_ttf"
+	"github.com/veandco/go-sdl2/ttf"
 )
 
 // Global var
@@ -30,6 +30,11 @@ const (
 	//_charHeight     = 6
 	_maxCmdLen   = 254
 	_cursorFlash = time.Duration(500 * time.Millisecond)
+)
+
+const (
+	systemSpriteBank = 0
+	userSpriteBank1  = 1
 )
 
 type Console interface {
@@ -59,10 +64,11 @@ type console struct {
 	window   *sdl.Window
 	renderer *sdl.Renderer
 
-	font            *ttf.Font
-	logo            *sdl.Surface
-	sprites         *sdl.Surface
-	originalPalette *palette
+	font              *ttf.Font
+	logo              *sdl.Surface
+	sprites           []*sdl.Surface
+	currentSpriteBank int
+	originalPalette   *palette
 
 	state    Persister
 	recorder Recorder
@@ -149,7 +155,6 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	_console.font = font
 
 	// init logo
-	// TOOD don't load assets from relative paths
 	logoPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/logo.png", goPath, _console.consoleType)
 	logo, err := img.Load(logoPath)
 	if err != nil {
@@ -159,10 +164,10 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	_console.logo = logo
 
 	// init sprites
-	sprites, err := img.Load("./sprites/sprites.png")
-	if err != nil {
-		return nil, fmt.Errorf("Error loading image: %s\n", err)
-	}
+	// There are 2 sprite banks
+	// 0 = System sprites
+	// 1 = User sprite bank 1
+	_console.sprites = make([]*sdl.Surface, 2)
 
 	tempSurface, err := sdl.CreateRGBSurface(0, int32(cfg.ConsoleWidth), int32(cfg.ConsoleHeight), 8, 0, 0, 0, 0)
 	if err != nil {
@@ -172,16 +177,39 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	_console.palette = newPalette(cfg.consoleType)
 	_console.originalPalette = newPalette(cfg.consoleType)
 
+	// init icons
+	iconsPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/icons.png", goPath, _console.consoleType)
+	icons, err := img.Load(iconsPath)
+	if err != nil {
+		return nil, fmt.Errorf("Error loading image: %s\n", err)
+	}
+
 	if err := setSurfacePalette(_console.originalPalette, tempSurface); err != nil {
 		return nil, err
 	}
 
-	paletteSurface, err := sprites.Convert(tempSurface.Format, tempSurface.Flags)
+	iconsSurface, err := icons.Convert(tempSurface.Format, tempSurface.Flags)
 	if err != nil {
 		return nil, err
 	}
 
-	_console.sprites = paletteSurface
+	_console.sprites[systemSpriteBank] = iconsSurface
+
+	if err := setSurfacePalette(_console.originalPalette, tempSurface); err != nil {
+		return nil, err
+	}
+
+	sprites, err := img.Load("./sprites/sprites.png")
+	if err != nil {
+		return nil, fmt.Errorf("Error loading image: %s\n", err)
+	}
+
+	spritesSurface, err := sprites.Convert(tempSurface.Format, tempSurface.Flags)
+	if err != nil {
+		return nil, err
+	}
+
+	_console.sprites[userSpriteBank1] = spritesSurface
 
 	// initialise modes
 	modes, err := _console.initModes()
