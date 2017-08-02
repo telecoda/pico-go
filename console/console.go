@@ -334,6 +334,11 @@ func (c *console) handleEvents() error {
 						return err
 					}
 				}
+			case *sdl.MouseButtonEvent:
+				// we only care about mouse clicks
+				if t.State == 1 && t.Button == 1 {
+					c.mouseClicked(t.X, t.Y)
+				}
 			default:
 				// if not handled pass event to mode event handler
 				if err := mode.HandleEvent(event); err != nil {
@@ -344,6 +349,31 @@ func (c *console) handleEvents() error {
 
 	}
 	return nil
+}
+
+func (c *console) mouseClicked(x, y int32) {
+	// transform window x,y coords to pixel buffer coords
+
+	fmt.Printf("Mouse clicked at x: %d y: %d\n", x, y)
+
+	// get mode
+	if mode, ok := c.modes[c.currentMode]; ok {
+		pb := mode.getPixelBuffer()
+		fmt.Printf("RenderRect: %#v\n", pb.renderRect)
+		fmt.Printf("pixelBuffer: %#v\n", pb.psRect)
+		// subtract top left offset
+		x -= pb.renderRect.X
+		y -= pb.renderRect.Y
+		fmt.Printf("[adjusted] Mouse clicked at x: %d y: %d\n", x, y)
+		// scale to match pixelbuffer
+		scale := float32(pb.renderRect.W) / float32(pb.pixelSurface.W)
+		scaledX := float32(x) / scale
+		scaledY := float32(y) / scale
+		x = int32(scaledX)
+		y = int32(scaledY)
+		fmt.Printf("[scaled] Mouse clicked at x: %d y: %d\n", x, y)
+	}
+
 }
 
 // saveState - saves console state periodically
