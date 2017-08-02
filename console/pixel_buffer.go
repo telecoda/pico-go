@@ -21,6 +21,7 @@ type pixelBuffer struct {
 	charRows     int
 	pixelSurface *sdl.Surface // offscreen pixel buffer
 	psRect       *sdl.Rect    // rect of pixelSurface
+	renderRect   *sdl.Rect    // rect on main window that pixelbuffer is rendered into
 	renderer     *sdl.Renderer
 	fps          int
 	timeBudget   int64
@@ -61,6 +62,7 @@ func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 	p.pixelSurface = ps
 
 	p.psRect = &sdl.Rect{X: 0, Y: 0, W: p.pixelSurface.W, H: p.pixelSurface.H}
+	p.renderRect = &sdl.Rect{X: 0, Y: 0, W: p.pixelSurface.W, H: p.pixelSurface.H}
 
 	p.textCursor.x = 0
 	p.textCursor.y = 0
@@ -125,7 +127,7 @@ func (p *pixelBuffer) Flip() error {
 	_console.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
 	_console.renderer.FillRect(fullRect)
 
-	var winRect sdl.Rect
+	//var renderRect sdl.Rect
 	x1 := int32(0)
 	y1 := int32(0)
 
@@ -178,10 +180,13 @@ func (p *pixelBuffer) Flip() error {
 	sH -= int32(_console.BorderWidth * 2)
 	sW -= int32(_console.BorderWidth * 2)
 
-	winRect = sdl.Rect{X: x1, Y: y1, W: sW, H: sH}
+	p.renderRect.X = x1
+	p.renderRect.Y = y1
+	p.renderRect.W = sW
+	p.renderRect.H = sH
 
 	// copy and scale offscreen buffer
-	_console.renderer.Copy(tex, p.psRect, &winRect)
+	_console.renderer.Copy(tex, p.psRect, p.renderRect)
 
 	_console.renderer.Present()
 
@@ -220,6 +225,10 @@ func (p *pixelBuffer) lockFps() float64 {
 	endFrame = time.Now()
 
 	return float64(time.Second) / float64(frameTime.Nanoseconds())
+}
+
+func (p *pixelBuffer) getPixelBuffer() *pixelBuffer {
+	return p
 }
 
 func (p *pixelBuffer) GetCursor() pos {

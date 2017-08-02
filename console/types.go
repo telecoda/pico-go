@@ -132,6 +132,7 @@ type PixelBuffer interface {
 	Destroy()
 	GetFrame() *sdl.Surface
 	PicoGraphicsAPI
+	getPixelBuffer() *pixelBuffer
 }
 
 var title = "pico-go virtual games console"
