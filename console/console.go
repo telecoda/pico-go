@@ -11,11 +11,7 @@ import (
 
 	"golang.org/x/image/font"
 
-	"os"
-
 	"sync"
-
-	"go/build"
 
 	"github.com/fogleman/gg"
 	"github.com/golang/freetype/truetype"
@@ -100,31 +96,33 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 		hasQuit:       false,
 	}
 
-	persister, err := NewStateManager()
-	if err != nil {
-		return nil, err
-	}
+	// TODO
+	// persister, err := NewStateManager()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	_console.state = persister
+	// _console.state = persister
 
-	state, err := persister.LoadState()
-	if err != nil {
-		fmt.Printf("Warning loading state: %s - using default\n", err)
-	}
+	// TODO
+	// state, err := persister.LoadState()
+	// if err != nil {
+	// 	fmt.Printf("Warning loading state: %s - using default\n", err)
+	// }
 	// // init SDL
 	// sdl.Init(sdl.INIT_EVERYTHING)
 	// sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "0")
 	// ttf.Init()
 
-	if state == nil {
-		// use defaults
-		// state = &ConsoleState{
-		// 	X: sdl.WINDOWPOS_CENTERED,
-		// 	Y: sdl.WINDOWPOS_CENTERED,
-		// 	W: cfg.WindowWidth,
-		// 	H: cfg.WindowHeight,
-		// }
-	}
+	//if state == nil {
+	// use defaults
+	// state = &ConsoleState{
+	// 	X: sdl.WINDOWPOS_CENTERED,
+	// 	Y: sdl.WINDOWPOS_CENTERED,
+	// 	W: cfg.WindowWidth,
+	// 	H: cfg.WindowHeight,
+	// }
+	//}
 
 	_console.recorder = NewRecorder(cfg.FPS, cfg.GifLength)
 	_console.Inputter = NewInputter()
@@ -152,10 +150,12 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 
 	// _console.renderer = r
 
-	goPath := build.Default.GOPATH
+	//goPath := build.Default.GOPATH
 
 	// init font
-	fontPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/font.ttf", goPath, _console.consoleType)
+
+	//fontPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/font.ttf", goPath, _console.consoleType)
+	fontPath := fmt.Sprintf("./font.ttf")
 	// font, err := ttf.OpenFont(fontPath, _console.Config.fontWidth)
 	// if err != nil {
 	// 	return nil, fmt.Errorf("Error loading font:%s", err)
@@ -200,8 +200,8 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	// 	return nil, fmt.Errorf("Error loading image: %s\n", err)
 	// }
 
-	logoPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/logo.png", goPath, _console.consoleType)
-	_, logo, err := ebitenutil.NewImageFromFile(logoPath, ebiten.FilterNearest)
+	//	logoPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/logo.png", goPath, _console.consoleType)
+	_, logo, err := ebitenutil.NewImageFromFile("./logo.png", ebiten.FilterNearest)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
 	}
@@ -222,8 +222,8 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	_console.originalPalette = newPalette(cfg.consoleType)
 
 	// init icons
-	iconsPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/icons.png", goPath, _console.consoleType)
-	_, icons, err := ebitenutil.NewImageFromFile(iconsPath, ebiten.FilterNearest)
+	//	iconsPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/icons.png", goPath, _console.consoleType)
+	_, icons, err := ebitenutil.NewImageFromFile("./icons.png", ebiten.FilterNearest)
 	//icons, err := img.Load(iconsPath)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
@@ -267,11 +267,11 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	_console.modes = modes
 
 	// init files
-	_console.currentDir = "/"
-	_console.baseDir, err = os.Getwd()
-	if err != nil {
-		return nil, err
-	}
+	// _console.currentDir = "/"
+	// _console.baseDir, err = os.Getwd()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// text input
 	//sdl.StartTextInput()
@@ -321,7 +321,7 @@ func (c *console) Run() error {
 	// // default to runtime
 	c.SetMode(CLI)
 
-	go c.saveState()
+	//go c.saveState()
 
 	// poll events
 	endFrame = time.Now() // init end frame

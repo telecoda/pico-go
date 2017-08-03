@@ -2,9 +2,6 @@ package console
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
-	"strings"
 )
 
 // init command list
@@ -105,25 +102,26 @@ func pwd(pb PixelBuffer) {
 
 func (d *dirCommand) Exec(pb PixelBuffer, statement string) error {
 	pwd(pb)
-	dir, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		return err
-	}
-	for _, file := range files {
-		name := strings.ToUpper(file.Name())
-		if file.IsDir() {
-			pb.Color(PICO8_PINK)
-			pb.Print(name)
-		} else {
-			pb.Color(PICO8_BLUE)
-			pb.Print(name)
-		}
+	// TODO
+	// dir, err := os.Getwd()
+	// if err != nil {
+	// 	return err
+	// }
+	// files, err := ioutil.ReadDir(dir)
+	// if err != nil {
+	// 	return err
+	// }
+	// for _, file := range files {
+	// 	name := strings.ToUpper(file.Name())
+	// 	if file.IsDir() {
+	// 		pb.Color(PICO8_PINK)
+	// 		pb.Print(name)
+	// 	} else {
+	// 		pb.Color(PICO8_BLUE)
+	// 		pb.Print(name)
+	// 	}
 
-	}
+	// }
 	return nil
 }
 
@@ -140,47 +138,48 @@ func NewCDCommand() Command {
 
 func (c *cdCommand) Exec(pb PixelBuffer, statement string) error {
 
-	// split statement into tokens
-	tokens := strings.Split(statement, " ")
-	if len(tokens) < 2 {
-		// no change
-		return nil
-	} else {
-		newDir := strings.ToLower(tokens[1])
+	// TODO
+	// // split statement into tokens
+	// tokens := strings.Split(statement, " ")
+	// if len(tokens) < 2 {
+	// 	// no change
+	// 	return nil
+	// } else {
+	// 	newDir := strings.ToLower(tokens[1])
 
-		newDir = _console.currentDir + "/" + newDir + "/"
-		// TODO get code working for case insensitive dir names
-		if err := os.Chdir(_console.baseDir + newDir); err != nil {
-			pb.Color(PICO8_WHITE)
-			pb.Print("DIRECTORY NOT FOUND")
-			return nil
-		}
+	// 	newDir = _console.currentDir + "/" + newDir + "/"
+	// 	// TODO get code working for case insensitive dir names
+	// 	if err := os.Chdir(_console.baseDir + newDir); err != nil {
+	// 		pb.Color(PICO8_WHITE)
+	// 		pb.Print("DIRECTORY NOT FOUND")
+	// 		return nil
+	// 	}
 
-		// get dir details from full dir path
-		fullDir, err := os.Getwd()
-		if err != nil {
-			return err
-		}
+	// 	// get dir details from full dir path
+	// 	fullDir, err := os.Getwd()
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		if len(fullDir) < len(_console.baseDir) {
-			// you can't cd .. above starting dir
-			os.Chdir(_console.baseDir + _console.currentDir)
-			pb.Color(PICO8_WHITE)
-			pb.Print("CD: FAILED")
-			return nil
+	// 	if len(fullDir) < len(_console.baseDir) {
+	// 		// you can't cd .. above starting dir
+	// 		os.Chdir(_console.baseDir + _console.currentDir)
+	// 		pb.Color(PICO8_WHITE)
+	// 		pb.Print("CD: FAILED")
+	// 		return nil
 
-		}
+	// 	}
 
-		if fullDir == _console.baseDir {
-			_console.currentDir = "/"
-		} else {
-			parts := strings.Split(fullDir, "/")
-			lastDir := parts[len(parts)-1]
-			_console.currentDir = "/" + lastDir + "/"
-		}
+	// 	if fullDir == _console.baseDir {
+	// 		_console.currentDir = "/"
+	// 	} else {
+	// 		parts := strings.Split(fullDir, "/")
+	// 		lastDir := parts[len(parts)-1]
+	// 		_console.currentDir = "/" + lastDir + "/"
+	// 	}
 
-	}
-	pwd(pb)
+	// }
+	// pwd(pb)
 
 	return nil
 }
@@ -199,23 +198,24 @@ func NewMkDirCommand() Command {
 
 func (m *mkdirCommand) Exec(pb PixelBuffer, statement string) error {
 
-	// split statement into tokens
-	tokens := strings.Split(statement, " ")
-	if len(tokens) < 2 {
-		pb.Color(PICO8_LIGHT_GRAY)
-		pb.Print(m.Help)
-		return nil
-	} else {
-		newDir := strings.ToLower(tokens[1])
+	// TODO
+	// // split statement into tokens
+	// tokens := strings.Split(statement, " ")
+	// if len(tokens) < 2 {
+	// 	pb.Color(PICO8_LIGHT_GRAY)
+	// 	pb.Print(m.Help)
+	// 	return nil
+	// } else {
+	// 	newDir := strings.ToLower(tokens[1])
 
-		newDir = _console.baseDir + _console.currentDir + newDir
-		// TODO get code working for case insensitive dir names
-		if err := os.Mkdir(newDir, 0700); err != nil {
-			pb.Color(PICO8_WHITE)
-			pb.Print("MKDIR: FAILED")
-			return nil
-		}
-	}
+	// 	newDir = _console.baseDir + _console.currentDir + newDir
+	// 	// TODO get code working for case insensitive dir names
+	// 	if err := os.Mkdir(newDir, 0700); err != nil {
+	// 		pb.Color(PICO8_WHITE)
+	// 		pb.Print("MKDIR: FAILED")
+	// 		return nil
+	// 	}
+	// }
 
 	return nil
 }

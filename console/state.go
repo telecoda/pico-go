@@ -1,12 +1,5 @@
 package console
 
-import (
-	"encoding/json"
-
-	"io/ioutil"
-	"os"
-)
-
 type ConsoleState struct {
 	X int
 	Y int
@@ -24,69 +17,74 @@ type stateManager struct {
 }
 
 func NewStateManager() (Persister, error) {
-
-	dir, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-	mgr := &stateManager{
-		dir: dir,
-	}
-	return mgr, nil
+	// TODO
+	// dir, err := os.Getwd()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// mgr := &stateManager{
+	// 	dir: dir,
+	// }
+	// return mgr, nil
+	return nil, nil
 }
 
 func (s *stateManager) SaveState(c Console) error {
+	// TODO
 
-	bounds := c.GetBounds()
-	// window := c.GetWindow()
-	// if window == nil {
-	// 	return fmt.Errorf("Console window is nil, cannot be saved")
+	// bounds := c.GetBounds()
+	// // window := c.GetWindow()
+	// // if window == nil {
+	// // 	return fmt.Errorf("Console window is nil, cannot be saved")
+	// // }
+
+	// // x, y := window.GetPosition()
+	// // w, h := window.GetSize()
+
+	// x := bounds.Min.X
+	// y := bounds.Min.Y
+	// w := bounds.Max.X
+	// h := bounds.Max.Y
+
+	// state := ConsoleState{
+	// 	X: x,
+	// 	Y: y,
+	// 	W: w,
+	// 	H: h,
 	// }
 
-	// x, y := window.GetPosition()
-	// w, h := window.GetSize()
-
-	x := bounds.Min.X
-	y := bounds.Min.Y
-	w := bounds.Max.X
-	h := bounds.Max.Y
-
-	state := ConsoleState{
-		X: x,
-		Y: y,
-		W: w,
-		H: h,
-	}
-
-	// save state to local dir
-	bytes, err := json.Marshal(&state)
-	if err != nil {
-		return err
-	}
-
-	filename := s.getFilename()
-	return ioutil.WriteFile(filename, bytes, 0600)
+	// // save state to local dir
+	// bytes, err := json.Marshal(&state)
+	// if err != nil {
+	// 	return err
+	// }
+	//	filename := s.getFilename()
+	//return ioutil.WriteFile(filename, bytes, 0600)
+	return nil
 }
 
 func (s *stateManager) LoadState() (*ConsoleState, error) {
-	filename := s.getFilename()
-	f, _ := os.Open(filename)
-	defer f.Close()
+	// filename := s.getFilename()
+	// f, _ := os.Open(filename)
+	// defer f.Close()
 
-	bytes, err := ioutil.ReadAll(f)
-	if err != nil {
-		return nil, err
-	}
+	// bytes, err := ioutil.ReadAll(f)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	state := &ConsoleState{}
-	err = json.Unmarshal(bytes, state)
-	if err != nil {
-		return nil, err
-	}
+	// state := &ConsoleState{}
+	// err = json.Unmarshal(bytes, state)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	return state, nil
+	// return state, nil
+	return nil, nil
 }
 
 func (s *stateManager) getFilename() string {
-	return s.dir + string(os.PathSeparator) + ".pico-go-state"
+	// TODO
+	//	return s.dir + string(os.PathSeparator) + ".pico-go-state"
+	return ""
 }
