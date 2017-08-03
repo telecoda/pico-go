@@ -2,10 +2,10 @@ package console
 
 import (
 	"fmt"
+	"image"
+	"image/draw"
 
 	"strings"
-
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 type cli struct {
@@ -18,8 +18,8 @@ type cli struct {
 	cmdPos     pos
 }
 
-var event sdl.Event
-var joysticks [16]*sdl.Joystick
+//var event sdl.Event
+//var joysticks [16]*sdl.Joystick
 
 func newCLIMode(c *console) Mode {
 	cli := &cli{
@@ -44,32 +44,33 @@ func newCLIMode(c *console) Mode {
 	return cli
 }
 
-func (c *cli) HandleEvent(event sdl.Event) error {
-	switch t := event.(type) {
-	case *sdl.TextInputEvent:
-		c.cmdInsert(string(t.Text[0]))
-	case *sdl.TextEditingEvent:
-		fmt.Printf("TEMP: text editing %s\n", t.Text)
-	case *sdl.KeyDownEvent:
-		switch t.Keysym.Sym {
-		case sdl.K_DELETE:
-			c.cmdDelete()
-		case sdl.K_BACKSPACE:
-			c.cmdBackspace()
-		case sdl.K_LEFT:
-			c.cursorLeft()
-		case sdl.K_RIGHT:
-			c.cursorRight()
-		case sdl.K_RETURN:
-			c.cmdEnter()
-		case sdl.K_q:
-			if t.Keysym.Mod == sdl.KMOD_CTRL {
-				c.console.Quit()
-			}
-		}
-	default:
-		//fmt.Printf("Some event: %#v \n", event)
-	}
+func (c *cli) HandleEvent(event string) error {
+	// TODO
+	// switch t := event.(type) {
+	// case *sdl.TextInputEvent:
+	// 	c.cmdInsert(string(t.Text[0]))
+	// case *sdl.TextEditingEvent:
+	// 	fmt.Printf("TEMP: text editing %s\n", t.Text)
+	// case *sdl.KeyDownEvent:
+	// 	switch t.Keysym.Sym {
+	// 	case sdl.K_DELETE:
+	// 		c.cmdDelete()
+	// 	case sdl.K_BACKSPACE:
+	// 		c.cmdBackspace()
+	// 	case sdl.K_LEFT:
+	// 		c.cursorLeft()
+	// 	case sdl.K_RIGHT:
+	// 		c.cursorRight()
+	// 	case sdl.K_RETURN:
+	// 		c.cmdEnter()
+	// 	case sdl.K_q:
+	// 		if t.Keysym.Mod == sdl.KMOD_CTRL {
+	// 			c.console.Quit()
+	// 		}
+	// 	}
+	// default:
+	// 	//fmt.Printf("Some event: %#v \n", event)
+	// }
 
 	return nil
 }
@@ -225,9 +226,10 @@ func (c *cli) Init() error {
 	c.PixelBuffer.ClsWithColor(c.console.BgColor)
 	pb := c.PixelBuffer.(*pixelBuffer)
 
-	logoRect := &sdl.Rect{X: 0, Y: 0, W: _logoWidth, H: _logoHeight}
-	screenRect := &sdl.Rect{X: 0, Y: 0, W: _logoWidth, H: _logoHeight}
-	_console.logo.Blit(logoRect, pb.pixelSurface, screenRect)
+	logoRect := image.Rect(0, 0, _logoWidth, _logoHeight)
+	screenRect := image.Rect(0, 0, _logoWidth, _logoHeight)
+	//_console.logo.Blit(logoRect, pb.pixelSurface, screenRect)
+	draw.Draw(pb.pixelSurface, logoRect, _console.logo, screenRect.Min, draw.Over)
 
 	title := fmt.Sprintf("PICO-GO %s", _version)
 	c.Cursor(0, 4)

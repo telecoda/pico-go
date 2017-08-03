@@ -2,7 +2,14 @@ package console
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
+	"io/ioutil"
+	"log"
 	"time"
+
+	"golang.org/x/image/font"
 
 	"os"
 
@@ -10,9 +17,10 @@ import (
 
 	"go/build"
 
-	"github.com/veandco/go-sdl2/img"
-	"github.com/veandco/go-sdl2/sdl"
-	"github.com/veandco/go-sdl2/ttf"
+	"github.com/fogleman/gg"
+	"github.com/golang/freetype/truetype"
+	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
 // Global var
@@ -41,7 +49,8 @@ type Console interface {
 	LoadCart(cart Cartridge) error
 	Run() error
 	Destroy()
-	GetWindow() *sdl.Window
+	//GetWindow() *sdl.Window
+	GetBounds() image.Rectangle
 	SetMode(newMode ModeType)
 	Inputter
 }
@@ -61,12 +70,12 @@ type console struct {
 
 	cart Cartridge
 
-	window   *sdl.Window
-	renderer *sdl.Renderer
+	screen    *ebiten.Image
+	testImage *image.RGBA
 
-	font              *ttf.Font
-	logo              *sdl.Surface
-	sprites           []*sdl.Surface
+	font              font.Face
+	logo              *image.RGBA
+	sprites           []*image.RGBA
 	currentSpriteBank int
 	originalPalette   *palette
 
@@ -102,114 +111,153 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	if err != nil {
 		fmt.Printf("Warning loading state: %s - using default\n", err)
 	}
-	// init SDL
-	sdl.Init(sdl.INIT_EVERYTHING)
-	sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "0")
-	ttf.Init()
+	// // init SDL
+	// sdl.Init(sdl.INIT_EVERYTHING)
+	// sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "0")
+	// ttf.Init()
 
 	if state == nil {
 		// use defaults
-		state = &ConsoleState{
-			X: sdl.WINDOWPOS_CENTERED,
-			Y: sdl.WINDOWPOS_CENTERED,
-			W: cfg.WindowWidth,
-			H: cfg.WindowHeight,
-		}
+		// state = &ConsoleState{
+		// 	X: sdl.WINDOWPOS_CENTERED,
+		// 	Y: sdl.WINDOWPOS_CENTERED,
+		// 	W: cfg.WindowWidth,
+		// 	H: cfg.WindowHeight,
+		// }
 	}
 
 	_console.recorder = NewRecorder(cfg.FPS, cfg.GifLength)
 	_console.Inputter = NewInputter()
 
 	// initialise window
-	window, err := sdl.CreateWindow(
-		title, state.X, state.Y,
-		state.W, state.H, sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
+	// window, err := sdl.CreateWindow(
+	// 	title, state.X, state.Y,
+	// 	state.W, state.H, sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
 
-	if err != nil {
-		return nil, err
-	}
-	_console.window = window
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// _console.window = window
 
-	// initialse renderer
-	// create renderer
-	r, _ := sdl.CreateRenderer(window, -2, sdl.RENDERER_ACCELERATED)
-	if r == nil {
-		// revert to software
-		r, _ = sdl.CreateRenderer(window, -2, sdl.RENDERER_SOFTWARE)
-		if r == nil {
-			return nil, err
-		}
-	}
+	// // initialse renderer
+	// // create renderer
+	// r, _ := sdl.CreateRenderer(window, -2, sdl.RENDERER_ACCELERATED)
+	// if r == nil {
+	// 	// revert to software
+	// 	r, _ = sdl.CreateRenderer(window, -2, sdl.RENDERER_SOFTWARE)
+	// 	if r == nil {
+	// 		return nil, err
+	// 	}
+	// }
 
-	_console.renderer = r
+	// _console.renderer = r
 
 	goPath := build.Default.GOPATH
 
 	// init font
 	fontPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/font.ttf", goPath, _console.consoleType)
-	font, err := ttf.OpenFont(fontPath, _console.Config.fontWidth)
+	// font, err := ttf.OpenFont(fontPath, _console.Config.fontWidth)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Error loading font:%s", err)
+	// }
+
+	// INIT font
+	// TODO move elsewhere..
+	f, err := ebitenutil.OpenFile(fontPath)
 	if err != nil {
-		return nil, fmt.Errorf("Error loading font:%s", err)
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	_console.font = font
+	tt, err := truetype.Parse(b)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	const dpi = 72
+	mplusNormalFont := truetype.NewFace(tt, &truetype.Options{
+		Size:    24,
+		DPI:     dpi,
+		Hinting: font.HintingFull,
+	})
+	// mplusBigFont = truetype.NewFace(tt, &truetype.Options{
+	// 	Size:    48,
+	// 	DPI:     dpi,
+	// 	Hinting: font.HintingFull,
+	// })
+
+	_console.font = mplusNormalFont
 
 	// init logo
+	// logoPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/logo.png", goPath, _console.consoleType)
+	// logo, err := img.Load(logoPath)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Error loading image: %s\n", err)
+	// }
+
 	logoPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/logo.png", goPath, _console.consoleType)
-	logo, err := img.Load(logoPath)
+	_, logo, err := ebitenutil.NewImageFromFile(logoPath, ebiten.FilterNearest)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
 	}
-
-	_console.logo = logo
+	_console.logo = logo.(*image.RGBA)
 
 	// init sprites
 	// There are 2 sprite banks
 	// 0 = System sprites
 	// 1 = User sprite bank 1
-	_console.sprites = make([]*sdl.Surface, 2)
+	_console.sprites = make([]*image.RGBA, 2)
 
-	tempSurface, err := sdl.CreateRGBSurface(0, int32(cfg.ConsoleWidth), int32(cfg.ConsoleHeight), 8, 0, 0, 0, 0)
-	if err != nil {
-		return nil, err
-	}
+	// tempSurface, err := sdl.CreateRGBSurface(0, int32(cfg.ConsoleWidth), int32(cfg.ConsoleHeight), 8, 0, 0, 0, 0)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	_console.palette = newPalette(cfg.consoleType)
 	_console.originalPalette = newPalette(cfg.consoleType)
 
 	// init icons
 	iconsPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/icons.png", goPath, _console.consoleType)
-	icons, err := img.Load(iconsPath)
+	_, icons, err := ebitenutil.NewImageFromFile(iconsPath, ebiten.FilterNearest)
+	//icons, err := img.Load(iconsPath)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
 	}
 
-	if err := setSurfacePalette(_console.originalPalette, tempSurface); err != nil {
-		return nil, err
-	}
+	// if err := setSurfacePalette(_console.originalPalette, tempSurface); err != nil {
+	// 	return nil, err
+	// }
 
-	iconsSurface, err := icons.Convert(tempSurface.Format, tempSurface.Flags)
-	if err != nil {
-		return nil, err
-	}
+	// iconsSurface, err := icons.Convert(tempSurface.Format, tempSurface.Flags)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	_console.sprites[systemSpriteBank] = iconsSurface
+	// _console.sprites[systemSpriteBank] = iconsSurface
+	_console.sprites[systemSpriteBank] = icons.(*image.RGBA)
 
-	if err := setSurfacePalette(_console.originalPalette, tempSurface); err != nil {
-		return nil, err
-	}
+	// if err := setSurfacePalette(_console.originalPalette, tempSurface); err != nil {
+	// 	return nil, err
+	// }
 
-	sprites, err := img.Load("./sprites/sprites.png")
+	//sprites, err := img.Load("./sprites/sprites.png")
+	_, sprites, err := ebitenutil.NewImageFromFile("./sprites/sprites.png", ebiten.FilterNearest)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
 	}
 
-	spritesSurface, err := sprites.Convert(tempSurface.Format, tempSurface.Flags)
-	if err != nil {
-		return nil, err
-	}
+	// spritesSurface, err := sprites.Convert(tempSurface.Format, tempSurface.Flags)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	_console.sprites[userSpriteBank1] = spritesSurface
+	// _console.sprites[userSpriteBank1] = spritesSurface
+	_console.sprites[userSpriteBank1] = sprites.(*image.RGBA)
 
 	// initialise modes
 	modes, err := _console.initModes()
@@ -226,13 +274,19 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	}
 
 	// text input
-	sdl.StartTextInput()
+	//sdl.StartTextInput()
 
 	return _console, nil
 }
 
-func (c *console) GetWindow() *sdl.Window {
-	return c.window
+// func (c *console) GetWindow() *sdl.Window {
+// 	return c.window
+// }
+
+func (c *console) GetBounds() image.Rectangle {
+	// TODO
+	//	return c.screen.Bounds()
+	return image.Rect(0, 0, 0, 0)
 }
 
 func (c *console) SetMode(newMode ModeType) {
@@ -272,82 +326,134 @@ func (c *console) Run() error {
 	// poll events
 	endFrame = time.Now() // init end frame
 	startFrame = time.Now()
-	for !c.hasQuit {
+	//for !c.hasQuit {
 
-		if mode, ok := c.modes[c.currentMode]; ok {
+	// if mode, ok := c.modes[c.currentMode]; ok {
 
-			if err := mode.Update(); err != nil {
-				return err
-			}
+	// 	if err := mode.Update(); err != nil {
+	// 		return err
+	// 	}
 
-			if err := mode.Render(); err != nil {
-				return err
-			}
+	// 	if err := mode.Render(); err != nil {
+	// 		return err
+	// 	}
 
-			// record frame
-			//			c.recorder.AddFrame(mode.GetFrame(), mode)
+	// 	// record frame
+	// 	//			c.recorder.AddFrame(mode.GetFrame(), mode)
 
-			mode.Flip()
+	// 	mode.Flip()
 
-		} else {
-			return fmt.Errorf("Mode :%d not found in console.modes", c.currentMode)
+	// } else {
+	// 	return fmt.Errorf("Mode :%d not found in console.modes", c.currentMode)
+	// }
+
+	//}
+
+	c.testImage = image.NewRGBA(image.Rect(0, 0, c.ConsoleWidth, c.ConsoleHeight))
+	rect := image.Rect(0, 0, c.ConsoleWidth, c.ConsoleHeight)
+	palette := color.Palette{
+		color.RGBA{0, 0, 0, 0},
+		color.RGBA{255, 0, 0, 255},
+	}
+	paletteImage := image.NewPaletted(rect, palette)
+
+	gc := gg.NewContextForImage(c.testImage)
+	gc.SetRGB(0, 0, 0)
+	gc.SetRGBA(1, 0, 0, 1)
+	gc.SetLineWidth(1)
+	gc.DrawLine(20, 20, 80, 60)
+	gc.Stroke()
+
+	// draw onto palette
+	draw.Draw(paletteImage, rect, gc.Image(), rect.Bounds().Min, draw.Over)
+	// // draw back again
+	draw.Draw(c.testImage, rect, paletteImage, rect.Bounds().Min, draw.Over)
+
+	return ebiten.Run(c.update, c.Config.ConsoleWidth, c.Config.ConsoleHeight, 2, "pico-go")
+}
+
+func (c *console) update(screen *ebiten.Image) error {
+	if ebiten.IsRunningSlowly() {
+		return nil
+	}
+
+	if mode, ok := c.modes[c.currentMode]; ok {
+
+		if err := mode.Update(); err != nil {
+			return err
 		}
 
+		if err := mode.Render(); err != nil {
+			return err
+		}
+
+		// record frame
+		//			c.recorder.AddFrame(mode.GetFrame(), mode)
+
+		mode.Flip()
+
+		//screen.ReplacePixels(mode.getPixelBuffer().pixelSurface.Pix)
+		screen.ReplacePixels(c.testImage.Pix)
+		ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %f", ebiten.CurrentFPS()))
+
+	} else {
+		return fmt.Errorf("Mode :%d not found in console.modes", c.currentMode)
 	}
 
 	return nil
 }
 
 func (c *console) handleEvents() error {
-	if mode, ok := c.modes[c.currentMode]; ok {
+	//	if mode, ok := c.modes[c.currentMode]; ok {
 
-		// poll all events
-		for event = sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+	// TODO
+	// poll all events
+	// for event = sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 
-			// this is the common event handling code
+	// 	// this is the common event handling code
 
-			// TODO keys to implement
-			// F7 Capture cartridge label image
-			// F8 Start recording a video
-			// F9 Save GIF video to desktop (max: 8 seconds by default)
+	// 	// TODO keys to implement
+	// 	// F7 Capture cartridge label image
+	// 	// F8 Start recording a video
+	// 	// F9 Save GIF video to desktop (max: 8 seconds by default)
 
-			switch t := event.(type) {
-			case *sdl.QuitEvent:
-				fmt.Printf("Quit event..\n")
-				c.state.SaveState(c)
-				c.hasQuit = true
-			case *sdl.KeyDownEvent:
-				switch t.Keysym.Sym {
-				case sdl.K_ESCAPE:
-					c.toggleCLI()
-				case sdl.K_F6:
-					if err := c.saveScreenshot(); err != nil {
-						return err
-					}
-				case sdl.K_F9:
-					if err := c.saveVideo(); err != nil {
-						return err
-					}
-				default:
-					// pass keydown events to mode handle
-					if err := mode.HandleEvent(event); err != nil {
-						return err
-					}
-				}
-			case *sdl.MouseButtonEvent:
-				// we only care about mouse clicks
-				if t.State == 1 && t.Button == 1 {
-					c.mouseClicked(t.X, t.Y)
-				}
-			default:
-				// if not handled pass event to mode event handler
-				if err := mode.HandleEvent(event); err != nil {
-					return err
-				}
-			}
-		}
+	// 	switch t := event.(type) {
+	// 	case *sdl.QuitEvent:
+	// 		fmt.Printf("Quit event..\n")
+	// 		c.state.SaveState(c)
+	// 		c.hasQuit = true
+	// 	case *sdl.KeyDownEvent:
+	// 		switch t.Keysym.Sym {
+	// 		case sdl.K_ESCAPE:
+	// 			c.toggleCLI()
+	// 		case sdl.K_F6:
+	// 			if err := c.saveScreenshot(); err != nil {
+	// 				return err
+	// 			}
+	// 		case sdl.K_F9:
+	// 			if err := c.saveVideo(); err != nil {
+	// 				return err
+	// 			}
+	// 		default:
+	// 			// pass keydown events to mode handle
+	// 			if err := mode.HandleEvent(event); err != nil {
+	// 				return err
+	// 			}
+	// 		}
+	// 	case *sdl.MouseButtonEvent:
+	// 		// we only care about mouse clicks
+	// 		if t.State == 1 && t.Button == 1 {
+	// 			c.mouseClicked(t.X, t.Y)
+	// 		}
+	// 	default:
+	// 		// if not handled pass event to mode event handler
+	// 		if err := mode.HandleEvent(event); err != nil {
+	// 			return err
+	// 		}
+	// 	}
+	// }
 
-	}
+	//	}
 	return nil
 }
 
@@ -362,11 +468,11 @@ func (c *console) mouseClicked(x, y int32) {
 		fmt.Printf("RenderRect: %#v\n", pb.renderRect)
 		fmt.Printf("pixelBuffer: %#v\n", pb.psRect)
 		// subtract top left offset
-		x -= pb.renderRect.X
-		y -= pb.renderRect.Y
+		x -= int32(pb.renderRect.Min.X)
+		y -= int32(pb.renderRect.Min.Y)
 		fmt.Printf("[adjusted] Mouse clicked at x: %d y: %d\n", x, y)
 		// scale to match pixelbuffer
-		scale := float32(pb.renderRect.W) / float32(pb.pixelSurface.W)
+		scale := float32(pb.renderRect.Max.X) / float32(pb.pixelSurface.Bounds().Max.X)
 		scaledX := float32(x) / scale
 		scaledY := float32(y) / scale
 		x = int32(scaledX)
@@ -415,7 +521,7 @@ func (c *console) toggleCLI() {
 
 // Destroy cleans up any resources at end
 func (c *console) Destroy() {
-	c.window.Destroy()
+	//c.window.Destroy()
 }
 
 // saveScreenshot - saves a screenshot of current frame

@@ -1,8 +1,6 @@
 package console
 
 import (
-	"fmt"
-
 	"encoding/json"
 
 	"io/ioutil"
@@ -39,13 +37,19 @@ func NewStateManager() (Persister, error) {
 
 func (s *stateManager) SaveState(c Console) error {
 
-	window := c.GetWindow()
-	if window == nil {
-		return fmt.Errorf("Console window is nil, cannot be saved")
-	}
+	bounds := c.GetBounds()
+	// window := c.GetWindow()
+	// if window == nil {
+	// 	return fmt.Errorf("Console window is nil, cannot be saved")
+	// }
 
-	x, y := window.GetPosition()
-	w, h := window.GetSize()
+	// x, y := window.GetPosition()
+	// w, h := window.GetSize()
+
+	x := bounds.Min.X
+	y := bounds.Min.Y
+	w := bounds.Max.X
+	h := bounds.Max.Y
 
 	state := ConsoleState{
 		X: x,

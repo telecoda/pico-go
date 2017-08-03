@@ -1,14 +1,14 @@
 package console
 
 import (
-	"github.com/veandco/go-sdl2/sdl"
+	"image"
 )
 
 type Mode interface {
 	Init() error
 	Render() error
 	Update() error
-	HandleEvent(event sdl.Event) error
+	HandleEvent(event string) error
 	PixelBuffer
 }
 
@@ -29,6 +29,6 @@ func (c *console) initModes() (map[ModeType]Mode, error) {
 	return modes, nil
 }
 
-func (m *mode) OffscreenBuffer() *sdl.Surface {
+func (m *mode) OffscreenBuffer() *image.RGBA {
 	return m.pixelSurface
 }

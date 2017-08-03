@@ -2,8 +2,8 @@ package console
 
 import (
 	"fmt"
-
-	"github.com/veandco/go-sdl2/sdl"
+	"image"
+	"image/color"
 )
 
 // PICO8 - colors
@@ -96,8 +96,8 @@ type rgba struct {
 type palette struct {
 	colorMap       map[Color]rgba
 	rgbaMap        map[uint32]Color
-	colors         []sdl.Color
-	originalColors []sdl.Color
+	colors         []color.Color
+	originalColors []color.Color
 }
 
 func newPalette(consoleType ConsoleType) *palette {
@@ -118,24 +118,24 @@ func newPico8Palette() *palette {
 
 	p := &palette{}
 	// set colours in palette
-	p.colors = make([]sdl.Color, TOTAL_COLORS)
-	p.originalColors = make([]sdl.Color, TOTAL_COLORS)
-	p.originalColors[PICO8_BLACK] = sdl.Color{R: 0, G: 0, B: 0, A: 255}
-	p.originalColors[PICO8_DARK_BLUE] = sdl.Color{R: 29, G: 43, B: 83, A: 255}
-	p.originalColors[PICO8_DARK_PURPLE] = sdl.Color{R: 126, G: 37, B: 83, A: 255}
-	p.originalColors[PICO8_DARK_GREEN] = sdl.Color{R: 0, G: 135, B: 81, A: 255}
-	p.originalColors[PICO8_BROWN] = sdl.Color{R: 171, G: 82, B: 54, A: 255}
-	p.originalColors[PICO8_DARK_GRAY] = sdl.Color{R: 95, G: 87, B: 79, A: 255}
-	p.originalColors[PICO8_LIGHT_GRAY] = sdl.Color{R: 194, G: 195, B: 199, A: 255}
-	p.originalColors[PICO8_WHITE] = sdl.Color{R: 255, G: 241, B: 232, A: 255}
-	p.originalColors[PICO8_RED] = sdl.Color{R: 255, G: 0, B: 77, A: 255}
-	p.originalColors[PICO8_ORANGE] = sdl.Color{R: 255, G: 163, B: 0, A: 255}
-	p.originalColors[PICO8_YELLOW] = sdl.Color{R: 255, G: 236, B: 39, A: 255}
-	p.originalColors[PICO8_GREEN] = sdl.Color{R: 0, G: 228, B: 54, A: 255}
-	p.originalColors[PICO8_BLUE] = sdl.Color{R: 41, G: 173, B: 255, A: 255}
-	p.originalColors[PICO8_INDIGO] = sdl.Color{R: 131, G: 118, B: 156, A: 255}
-	p.originalColors[PICO8_PINK] = sdl.Color{R: 255, G: 119, B: 168, A: 255}
-	p.originalColors[PICO8_PEACH] = sdl.Color{R: 255, G: 204, B: 170, A: 255}
+	p.colors = make([]color.Color, TOTAL_COLORS)
+	p.originalColors = make([]color.Color, TOTAL_COLORS)
+	p.originalColors[PICO8_BLACK] = color.RGBA{R: 0, G: 0, B: 0, A: 255}
+	p.originalColors[PICO8_DARK_BLUE] = color.RGBA{R: 29, G: 43, B: 83, A: 255}
+	p.originalColors[PICO8_DARK_PURPLE] = color.RGBA{R: 126, G: 37, B: 83, A: 255}
+	p.originalColors[PICO8_DARK_GREEN] = color.RGBA{R: 0, G: 135, B: 81, A: 255}
+	p.originalColors[PICO8_BROWN] = color.RGBA{R: 171, G: 82, B: 54, A: 255}
+	p.originalColors[PICO8_DARK_GRAY] = color.RGBA{R: 95, G: 87, B: 79, A: 255}
+	p.originalColors[PICO8_LIGHT_GRAY] = color.RGBA{R: 194, G: 195, B: 199, A: 255}
+	p.originalColors[PICO8_WHITE] = color.RGBA{R: 255, G: 241, B: 232, A: 255}
+	p.originalColors[PICO8_RED] = color.RGBA{R: 255, G: 0, B: 77, A: 255}
+	p.originalColors[PICO8_ORANGE] = color.RGBA{R: 255, G: 163, B: 0, A: 255}
+	p.originalColors[PICO8_YELLOW] = color.RGBA{R: 255, G: 236, B: 39, A: 255}
+	p.originalColors[PICO8_GREEN] = color.RGBA{R: 0, G: 228, B: 54, A: 255}
+	p.originalColors[PICO8_BLUE] = color.RGBA{R: 41, G: 173, B: 255, A: 255}
+	p.originalColors[PICO8_INDIGO] = color.RGBA{R: 131, G: 118, B: 156, A: 255}
+	p.originalColors[PICO8_PINK] = color.RGBA{R: 255, G: 119, B: 168, A: 255}
+	p.originalColors[PICO8_PEACH] = color.RGBA{R: 255, G: 204, B: 170, A: 255}
 
 	// copy to working colors
 	for i := range p.originalColors {
@@ -151,24 +151,24 @@ func newTic80Palette() *palette {
 
 	p := &palette{}
 	// set colours in palette
-	p.colors = make([]sdl.Color, TOTAL_COLORS)
-	p.originalColors = make([]sdl.Color, TOTAL_COLORS)
-	p.originalColors[TIC80_BLACK] = sdl.Color{R: 20, G: 12, B: 28, A: 255}
-	p.originalColors[TIC80_DARK_RED] = sdl.Color{R: 68, G: 36, B: 52, A: 255}
-	p.originalColors[TIC80_DARK_BLUE] = sdl.Color{R: 48, G: 52, B: 109, A: 255}
-	p.originalColors[TIC80_DARK_GRAY] = sdl.Color{R: 78, G: 74, B: 78, A: 255}
-	p.originalColors[TIC80_BROWN] = sdl.Color{R: 133, G: 76, B: 48, A: 255}
-	p.originalColors[TIC80_DARK_GREEN] = sdl.Color{R: 52, G: 101, B: 36, A: 255}
-	p.originalColors[TIC80_RED] = sdl.Color{R: 208, G: 70, B: 72, A: 255}
-	p.originalColors[TIC80_LIGHT_GRAY] = sdl.Color{R: 117, G: 113, B: 97, A: 255}
-	p.originalColors[TIC80_LIGHT_BLUE] = sdl.Color{R: 89, G: 125, B: 206, A: 255}
-	p.originalColors[TIC80_ORANGE] = sdl.Color{R: 210, G: 125, B: 44, A: 255}
-	p.originalColors[TIC80_BLUE_GRAY] = sdl.Color{R: 133, G: 149, B: 161, A: 255}
-	p.originalColors[TIC80_LIGHT_GREEN] = sdl.Color{R: 109, G: 170, B: 44, A: 255}
-	p.originalColors[TIC80_PEACH] = sdl.Color{R: 210, G: 170, B: 153, A: 255}
-	p.originalColors[TIC80_CYAN] = sdl.Color{R: 109, G: 194, B: 202, A: 255}
-	p.originalColors[TIC80_YELLOW] = sdl.Color{R: 218, G: 212, B: 94, A: 255}
-	p.originalColors[TIC80_WHITE] = sdl.Color{R: 222, G: 238, B: 214, A: 255}
+	p.colors = make([]color.Color, TOTAL_COLORS)
+	p.originalColors = make([]color.Color, TOTAL_COLORS)
+	p.originalColors[TIC80_BLACK] = color.RGBA{R: 20, G: 12, B: 28, A: 255}
+	p.originalColors[TIC80_DARK_RED] = color.RGBA{R: 68, G: 36, B: 52, A: 255}
+	p.originalColors[TIC80_DARK_BLUE] = color.RGBA{R: 48, G: 52, B: 109, A: 255}
+	p.originalColors[TIC80_DARK_GRAY] = color.RGBA{R: 78, G: 74, B: 78, A: 255}
+	p.originalColors[TIC80_BROWN] = color.RGBA{R: 133, G: 76, B: 48, A: 255}
+	p.originalColors[TIC80_DARK_GREEN] = color.RGBA{R: 52, G: 101, B: 36, A: 255}
+	p.originalColors[TIC80_RED] = color.RGBA{R: 208, G: 70, B: 72, A: 255}
+	p.originalColors[TIC80_LIGHT_GRAY] = color.RGBA{R: 117, G: 113, B: 97, A: 255}
+	p.originalColors[TIC80_LIGHT_BLUE] = color.RGBA{R: 89, G: 125, B: 206, A: 255}
+	p.originalColors[TIC80_ORANGE] = color.RGBA{R: 210, G: 125, B: 44, A: 255}
+	p.originalColors[TIC80_BLUE_GRAY] = color.RGBA{R: 133, G: 149, B: 161, A: 255}
+	p.originalColors[TIC80_LIGHT_GREEN] = color.RGBA{R: 109, G: 170, B: 44, A: 255}
+	p.originalColors[TIC80_PEACH] = color.RGBA{R: 210, G: 170, B: 153, A: 255}
+	p.originalColors[TIC80_CYAN] = color.RGBA{R: 109, G: 194, B: 202, A: 255}
+	p.originalColors[TIC80_YELLOW] = color.RGBA{R: 218, G: 212, B: 94, A: 255}
+	p.originalColors[TIC80_WHITE] = color.RGBA{R: 222, G: 238, B: 214, A: 255}
 
 	// copy to working colors
 	for i := range p.originalColors {
@@ -184,24 +184,24 @@ func newZXSpectrumPalette() *palette {
 
 	p := &palette{}
 	// set colours in palette
-	p.colors = make([]sdl.Color, TOTAL_COLORS)
-	p.originalColors = make([]sdl.Color, TOTAL_COLORS)
-	p.originalColors[ZX_BLACK] = sdl.Color{R: 0, G: 0, B: 0, A: 255}
-	p.originalColors[ZX_BLUE] = sdl.Color{R: 0, G: 41, B: 197, A: 255}
-	p.originalColors[ZX_RED] = sdl.Color{R: 213, G: 39, B: 30, A: 255}
-	p.originalColors[ZX_MAGENTA] = sdl.Color{R: 211, G: 58, B: 199, A: 255}
-	p.originalColors[ZX_GREEN] = sdl.Color{R: 0, G: 197, B: 49, A: 255}
-	p.originalColors[ZX_CYAN] = sdl.Color{R: 0, G: 200, B: 201, A: 255}
-	p.originalColors[ZX_YELLOW] = sdl.Color{R: 205, G: 200, B: 59, A: 255}
-	p.originalColors[ZX_WHITE] = sdl.Color{R: 203, G: 203, B: 203, A: 255}
-	p.originalColors[ZX_BRIGHT_BLACK] = sdl.Color{R: 0, G: 0, B: 0, A: 255}
-	p.originalColors[ZX_BRIGHT_BLUE] = sdl.Color{R: 0, G: 54, B: 247, A: 255}
-	p.originalColors[ZX_BRIGHT_RED] = sdl.Color{R: 255, G: 52, B: 40, A: 255}
-	p.originalColors[ZX_BRIGHT_MAGENTA] = sdl.Color{R: 255, G: 75, B: 250, A: 255}
-	p.originalColors[ZX_BRIGHT_GREEN] = sdl.Color{R: 0, G: 247, B: 63, A: 255}
-	p.originalColors[ZX_BRIGHT_CYAN] = sdl.Color{R: 0, G: 252, B: 253, A: 255}
-	p.originalColors[ZX_BRIGHT_YELLOW] = sdl.Color{R: 255, G: 251, B: 76, A: 255}
-	p.originalColors[ZX_BRIGHT_WHITE] = sdl.Color{R: 255, G: 255, B: 255, A: 255}
+	p.colors = make([]color.Color, TOTAL_COLORS)
+	p.originalColors = make([]color.Color, TOTAL_COLORS)
+	p.originalColors[ZX_BLACK] = color.RGBA{R: 0, G: 0, B: 0, A: 255}
+	p.originalColors[ZX_BLUE] = color.RGBA{R: 0, G: 41, B: 197, A: 255}
+	p.originalColors[ZX_RED] = color.RGBA{R: 213, G: 39, B: 30, A: 255}
+	p.originalColors[ZX_MAGENTA] = color.RGBA{R: 211, G: 58, B: 199, A: 255}
+	p.originalColors[ZX_GREEN] = color.RGBA{R: 0, G: 197, B: 49, A: 255}
+	p.originalColors[ZX_CYAN] = color.RGBA{R: 0, G: 200, B: 201, A: 255}
+	p.originalColors[ZX_YELLOW] = color.RGBA{R: 205, G: 200, B: 59, A: 255}
+	p.originalColors[ZX_WHITE] = color.RGBA{R: 203, G: 203, B: 203, A: 255}
+	p.originalColors[ZX_BRIGHT_BLACK] = color.RGBA{R: 0, G: 0, B: 0, A: 255}
+	p.originalColors[ZX_BRIGHT_BLUE] = color.RGBA{R: 0, G: 54, B: 247, A: 255}
+	p.originalColors[ZX_BRIGHT_RED] = color.RGBA{R: 255, G: 52, B: 40, A: 255}
+	p.originalColors[ZX_BRIGHT_MAGENTA] = color.RGBA{R: 255, G: 75, B: 250, A: 255}
+	p.originalColors[ZX_BRIGHT_GREEN] = color.RGBA{R: 0, G: 247, B: 63, A: 255}
+	p.originalColors[ZX_BRIGHT_CYAN] = color.RGBA{R: 0, G: 252, B: 253, A: 255}
+	p.originalColors[ZX_BRIGHT_YELLOW] = color.RGBA{R: 255, G: 251, B: 76, A: 255}
+	p.originalColors[ZX_BRIGHT_WHITE] = color.RGBA{R: 255, G: 255, B: 255, A: 255}
 
 	// copy to working colors
 	for i := range p.originalColors {
@@ -217,24 +217,24 @@ func newCBM64Palette() *palette {
 
 	p := &palette{}
 	// set colours in palette
-	p.colors = make([]sdl.Color, TOTAL_COLORS)
-	p.originalColors = make([]sdl.Color, TOTAL_COLORS)
-	p.originalColors[C64_BLACK] = sdl.Color{R: 0, G: 0, B: 0, A: 255}
-	p.originalColors[C64_WHITE] = sdl.Color{R: 255, G: 255, B: 255, A: 255}
-	p.originalColors[C64_RED] = sdl.Color{R: 160, G: 78, B: 70, A: 255}
-	p.originalColors[C64_CYAN] = sdl.Color{R: 110, G: 193, B: 199, A: 255}
-	p.originalColors[C64_PURPLE] = sdl.Color{R: 161, G: 89, B: 163, A: 255}
-	p.originalColors[C64_GREEN] = sdl.Color{R: 95, G: 171, B: 98, A: 255}
-	p.originalColors[C64_BLUE] = sdl.Color{R: 80, G: 71, B: 154, A: 255}
-	p.originalColors[C64_YELLOW] = sdl.Color{R: 202, G: 212, B: 140, A: 255}
-	p.originalColors[C64_ORANGE] = sdl.Color{R: 161, G: 104, B: 63, A: 255}
-	p.originalColors[C64_BROWN] = sdl.Color{R: 109, G: 83, B: 21, A: 255}
-	p.originalColors[C64_LIGHT_RED] = sdl.Color{R: 202, G: 127, B: 120, A: 255}
-	p.originalColors[C64_DARK_GREY] = sdl.Color{R: 99, G: 99, B: 99, A: 255}
-	p.originalColors[C64_GREY] = sdl.Color{R: 139, G: 139, B: 139, A: 255}
-	p.originalColors[C64_LIGHT_GREEN] = sdl.Color{R: 157, G: 226, B: 160, A: 255}
-	p.originalColors[C64_LIGHT_BLUE] = sdl.Color{R: 138, G: 129, B: 202, A: 255}
-	p.originalColors[C64_LIGHT_GREY] = sdl.Color{R: 174, G: 174, B: 174, A: 255}
+	p.colors = make([]color.Color, TOTAL_COLORS)
+	p.originalColors = make([]color.Color, TOTAL_COLORS)
+	p.originalColors[C64_BLACK] = color.RGBA{R: 0, G: 0, B: 0, A: 255}
+	p.originalColors[C64_WHITE] = color.RGBA{R: 255, G: 255, B: 255, A: 255}
+	p.originalColors[C64_RED] = color.RGBA{R: 160, G: 78, B: 70, A: 255}
+	p.originalColors[C64_CYAN] = color.RGBA{R: 110, G: 193, B: 199, A: 255}
+	p.originalColors[C64_PURPLE] = color.RGBA{R: 161, G: 89, B: 163, A: 255}
+	p.originalColors[C64_GREEN] = color.RGBA{R: 95, G: 171, B: 98, A: 255}
+	p.originalColors[C64_BLUE] = color.RGBA{R: 80, G: 71, B: 154, A: 255}
+	p.originalColors[C64_YELLOW] = color.RGBA{R: 202, G: 212, B: 140, A: 255}
+	p.originalColors[C64_ORANGE] = color.RGBA{R: 161, G: 104, B: 63, A: 255}
+	p.originalColors[C64_BROWN] = color.RGBA{R: 109, G: 83, B: 21, A: 255}
+	p.originalColors[C64_LIGHT_RED] = color.RGBA{R: 202, G: 127, B: 120, A: 255}
+	p.originalColors[C64_DARK_GREY] = color.RGBA{R: 99, G: 99, B: 99, A: 255}
+	p.originalColors[C64_GREY] = color.RGBA{R: 139, G: 139, B: 139, A: 255}
+	p.originalColors[C64_LIGHT_GREEN] = color.RGBA{R: 157, G: 226, B: 160, A: 255}
+	p.originalColors[C64_LIGHT_BLUE] = color.RGBA{R: 138, G: 129, B: 202, A: 255}
+	p.originalColors[C64_LIGHT_GREY] = color.RGBA{R: 174, G: 174, B: 174, A: 255}
 
 	// copy to working colors
 	for i := range p.originalColors {
@@ -255,9 +255,12 @@ func (p *palette) updateColorMaps() {
 	p.colorMap = make(map[Color]rgba, len(p.colors))
 	p.rgbaMap = make(map[uint32]Color, len(p.colors))
 	for i, c := range p.colors {
-		color := rgba{R: c.R, G: c.G, B: c.B, A: c.A}
-		p.colorMap[Color(i)] = color
-		p.rgbaMap[color.toIndex()] = Color(i)
+		if c != nil {
+			r, g, b, a := c.RGBA()
+			color := rgba{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
+			p.colorMap[Color(i)] = color
+			p.rgbaMap[color.toIndex()] = Color(i)
+		}
 	}
 
 }
@@ -287,13 +290,15 @@ func (p *palette) GetColorID(rgba rgba) Color {
 	return 0
 }
 
-func setSurfacePalette(palette Paletter, surface *sdl.Surface) error {
-	p, err := sdl.AllocPalette(TOTAL_COLORS)
-	if err != nil {
-		return err
-	}
-	p.SetColors(palette.GetSDLColors())
-	return surface.SetPalette(p)
+func setSurfacePalette(palette Paletter, surface *image.RGBA) error {
+	// TODO all this ---v
+	// p, err := sdl.AllocPalette(TOTAL_COLORS)
+	// if err != nil {
+	// 	return err
+	// }
+	// p.SetColors(palette.GetColors())
+	// return surface.SetPalette(p)
+	return nil
 }
 
 func (p *palette) PaletteReset() {
@@ -311,7 +316,7 @@ func (p *palette) PaletteCopy() Paletter {
 	return p2
 }
 
-func (p *palette) GetSDLColors() []sdl.Color {
+func (p *palette) GetColors() []color.Color {
 	return p.colors
 }
 

@@ -1,7 +1,8 @@
 package console
 
 import (
-	"github.com/veandco/go-sdl2/sdl"
+	"image"
+	"image/color"
 )
 
 type Color int
@@ -53,7 +54,7 @@ type Paletter interface {
 	PaletteCopy() Paletter
 	GetColorID(rgba rgba) Color
 	GetRGBA(color Color) (rgba, uint32)
-	GetSDLColors() []sdl.Color
+	GetColors() []color.Color
 	MapColor(fromColor Color, toColor Color) error
 	SetTransparent(color Color, enabled bool) error
 }
@@ -130,7 +131,7 @@ type Runtime interface {
 type PixelBuffer interface {
 	Flip() error // Copy graphics buffer to screen
 	Destroy()
-	GetFrame() *sdl.Surface
+	GetFrame() *image.RGBA
 	PicoGraphicsAPI
 	getPixelBuffer() *pixelBuffer
 }

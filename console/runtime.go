@@ -1,7 +1,5 @@
 package console
 
-import "github.com/veandco/go-sdl2/sdl"
-
 type runtime struct {
 	console *console
 	running bool
@@ -20,8 +18,10 @@ func newRuntimeMode(c *console) Runtime {
 	return runtime
 }
 
-func (r *runtime) HandleEvent(event sdl.Event) error {
-	return _console.storeKeyState(event)
+func (r *runtime) HandleEvent(event string) error {
+	// TODO
+	//	return _console.storeKeyState(event)
+	return nil
 }
 
 func (r *runtime) LoadCart(cart Cartridge) error {

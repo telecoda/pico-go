@@ -1,16 +1,15 @@
 package console
 
 import (
+	"image"
 	"time"
-
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 type cursor struct {
 	pos
 	color   Color
-	surface *sdl.Surface
-	rect    *sdl.Rect
+	surface *image.RGBA
+	rect    *image.Rectangle
 	on      bool
 	speed   time.Duration
 }
@@ -18,8 +17,8 @@ type cursor struct {
 func newCursor(pb PixelBuffer, color Color) *cursor {
 	c := &cursor{
 		color:   color,
-		surface: pb.(*pixelBuffer).pixelSurface,
-		rect:    &sdl.Rect{X: 0, Y: 0, W: int32(_console.Config.fontWidth), H: int32(_console.Config.fontHeight)},
+		surface: pb.getPixelBuffer().pixelSurface,
+		rect:    &image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: _console.Config.fontWidth, Y: _console.Config.fontHeight}},
 		on:      true,
 	}
 
@@ -42,8 +41,10 @@ func (c *cursor) cursorFlasher(ticker *time.Ticker) {
 // draw cursor on surface
 func (c *cursor) render() {
 	// draw at pos
-	dRect := &sdl.Rect{X: (int32(c.pos.x * _console.Config.fontWidth)), Y: (int32(c.pos.y * _console.Config.fontHeight)), W: int32(_console.Config.fontWidth), H: int32(_console.Config.fontHeight - 1)}
+	// TODO
+	//	dRect := &sdl.Rect{X: (int32(c.pos.x * _console.Config.fontWidth)), Y: (int32(c.pos.y * _console.Config.fontHeight)), W: int32(_console.Config.fontWidth), H: int32(_console.Config.fontHeight - 1)}
 	if c.on {
-		c.surface.FillRect(dRect, uint32(c.color))
+		// TODO
+		//c.surface.FillRect(dRect, uint32(c.color))
 	}
 }

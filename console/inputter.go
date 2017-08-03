@@ -2,8 +2,6 @@ package console
 
 import (
 	"sync"
-
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 type inputter struct {
@@ -13,7 +11,7 @@ type inputter struct {
 
 type Inputter interface {
 	PicoInputAPI
-	storeKeyState(event sdl.Event) error
+	storeKeyState(event string) error
 }
 
 func NewInputter() Inputter {
@@ -39,22 +37,25 @@ func NewInputter() Inputter {
 	return i
 }
 
-func (i *inputter) storeKeyState(event sdl.Event) error {
+func (i *inputter) storeKeyState(event string) error {
 
-	switch event.(type) {
-	case *sdl.KeyDownEvent:
-		// update keydown map
-		keyEvent := event.(*sdl.KeyDownEvent)
-		i.Lock()
-		defer i.Unlock()
-		i.keydownMap[int(keyEvent.Keysym.Scancode)] = true
-	case *sdl.KeyUpEvent:
-		// update keydown map
-		keyEvent := event.(*sdl.KeyUpEvent)
-		i.Lock()
-		defer i.Unlock()
-		i.keydownMap[int(keyEvent.Keysym.Scancode)] = false
-	}
+	// something here..
+
+	/*ebiten.IsKeyPressed(ebiten.Key(i) */
+	// switch event.(type) {
+	// case *.KeyDownEvent:
+	// 	// update keydown map
+	// 	keyEvent := event.(*sxx.KeyDownEvent)
+	// 	i.Lock()
+	// 	defer i.Unlock()
+	// 	i.keydownMap[int(keyEvent.Keysym.Scancode)] = true
+	// case *sxxx.KeyUpEvent:
+	// 	// update keydown map
+	// 	keyEvent := event.(*sxx.KeyUpEvent)
+	// 	i.Lock()
+	// 	defer i.Unlock()
+	// 	i.keydownMap[int(keyEvent.Keysym.Scancode)] = false
+	// }
 	return nil
 }
 

@@ -1,9 +1,5 @@
 package console
 
-import (
-	"github.com/veandco/go-sdl2/sdl"
-)
-
 type codeEditor struct {
 	console *console
 	PixelBuffer
@@ -20,17 +16,17 @@ func newCodeEditorMode(c *console) Mode {
 	return codeEditor
 }
 
-func (c *codeEditor) HandleEvent(event sdl.Event) error {
-	switch t := event.(type) {
-	case *sdl.KeyDownEvent:
-		switch t.Keysym.Sym {
-		// case sdl.K_RIGHT:
-		// 	fmt.Printf("Switching to runtime\n")
-		// 	c.console.SetMode(RUNTIME)
-		}
-	default:
-		//fmt.Printf("Some event: %#v \n", event)
-	}
+func (c *codeEditor) HandleEvent(event string) error {
+	// switch t := event.(type) {
+	// case *sdl.KeyDownEvent:
+	// 	switch t.Keysym.Sym {
+	// 	// case sdl.K_RIGHT:
+	// 	// 	fmt.Printf("Switching to runtime\n")
+	// 	// 	c.console.SetMode(RUNTIME)
+	// 	}
+	// default:
+	// 	//fmt.Printf("Some event: %#v \n", event)
+	// }
 
 	return nil
 }
