@@ -3,7 +3,6 @@ package console
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"image/draw"
 	"io/ioutil"
 	"log"
@@ -13,7 +12,6 @@ import (
 
 	"sync"
 
-	"github.com/fogleman/gg"
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
@@ -66,8 +64,8 @@ type console struct {
 
 	cart Cartridge
 
-	screen    *ebiten.Image
-	testImage *image.RGBA
+	screen *ebiten.Image
+	pImage *image.Paletted
 
 	font              font.Face
 	logo              *image.RGBA
@@ -179,9 +177,9 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 		log.Fatal(err)
 	}
 
-	const dpi = 72
+	const dpi = 48
 	mplusNormalFont := truetype.NewFace(tt, &truetype.Options{
-		Size:    24,
+		Size:    6,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
@@ -220,6 +218,11 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 
 	_console.palette = newPalette(cfg.consoleType)
 	_console.originalPalette = newPalette(cfg.consoleType)
+
+	// create paletted image
+	rect := image.Rect(0, 0, cfg.ConsoleWidth, cfg.ConsoleHeight)
+	pImage := image.NewPaletted(rect, _console.palette.colors)
+	_console.pImage = pImage
 
 	// init icons
 	//	iconsPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/icons.png", goPath, _console.consoleType)
@@ -319,7 +322,8 @@ var endFrame time.Time
 func (c *console) Run() error {
 
 	// // default to runtime
-	c.SetMode(CLI)
+	//c.SetMode(CLI)
+	c.SetMode(RUNTIME)
 
 	//go c.saveState()
 
@@ -349,27 +353,27 @@ func (c *console) Run() error {
 
 	//}
 
-	c.testImage = image.NewRGBA(image.Rect(0, 0, c.ConsoleWidth, c.ConsoleHeight))
-	rect := image.Rect(0, 0, c.ConsoleWidth, c.ConsoleHeight)
-	palette := color.Palette{
-		color.RGBA{0, 0, 0, 0},
-		color.RGBA{255, 0, 0, 255},
-	}
-	paletteImage := image.NewPaletted(rect, palette)
+	// c.testImage = image.NewRGBA(image.Rect(0, 0, c.ConsoleWidth, c.ConsoleHeight))
+	// rect := image.Rect(0, 0, c.ConsoleWidth, c.ConsoleHeight)
+	// palette := color.Palette{
+	// 	color.RGBA{0, 0, 0, 0},
+	// 	color.RGBA{255, 0, 0, 255},
+	// }
+	// paletteImage := image.NewPaletted(rect, palette)
 
-	gc := gg.NewContextForImage(c.testImage)
-	gc.SetRGB(0, 0, 0)
-	gc.SetRGBA(1, 0, 0, 1)
-	gc.SetLineWidth(1)
-	gc.DrawLine(20, 20, 80, 60)
-	gc.Stroke()
+	// gc := gg.NewContextForImage(c.testImage)
+	// gc.SetRGB(0, 0, 0)
+	// gc.SetRGBA(1, 0, 0, 1)
+	// gc.SetLineWidth(1)
+	// gc.DrawLine(20, 20, 80, 60)
+	// gc.Stroke()
 
 	// draw onto palette
-	draw.Draw(paletteImage, rect, gc.Image(), rect.Bounds().Min, draw.Over)
+	//	draw.Draw(paletteImage, rect, gc.Image(), rect.Bounds().Min, draw.Over)
 	// // draw back again
-	draw.Draw(c.testImage, rect, paletteImage, rect.Bounds().Min, draw.Over)
+	//	draw.Draw(c.testImage, rect, paletteImage, rect.Bounds().Min, draw.Over)
 
-	return ebiten.Run(c.update, c.Config.ConsoleWidth, c.Config.ConsoleHeight, 2, "pico-go")
+	return ebiten.Run(c.update, c.Config.ConsoleWidth, c.Config.ConsoleHeight, 6, "pico-go")
 }
 
 func (c *console) update(screen *ebiten.Image) error {
@@ -392,8 +396,42 @@ func (c *console) update(screen *ebiten.Image) error {
 
 		mode.Flip()
 
-		//screen.ReplacePixels(mode.getPixelBuffer().pixelSurface.Pix)
-		screen.ReplacePixels(c.testImage.Pix)
+		pb := mode.getPixelBuffer()
+		//screen.ReplacePixels(pb.pixelSurface.Pix)
+
+		// gc = gg.NewContextForImage(drawImage)
+		// gc.SetRGB(0, 0, 0)
+		// gc.SetRGBA(1, 0, 0, 1)
+		// gc.SetLineWidth(1)
+		// gc.DrawLine(20, 20, 80, 60)
+		// gc.Stroke()
+
+		// pb.gc.Stroke()
+		// pb.gc.SetLineWidth(1)
+		// pb.gc.SetLineCapSquare()
+		// red := c.palette.GetColor(PICO8_RED)
+		// pattern := gg.NewSolidPattern(red)
+		// pb.gc.SetStrokeStyle(pattern)
+		// //col := pb.palette.GetColor(PICO8_RED)
+		// //r, g, b, _ := col.RGBA()
+		// //pb.gc.SetRGB255(int(r), int(g), int(b))
+		// //		pb.gc.SetRGB(0, 0, 0)
+		// //		pb.gc.SetRGBA(1, 0, 0, 1)
+		// //pb.gc.SetRGB(255, 0, 0)
+		// pb.gc.DrawLine(20, 85, 50, 85)
+		// pb.gc.Stroke()
+
+		// set pixels
+		// for x := 20; x < 50; x++ {
+		// 	pb.pixelSurface.Set(x, 90, col)
+		// }
+
+		// draw onto palette
+		draw.Draw(c.pImage, c.pImage.Bounds(), pb.gc.Image(), c.pImage.Bounds().Min, draw.Over)
+		// draw back again
+		draw.Draw(pb.pixelSurface, c.pImage.Bounds(), c.pImage, c.pImage.Bounds().Min, draw.Over)
+		screen.ReplacePixels(pb.pixelSurface.Pix)
+
 		ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %f", ebiten.CurrentFPS()))
 
 	} else {

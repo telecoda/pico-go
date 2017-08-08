@@ -223,12 +223,12 @@ func (c *cli) cursorRight() {
 
 func (c *cli) Init() error {
 	// get native pixel buffer
-	c.PixelBuffer.ClsWithColor(c.console.BgColor)
+	//c.PixelBuffer.ClsWithColor(c.console.BgColor)
+	c.PixelBuffer.ClsWithColor(5)
 	pb := c.PixelBuffer.(*pixelBuffer)
 
 	logoRect := image.Rect(0, 0, _logoWidth, _logoHeight)
 	screenRect := image.Rect(0, 0, _logoWidth, _logoHeight)
-	//_console.logo.Blit(logoRect, pb.pixelSurface, screenRect)
 	draw.Draw(pb.pixelSurface, logoRect, _console.logo, screenRect.Min, draw.Over)
 
 	title := fmt.Sprintf("PICO-GO %s", _version)
@@ -238,7 +238,6 @@ func (c *cli) Init() error {
 
 	c.PixelBuffer.Print("(C) 2017 @TELECODA")
 	c.PixelBuffer.Print("TYPE HELP FOR HELP")
-
 	c.initCmd()
 	return nil
 }
@@ -258,6 +257,8 @@ func (c *cli) Update() error {
 }
 
 func (c *cli) Render() error {
+	//pb := c.PixelBuffer.(*pixelBuffer)
+
 	// render text
 	lines := c.getCmdLines()
 	c.clearCmd(len(lines))

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/fogleman/gg"
+	"github.com/hajimehoshi/ebiten"
 )
 
 type mode struct {
@@ -20,7 +21,8 @@ type pixelBuffer struct {
 	palette      *palette
 	charCols     int
 	charRows     int
-	pixelSurface *image.RGBA     // offscreen pixel buffer
+	pixelSurface *image.RGBA // offscreen pixel buffer
+	screen       *ebiten.Image
 	gc           *gg.Context     // graphics context
 	psRect       image.Rectangle // rect of pixelSurface
 	renderRect   image.Rectangle // rect on main window that pixelbuffer is rendered into
@@ -64,8 +66,13 @@ func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 		return nil, err
 	}
 
+	var err error
+	screen, err := ebiten.NewImageFromImage(ps, ebiten.FilterNearest)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create ebiten image %s", err)
+	}
+	p.screen = screen
 	p.pixelSurface = ps
-
 	// p.psRect = &sdl.Rect{X: 0, Y: 0, W: p.pixelSurface.W, H: p.pixelSurface.H}
 	// p.renderRect = &sdl.Rect{X: 0, Y: 0, W: p.pixelSurface.W, H: p.pixelSurface.H}
 
@@ -81,7 +88,14 @@ func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 	// if err != nil {
 	// 	return nil, err
 	// }
-	p.gc = gg.NewContextForImage(ps)
+	p.gc = gg.NewContextForRGBA(ps)
+	// if err := p.gc.LoadFontFace("/Library/Fonts/Arial.ttf", 6); err != nil {
+	// 	panic(err)
+	// }
+	p.gc.SetFontFace(_console.font)
+	p.gc.SetLineWidth(1)
+	p.gc.Identity()
+	p.gc.SetStrokeStyle(gg.NewSolidPattern(color.White))
 	return p, nil
 }
 
@@ -101,8 +115,7 @@ func (p *pixelBuffer) Render() error {
 
 // Cls - clears pixel buffer
 func (p *pixelBuffer) Cls() {
-	//p.pixelSurface.FillRect(p.psRect, uint32(p.bgColor))
-	// TODO p.gc.SetColor(p.bgColor)
+	p.gc.SetColor(p.palette.GetColor(p.bgColor))
 	p.gc.Clear()
 }
 
@@ -326,6 +339,12 @@ func (p *pixelBuffer) PrintAtWithColor(str string, x, y int, colorID Color) {
 	// 	posRect := &sdl.Rect{X: int32(x), Y: int32(y), W: textSurface.W, H: textSurface.H}
 	// 	textSurface.Blit(tRect, p.pixelSurface, posRect)
 	// }
+	if str != "" {
+		p.gc.SetColor(_console.palette.GetColor(colorID))
+		p.gc.DrawString(str, float64(x), float64(y))
+		//fmt.Printf("Printing text message: %s font: %#v\n", str, _console.font)
+	}
+
 	// save print pos
 	p.textCursor = pixelToChar(pos{x, y})
 
@@ -373,13 +392,20 @@ func (p *pixelBuffer) Line(x0, y0, x1, y1 int) {
 
 // LineWithColor - line with color
 func (p *pixelBuffer) LineWithColor(x0, y0, x1, y1 int, colorID Color) {
-	p.fgColor = colorID
-	rgba, _ := p.palette.GetRGBA(p.fgColor)
-	p.gc.SetRGBA255(int(rgba.R), int(rgba.G), int(rgba.B), int(rgba.A))
+	p.setFGColor(colorID)
+	// p.gc.SetRGB(0, 0, 0)
+	// p.gc.SetRGBA(1, 0, 0, 1)
+	p.gc.SetLineWidth(0.6)
 	p.gc.DrawLine(float64(x0), float64(y0), float64(x1), float64(y1))
 	p.gc.Stroke()
-	// p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
-	// p.renderer.DrawLine(x0, y0, x1, y1)
+}
+
+func (p *pixelBuffer) setFGColor(colorID Color) {
+	p.fgColor = colorID
+	//	p.gc.SetColor(p.palette.GetColor(colorID))
+	c := p.palette.GetColor(colorID)
+	r, g, b, _ := c.RGBA()
+	p.gc.SetRGB255(int(r), int(g), int(b))
 }
 
 // PGet - pixel get
@@ -408,11 +434,7 @@ func (p *pixelBuffer) PSet(x, y int) {
 
 // PSetWithColor - pixel set with color
 func (p *pixelBuffer) PSetWithColor(x0, y0 int, colorID Color) {
-	p.fgColor = colorID
-	rgba, _ := p.palette.GetRGBA(p.fgColor)
-	//	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
-	//	p.renderer.DrawPoint(x0, y0)
-	p.gc.SetRGBA255(int(rgba.R), int(rgba.G), int(rgba.B), int(rgba.A))
+	p.setFGColor(colorID)
 	p.gc.DrawPoint(float64(x0), float64(y0), 1)
 }
 
@@ -424,11 +446,7 @@ func (p *pixelBuffer) Rect(x0, y0, x1, y1 int) {
 // RectWithColor - draw rectangle with color
 func (p *pixelBuffer) RectWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.fgColor = colorID
-	rgba, _ := p.palette.GetRGBA(p.fgColor)
-	//rect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - y0)}
-	// p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
-	// p.renderer.DrawRect(rect)
-	p.gc.SetRGBA255(int(rgba.R), int(rgba.G), int(rgba.B), int(rgba.A))
+	p.gc.SetColor(p.palette.GetColor(colorID))
 	p.gc.DrawRectangle(float64(x0), float64(y0), float64(x1), float64(y1))
 	p.gc.Stroke()
 }
@@ -441,10 +459,7 @@ func (p *pixelBuffer) RectFill(x0, y0, x1, y1 int) {
 // RectFillWithColor - fill rectangle with color
 func (p *pixelBuffer) RectFillWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.fgColor = colorID
-	//fRect := &sdl.Rect{X: int32(x0), Y: int32(y0), W: int32(x1 - x0), H: int32(y1 - y0)}
-	//p.pixelSurface.FillRect(fRect, uint32(colorID))
-	rgba, _ := p.palette.GetRGBA(p.fgColor)
-	p.gc.SetRGBA255(int(rgba.R), int(rgba.G), int(rgba.B), int(rgba.A))
+	p.gc.SetColor(p.palette.GetColor(colorID))
 	p.gc.DrawRectangle(float64(x0), float64(y0), float64(x1), float64(y1))
 	p.gc.Fill()
 }
@@ -568,6 +583,11 @@ func (p *pixelBuffer) Color(colorID Color) {
 func (p *pixelBuffer) GetRGBA(color Color) (rgba, uint32) {
 	return p.palette.GetRGBA(color)
 
+}
+
+// GetColor - get color by id
+func (p *pixelBuffer) GetColor(colorID Color) color.Color {
+	return p.palette.GetColor(colorID)
 }
 
 // GetColorID - find color from rgba

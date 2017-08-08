@@ -53,6 +53,7 @@ type Paletter interface {
 	PaletteReset()
 	PaletteCopy() Paletter
 	GetColorID(rgba rgba) Color
+	GetColor(colorID Color) color.Color
 	GetRGBA(color Color) (rgba, uint32)
 	GetColors() []color.Color
 	MapColor(fromColor Color, toColor Color) error
@@ -103,7 +104,7 @@ var ConsoleTypes = map[ConsoleType]string{
 	CBM64:       "CBM64",
 }
 
-const TOTAL_COLORS = 256
+const TOTAL_COLORS = 16
 
 type Configger interface {
 	GetConfig() Config
