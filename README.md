@@ -7,7 +7,12 @@ Pico-go is virtual console inspired by [pico8](https://www.lexaloffle.com/pico-8
 The plan is to build something similar to pico8 but where the games can be coded in Go instead of Lua.
 
 <font color="red">**
-Note: this project is very much work in progress at the moment, watch this space..**</font>
+NOTE:- development on pico-go is currently suspended (see [sdl_2_ebiten branch](https://github.com/telecoda/pico-go/blob/sdl_2_ebiten/README.md) for more details)
+
+Therefore with a heavy heart I'm deciding to suspend development on pico-go for now.  The effort to continue developing a tool with a very limited (maybe non-existent) userbase is not worthwhile, but it was a fun ride.
+</font>
+
+
 
 See [TODO](TODO.md) for current implementation status.
 
