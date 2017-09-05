@@ -655,20 +655,7 @@ func (p *pixelBuffer) sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 	// 	flip = sdl.FLIP_NONE
 	// }
 
-	// if int(rot)%360 == 0 {
-	// 	// this is a dirty hack to make sure transparency is still respected at 0 degrees
-	// 	// weirdly when rendering at exactly 0 degrees with no flipping the background is
-	// 	// rendered as black
-	// 	rot = 0.0000000000001
-	// }
-
-	// // create sprite surface, to copy a single sprite onto
-	// ss1, err := sdl.CreateRGBSurface(0, int32(sw), int32(sh), 32, 0, 0, 0, 0)
-	// if err != nil {
-	// 	fmt.Printf("Failed to create surface1: %s\n", err)
-	// 	return
-	// }
-	// defer ss1.Free()
+	// TOOD rotation and flipping not supported yet
 
 	// convert sprite number into x,y pos
 	xCell := n % _spritesPerLine
@@ -678,79 +665,16 @@ func (p *pixelBuffer) sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 	yPos := yCell * _spriteHeight
 
 	// this is the rect to copy from sprite sheet
-	// spriteSrcRect := &sdl.Rect{X: xPos, Y: yPos, W: sw, H: sh}
 	spriteSrcRect := image.Rect(xPos, yPos, xPos+sw, yPos+sh)
-	// this rect represents the size of the resulting sprite
-	//ss1Rect := &sdl.Rect{X: 0, Y: 0, W: ss1.W, H: ss1.H}
-	//ss1Rect := image.Rect(0, 0, sw, sh)
-
-	// // set palette for sprites based on current palette
-	// sprites := _console.sprites[_console.currentSpriteBank]
-	// if err := setSurfacePalette(p.palette, sprites); err != nil {
-	// 	fmt.Printf("Failed to update sprite surface palette: %s\n", err)
-	// 	return
-	// }
-
-	// spriteRect := image.Rect(0, 0, 16, 16)
+	// this rect is where the sprite will be copied to
 	screenRect := image.Rect(x, y, x+dw, y+dh)
-	fmt.Printf("TEMP: x: %d y: %d w: %d h: %d\n", x, y, w, h)
-	fmt.Printf("screenRect: %#v \nspriteRect: %#v\n", screenRect, spriteSrcRect)
-	fmt.Printf("sw: %d sh: %d\n", screenRect.Dx(), screenRect.Dy())
 
-	//draw.Draw(p.pixelSurface, screenRect, _console.sprites[userSpriteBank1], spriteSrcRect.Min, draw.Over)
 	options := &drawx.Options{
 		SrcMask:  _console.sprites[userSpriteMask1],
 		SrcMaskP: image.Point{0, 0},
 	}
-	// options = nil
 	fmt.Printf("TEMP: options: %#v\n", options)
 	drawx.NearestNeighbor.Scale(p.pixelSurface, screenRect, _console.sprites[userSpriteBank1], spriteSrcRect, drawx.Over, options)
-	//p.gc.Rotate(45 * math.Pi / 180)
-	//p.gc.DrawImage(_console.sprites[userSpriteBank1], x, y)
-	//p.gc.Rotate(0)
-
-	// screenRect = image.Rect(50, 50, sw, sh)
-	// draw.DrawMask(p.pixelSurface, screenRect, _console.sprites[userSpriteBank1], screenRect.Min, nil, draw.Over)
-	// // copy sprite data from sprite sheet onto sprite surface
-	// err = sprites.Blit(spriteSrcRect, ss1, ss1Rect)
-	// if err != nil {
-	// 	fmt.Printf("Failed to blit surface1: %s\n", err)
-	// 	return
-	// }
-
-	// // create 2nd sprite for blitscaling
-	// ss2, err := sdl.CreateRGBSurface(0, int32(dw), int32(dh), 32, 0, 0, 0, 0)
-	// if err != nil {
-	// 	fmt.Printf("Failed to create surface2: %s\n", err)
-	// 	return
-	// }
-	// defer ss2.Free()
-
-	// ss2Rect := &sdl.Rect{X: 0, Y: 0, W: ss2.W, H: ss2.H}
-
-	// // copy sprite data from sprite sheet onto sprite surface
-	// err = ss1.BlitScaled(ss1Rect, ss2, ss2Rect)
-	// // err = ss1.Blit(ss1Rect, ss2, ss2Rect)
-	// if err != nil {
-	// 	fmt.Printf("Failed to blit surface2: %s\n", err)
-	// 	return
-	// }
-	// //	ss2.SetColorKey(1, 0)
-	// texture, err := p.renderer.CreateTextureFromSurface(ss2)
-	// if err != nil {
-	// 	fmt.Printf("Failed to create texture: %s\n", err)
-	// 	return
-	// }
-	// defer texture.Destroy()
-
-	// centre := &sdl.Point{X: int32(dw / 2), Y: int32(dh / 2)}
-
-	// screenRect := &sdl.Rect{X: int32(x), Y: int32(y), W: int32(dw), H: int32(dh)}
-
-	// err = p.renderer.CopyEx(texture, ss2Rect, screenRect, rot, centre, flip)
-	// if err != nil {
-	// 	fmt.Printf("Error: 1 %s\n", err)
-	// }
 
 }
 
@@ -779,11 +703,6 @@ func (p *pixelBuffer) GetColorID(rgba rgba) Color {
 
 func (p *pixelBuffer) PaletteReset() {
 	p.palette.PaletteReset()
-	// reset palette on sprites
-	//setSurfacePalette(p.palette, _console.sprites[systemSpriteBank])
-	//setSurfacePalette(p.palette, _console.sprites[userSpriteBank1])
-	// reset palette on pixel buffer
-	//setSurfacePalette(p.palette, p.pixelSurface)
 }
 
 func (p *pixelBuffer) PaletteCopy() Paletter {
@@ -812,6 +731,5 @@ func (p *pixelBuffer) SetTransparent(color Color, enabled bool) error {
 
 // Destroy cleans up any resources at end
 func (p *pixelBuffer) Destroy() {
-	//p.pixelSurface.Free()
 	p.pixelSurface = nil
 }

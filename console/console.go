@@ -183,22 +183,10 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
-	// mplusBigFont = truetype.NewFace(tt, &truetype.Options{
-	// 	Size:    48,
-	// 	DPI:     dpi,
-	// 	Hinting: font.HintingFull,
-	// })
 
 	_console.font = mplusNormalFont
 
 	// init logo
-	// logoPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/logo.png", goPath, _console.consoleType)
-	// logo, err := img.Load(logoPath)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("Error loading image: %s\n", err)
-	// }
-
-	//	logoPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/logo.png", goPath, _console.consoleType)
 	_, logo, err := ebitenutil.NewImageFromFile("./assets/logo.png", ebiten.FilterNearest)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
@@ -206,15 +194,11 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	_console.logo = logo.(*image.RGBA)
 
 	// init sprites
-	// There are 2 sprite banks
+	// There are 3 sprite banks
 	// 0 = System sprites
 	// 1 = User sprite bank 1
+	// 2 = User sprite bank 1 mask
 	_console.sprites = make([]*image.RGBA, 3)
-
-	// tempSurface, err := sdl.CreateRGBSurface(0, int32(cfg.ConsoleWidth), int32(cfg.ConsoleHeight), 8, 0, 0, 0, 0)
-	// if err != nil {
-	// 	return nil, err
-	// }
 
 	_console.palette = newPalette(cfg.consoleType)
 	_console.originalPalette = newPalette(cfg.consoleType)
@@ -225,41 +209,18 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	_console.pImage = pImage
 
 	// init icons
-	//	iconsPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/icons.png", goPath, _console.consoleType)
 	_, icons, err := ebitenutil.NewImageFromFile("./assets/icons.png", ebiten.FilterNearest)
-	//icons, err := img.Load(iconsPath)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
 	}
 
-	// if err := setSurfacePalette(_console.originalPalette, tempSurface); err != nil {
-	// 	return nil, err
-	// }
-
-	// iconsSurface, err := icons.Convert(tempSurface.Format, tempSurface.Flags)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// _console.sprites[systemSpriteBank] = iconsSurface
 	_console.sprites[systemSpriteBank] = icons.(*image.RGBA)
 
-	// if err := setSurfacePalette(_console.originalPalette, tempSurface); err != nil {
-	// 	return nil, err
-	// }
-
-	//sprites, err := img.Load("./sprites/sprites.png")
 	_, sprites, err := ebitenutil.NewImageFromFile("./assets/sprites.png", ebiten.FilterNearest)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
 	}
 
-	// spritesSurface, err := sprites.Convert(tempSurface.Format, tempSurface.Flags)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// _console.sprites[userSpriteBank1] = spritesSurface
 	_console.sprites[userSpriteBank1] = sprites.(*image.RGBA)
 
 	// create a mask
@@ -300,9 +261,6 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	// if err != nil {
 	// 	return nil, err
 	// }
-
-	// text input
-	//sdl.StartTextInput()
 
 	return _console, nil
 }
@@ -355,48 +313,6 @@ func (c *console) Run() error {
 	// poll events
 	endFrame = time.Now() // init end frame
 	startFrame = time.Now()
-	//for !c.hasQuit {
-
-	// if mode, ok := c.modes[c.currentMode]; ok {
-
-	// 	if err := mode.Update(); err != nil {
-	// 		return err
-	// 	}
-
-	// 	if err := mode.Render(); err != nil {
-	// 		return err
-	// 	}
-
-	// 	// record frame
-	// 	//			c.recorder.AddFrame(mode.GetFrame(), mode)
-
-	// 	mode.Flip()
-
-	// } else {
-	// 	return fmt.Errorf("Mode :%d not found in console.modes", c.currentMode)
-	// }
-
-	//}
-
-	// c.testImage = image.NewRGBA(image.Rect(0, 0, c.ConsoleWidth, c.ConsoleHeight))
-	// rect := image.Rect(0, 0, c.ConsoleWidth, c.ConsoleHeight)
-	// palette := color.Palette{
-	// 	color.RGBA{0, 0, 0, 0},
-	// 	color.RGBA{255, 0, 0, 255},
-	// }
-	// paletteImage := image.NewPaletted(rect, palette)
-
-	// gc := gg.NewContextForImage(c.testImage)
-	// gc.SetRGB(0, 0, 0)
-	// gc.SetRGBA(1, 0, 0, 1)
-	// gc.SetLineWidth(1)
-	// gc.DrawLine(20, 20, 80, 60)
-	// gc.Stroke()
-
-	// draw onto palette
-	//	draw.Draw(paletteImage, rect, gc.Image(), rect.Bounds().Min, draw.Over)
-	// // draw back again
-	//	draw.Draw(c.testImage, rect, paletteImage, rect.Bounds().Min, draw.Over)
 
 	return ebiten.Run(c.update, c.Config.ConsoleWidth, c.Config.ConsoleHeight, 6, "pico-go")
 }
@@ -422,39 +338,7 @@ func (c *console) update(screen *ebiten.Image) error {
 		mode.Flip()
 
 		pb := mode.getPixelBuffer()
-		//screen.ReplacePixels(pb.pixelSurface.Pix)
 
-		// gc = gg.NewContextForImage(drawImage)
-		// gc.SetRGB(0, 0, 0)
-		// gc.SetRGBA(1, 0, 0, 1)
-		// gc.SetLineWidth(1)
-		// gc.DrawLine(20, 20, 80, 60)
-		// gc.Stroke()
-
-		// pb.gc.Stroke()
-		// pb.gc.SetLineWidth(1)
-		// pb.gc.SetLineCapSquare()
-		// red := c.palette.GetColor(PICO8_RED)
-		// pattern := gg.NewSolidPattern(red)
-		// pb.gc.SetStrokeStyle(pattern)
-		// //col := pb.palette.GetColor(PICO8_RED)
-		// //r, g, b, _ := col.RGBA()
-		// //pb.gc.SetRGB255(int(r), int(g), int(b))
-		// //		pb.gc.SetRGB(0, 0, 0)
-		// //		pb.gc.SetRGBA(1, 0, 0, 1)
-		// //pb.gc.SetRGB(255, 0, 0)
-		// pb.gc.DrawLine(20, 85, 50, 85)
-		// pb.gc.Stroke()
-
-		// set pixels
-		// for x := 20; x < 50; x++ {
-		// 	pb.pixelSurface.Set(x, 90, col)
-		// }
-
-		// draw onto palette
-		//draw.Draw(c.pImage, c.pImage.Bounds(), pb.gc.Image(), c.pImage.Bounds().Min, draw.Over)
-		// draw back again
-		//draw.Draw(pb.pixelSurface, c.pImage.Bounds(), c.pImage, c.pImage.Bounds().Min, draw.Over)
 		screen.ReplacePixels(pb.pixelSurface.Pix)
 
 		ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %f", ebiten.CurrentFPS()))
