@@ -1,8 +1,6 @@
 package code
 
 import (
-	"math/rand"
-
 	"github.com/telecoda/pico-go/console"
 )
 
@@ -44,14 +42,14 @@ func (c *cartridge) Update() {
 
 		if c.mapAnim {
 			c.MapColor(console.Color(c.currentColor), console.PICO8_RED)
-			c.MapColor(console.Color(15), console.Color(rand.Intn(16)))
+			// c.MapColor(console.Color(15), console.Color(rand.Intn(16)))
 		} else {
 			c.SetTransparent(console.Color(c.currentColor), true)
 		}
 		// reset counters
 		c.frameCount = 0
 		c.currentColor++
-		if c.currentColor > 16 {
+		if c.currentColor > 15 {
 			// all colors have been swapped reset
 			c.currentColor = 0
 			c.PaletteReset()

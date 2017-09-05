@@ -6,6 +6,8 @@ import (
 	"image/color"
 	"time"
 
+	drawx "golang.org/x/image/draw"
+
 	"github.com/fogleman/gg"
 	"github.com/hajimehoshi/ebiten"
 )
@@ -96,6 +98,7 @@ func newPixelBuffer(cfg Config) (PixelBuffer, error) {
 	p.gc.SetLineWidth(1)
 	p.gc.Identity()
 	p.gc.SetStrokeStyle(gg.NewSolidPattern(color.White))
+
 	return p, nil
 }
 
@@ -307,7 +310,7 @@ func (p *pixelBuffer) ScrollUpLine() {
 func (p *pixelBuffer) Print(str string) {
 	pixelPos := charToPixel(p.textCursor)
 
-	p.PrintAtWithColor(str, 0, int(pixelPos.y), p.fgColor)
+	p.PrintAtWithColor(str, int(pixelPos.x), int(pixelPos.y), p.fgColor)
 
 	// increase printPos by 1 line
 	p.textCursor.y++
@@ -325,24 +328,10 @@ func (p *pixelBuffer) PrintAt(str string, x, y int) {
 // PrintAtWithColor - prints a string of characters to the screen at position with color
 func (p *pixelBuffer) PrintAtWithColor(str string, x, y int, colorID Color) {
 	p.fgColor = colorID
-	// TODO
-	// if str != "" {
-	// 	rgbaFg, _ := p.palette.GetRGBA(colorID)
-	// 	fgColor := sdl.Color{R: rgbaFg.R, G: rgbaFg.G, B: rgbaFg.B, A: rgbaFg.A}
-	// 	textSurface, err := _console.font.RenderUTF8_Solid(str, fgColor)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	defer textSurface.Free()
-	// 	// copy text surface to offscreen buffer
-	// 	tRect := &sdl.Rect{X: 0, Y: 0, W: textSurface.W, H: textSurface.H}
-	// 	posRect := &sdl.Rect{X: int32(x), Y: int32(y), W: textSurface.W, H: textSurface.H}
-	// 	textSurface.Blit(tRect, p.pixelSurface, posRect)
-	// }
+
 	if str != "" {
 		p.gc.SetColor(_console.palette.GetColor(colorID))
-		p.gc.DrawString(str, float64(x), float64(y))
-		//fmt.Printf("Printing text message: %s font: %#v\n", str, _console.font)
+		p.gc.DrawString(str, float64(x), float64(y+_console.fontHeight/2))
 	}
 
 	// save print pos
@@ -358,14 +347,53 @@ func (p *pixelBuffer) Circle(x, y, r int) {
 }
 
 // CircleWithColor - draw circle with color
-func (p *pixelBuffer) CircleWithColor(x, y, r int, colorID Color) {
+func (p *pixelBuffer) CircleWithColor(x0, y0, r int, colorID Color) {
 	p.fgColor = colorID
-	rgba, _ := p.palette.GetRGBA(p.fgColor)
-	//sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
-	p.gc.SetRGBA255(int(rgba.R), int(rgba.G), int(rgba.B), int(rgba.A))
-	p.gc.DrawCircle(float64(x), float64(y), float64(r))
-	p.gc.Stroke()
-	//gfx.CircleColor(p.renderer, x, y, r, sColor)
+
+	x := 0
+	y := r
+	p0 := (5 - r*4) / 4
+
+	/* circle calcs from this blog
+	http://xiaohuiliucuriosity.blogspot.co.uk/2015/03/draw-circle-using-integer-arithmetic.html
+	*/
+
+	p.circlePoints(x0, y0, x, y)
+	for x < y {
+		x++
+		if p0 < 0 {
+			p0 += 2*x + 1
+		} else {
+			y--
+			p0 += 2*(x-y) + 1
+		}
+		p.circlePoints(x0, y0, x, y)
+	}
+
+}
+
+func (p *pixelBuffer) circlePoints(cx, cy, x, y int) {
+
+	if x == 0 {
+		p.PSet(cx, cy+y)
+		p.PSet(cx, cy-y)
+		p.PSet(cx+y, cy)
+		p.PSet(cx-y, cy)
+	} else if x == y {
+		p.PSet(cx+x, cy+y)
+		p.PSet(cx-x, cy+y)
+		p.PSet(cx+x, cy-y)
+		p.PSet(cx-x, cy-y)
+	} else if x < y {
+		p.PSet(cx+x, cy+y)
+		p.PSet(cx-x, cy+y)
+		p.PSet(cx+x, cy-y)
+		p.PSet(cx-x, cy-y)
+		p.PSet(cx+y, cy+x)
+		p.PSet(cx-y, cy+x)
+		p.PSet(cx+y, cy-x)
+		p.PSet(cx-y, cy-x)
+	}
 }
 
 // CircleFill - fill circle with drawing color
@@ -374,15 +402,39 @@ func (p *pixelBuffer) CircleFill(x, y, r int) {
 }
 
 // CircleFillWithColor - fill circle with color
-func (p *pixelBuffer) CircleFillWithColor(x, y, r int, colorID Color) {
+func (p *pixelBuffer) CircleFillWithColor(x0, y0, r int, colorID Color) {
 	p.fgColor = colorID
-	rgba, _ := p.palette.GetRGBA(p.fgColor)
-	//	p.renderer.SetDrawColor(rgba.R, rgba.G, rgba.B, rgba.A)
-	//sColor := sdl.Color{R: rgba.R, G: rgba.G, B: rgba.B, A: rgba.A}
-	p.gc.SetRGBA255(int(rgba.R), int(rgba.G), int(rgba.B), int(rgba.A))
-	p.gc.DrawCircle(float64(x), float64(y), float64(r))
-	p.gc.Fill()
-	//gfx.FilledCircleColor(p.renderer, x, y, r, sColor)
+	// rgba, _ := p.palette.GetRGBA(p.fgColor)
+	// p.gc.SetRGBA255(int(rgba.R), int(rgba.G), int(rgba.B), int(rgba.A))
+	// p.gc.DrawCircle(float64(x), float64(y), float64(r))
+	// p.gc.Fill()
+
+	x := 0
+	y := r
+	p0 := (5 - r*4) / 4
+
+	/* circle calcs from this blog
+	http://groups.csail.mit.edu/graphics/classes/6.837/F98/Lecture6/circle.html
+	*/
+
+	p.circleLines(x0, y0, x, y)
+	for x < y {
+		x++
+		if p0 < 0 {
+			p0 += 2*x + 1
+		} else {
+			y--
+			p0 += 2*(x-y) + 1
+		}
+		p.circleLines(x0, y0, x, y)
+	}
+}
+
+func (p *pixelBuffer) circleLines(cx, cy, x, y int) {
+	p.Line(cx-x, cy+y, cx+x, cy+y)
+	p.Line(cx-x, cy-y, cx+x, cy-y)
+	p.Line(cx-y, cy+x, cx+y, cy+x)
+	p.Line(cx-y, cy-x, cx+y, cy-x)
 }
 
 // Line - line in drawing color
@@ -391,13 +443,130 @@ func (p *pixelBuffer) Line(x0, y0, x1, y1 int) {
 }
 
 // LineWithColor - line with color
-func (p *pixelBuffer) LineWithColor(x0, y0, x1, y1 int, colorID Color) {
+func (p *pixelBuffer) LineWithColor(x1, y1, x2, y2 int, colorID Color) {
 	p.setFGColor(colorID)
-	// p.gc.SetRGB(0, 0, 0)
-	// p.gc.SetRGBA(1, 0, 0, 1)
-	p.gc.SetLineWidth(0.6)
-	p.gc.DrawLine(float64(x0), float64(y0), float64(x1), float64(y1))
-	p.gc.Stroke()
+
+	col := p.palette.GetColor(colorID)
+
+	/* Code from
+	https://github.com/StephaneBunel/bresenham/blob/master/drawline.go#L12-L22
+	*/
+	// draw line
+
+	var dx, dy, e, slope int
+
+	// Because drawing p1 -> p2 is equivalent to draw p2 -> p1,
+	// I sort points in x-axis order to handle only half of possible cases.
+	if x1 > x2 {
+		x1, y1, x2, y2 = x2, y2, x1, y1
+	}
+
+	dx, dy = x2-x1, y2-y1
+	// Because point is x-axis ordered, dx cannot be negative
+	if dy < 0 {
+		dy = -dy
+	}
+
+	switch {
+
+	// Is line a point ?
+	case x1 == x2 && y1 == y2:
+		p.pixelSurface.Set(x1, y1, col)
+
+	// Is line an horizontal ?
+	case y1 == y2:
+		for ; dx != 0; dx-- {
+			p.pixelSurface.Set(x1, y1, col)
+			x1++
+		}
+		p.pixelSurface.Set(x1, y1, col)
+
+	// Is line a vertical ?
+	case x1 == x2:
+		if y1 > y2 {
+			y1, y2 = y2, y1
+		}
+		for ; dy != 0; dy-- {
+			p.pixelSurface.Set(x1, y1, col)
+			y1++
+		}
+		p.pixelSurface.Set(x1, y1, col)
+
+	// Is line a diagonal ?
+	case dx == dy:
+		if y1 < y2 {
+			for ; dx != 0; dx-- {
+				p.pixelSurface.Set(x1, y1, col)
+				x1++
+				y1++
+			}
+		} else {
+			for ; dx != 0; dx-- {
+				p.pixelSurface.Set(x1, y1, col)
+				x1++
+				y1--
+			}
+		}
+		p.pixelSurface.Set(x1, y1, col)
+
+	// wider than high ?
+	case dx > dy:
+		if y1 < y2 {
+			// BresenhamDxXRYD(img, x1, y1, x2, y2, col)
+			dy, e, slope = 2*dy, dx, 2*dx
+			for ; dx != 0; dx-- {
+				p.pixelSurface.Set(x1, y1, col)
+				x1++
+				e -= dy
+				if e < 0 {
+					y1++
+					e += slope
+				}
+			}
+		} else {
+			// BresenhamDxXRYU(img, x1, y1, x2, y2, col)
+			dy, e, slope = 2*dy, dx, 2*dx
+			for ; dx != 0; dx-- {
+				p.pixelSurface.Set(x1, y1, col)
+				x1++
+				e -= dy
+				if e < 0 {
+					y1--
+					e += slope
+				}
+			}
+		}
+		p.pixelSurface.Set(x2, y2, col)
+
+	// higher than wide.
+	default:
+		if y1 < y2 {
+			// BresenhamDyXRYD(img, x1, y1, x2, y2, col)
+			dx, e, slope = 2*dx, dy, 2*dy
+			for ; dy != 0; dy-- {
+				p.pixelSurface.Set(x1, y1, col)
+				y1++
+				e -= dx
+				if e < 0 {
+					x1++
+					e += slope
+				}
+			}
+		} else {
+			// BresenhamDyXRYU(img, x1, y1, x2, y2, col)
+			dx, e, slope = 2*dx, dy, 2*dy
+			for ; dy != 0; dy-- {
+				p.pixelSurface.Set(x1, y1, col)
+				y1--
+				e -= dx
+				if e < 0 {
+					x1++
+					e += slope
+				}
+			}
+		}
+		p.pixelSurface.Set(x2, y2, col)
+	}
 }
 
 func (p *pixelBuffer) setFGColor(colorID Color) {
@@ -410,17 +579,8 @@ func (p *pixelBuffer) setFGColor(colorID Color) {
 
 // PGet - pixel get
 func (p *pixelBuffer) PGet(x, y int) Color {
-	// pixels := p.pixelSurface.Pixels()
-	// // get specific pixel
-	// w := _console.ConsoleWidth
-	// offset := 4 * (y*w + x)
-	// r := pixels[offset+3]
-	// g := pixels[offset+2]
-	// b := pixels[offset+1]
-	// a := pixels[offset+0]
 
 	c := p.pixelSurface.At(x, y)
-	//rgba := rgba{R: r, G: g, B: b, A: a}
 	r, g, b, a := c.RGBA()
 	color := rgba{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 
@@ -435,7 +595,7 @@ func (p *pixelBuffer) PSet(x, y int) {
 // PSetWithColor - pixel set with color
 func (p *pixelBuffer) PSetWithColor(x0, y0 int, colorID Color) {
 	p.setFGColor(colorID)
-	p.gc.DrawPoint(float64(x0), float64(y0), 1)
+	p.pixelSurface.Set(x0, y0, p.palette.GetColor(colorID))
 }
 
 // Rect - draw rectangle with drawing color
@@ -446,9 +606,10 @@ func (p *pixelBuffer) Rect(x0, y0, x1, y1 int) {
 // RectWithColor - draw rectangle with color
 func (p *pixelBuffer) RectWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.fgColor = colorID
-	p.gc.SetColor(p.palette.GetColor(colorID))
-	p.gc.DrawRectangle(float64(x0), float64(y0), float64(x1), float64(y1))
-	p.gc.Stroke()
+	p.Line(x0, y0, x1, y0)
+	p.Line(x1, y0, x1, y1)
+	p.Line(x1, y1, x0, y1)
+	p.Line(x0, y1, x0, y0)
 }
 
 // RectFill - fill rectangle with drawing color
@@ -459,9 +620,9 @@ func (p *pixelBuffer) RectFill(x0, y0, x1, y1 int) {
 // RectFillWithColor - fill rectangle with color
 func (p *pixelBuffer) RectFillWithColor(x0, y0, x1, y1 int, colorID Color) {
 	p.fgColor = colorID
-	p.gc.SetColor(p.palette.GetColor(colorID))
-	p.gc.DrawRectangle(float64(x0), float64(y0), float64(x1), float64(y1))
-	p.gc.Fill()
+	for x := x0; x < x1; x++ {
+		p.Line(x, y0, x, y1)
+	}
 }
 
 // Spriter methods
@@ -479,9 +640,8 @@ func (p *pixelBuffer) Sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 
 func (p *pixelBuffer) sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flipY bool) {
 
-	// TODO
-	// sw := int32(w) * _spriteWidth
-	// sh := int32(h) * _spriteHeight
+	sw := w * _spriteWidth
+	sh := h * _spriteHeight
 
 	// var flip sdl.RendererFlip
 	// if flipX {
@@ -510,17 +670,19 @@ func (p *pixelBuffer) sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 	// }
 	// defer ss1.Free()
 
-	// // convert sprite number into x,y pos
-	// xCell := n % _spritesPerLine
-	// yCell := (n - xCell) / _spritesPerLine
+	// convert sprite number into x,y pos
+	xCell := n % _spritesPerLine
+	yCell := (n - xCell) / _spritesPerLine
 
-	// xPos := int32(xCell * _spriteWidth)
-	// yPos := int32(yCell * _spriteHeight)
+	xPos := xCell * _spriteWidth
+	yPos := yCell * _spriteHeight
 
-	// // this is the rect to copy from sprite sheet
+	// this is the rect to copy from sprite sheet
 	// spriteSrcRect := &sdl.Rect{X: xPos, Y: yPos, W: sw, H: sh}
-	// // this rect represents the size of the resulting sprite
-	// ss1Rect := &sdl.Rect{X: 0, Y: 0, W: ss1.W, H: ss1.H}
+	spriteSrcRect := image.Rect(xPos, yPos, xPos+sw, yPos+sh)
+	// this rect represents the size of the resulting sprite
+	//ss1Rect := &sdl.Rect{X: 0, Y: 0, W: ss1.W, H: ss1.H}
+	//ss1Rect := image.Rect(0, 0, sw, sh)
 
 	// // set palette for sprites based on current palette
 	// sprites := _console.sprites[_console.currentSpriteBank]
@@ -529,6 +691,26 @@ func (p *pixelBuffer) sprite(n, x, y, w, h, dw, dh int, rot float64, flipX, flip
 	// 	return
 	// }
 
+	// spriteRect := image.Rect(0, 0, 16, 16)
+	screenRect := image.Rect(x, y, x+dw, y+dh)
+	fmt.Printf("TEMP: x: %d y: %d w: %d h: %d\n", x, y, w, h)
+	fmt.Printf("screenRect: %#v \nspriteRect: %#v\n", screenRect, spriteSrcRect)
+	fmt.Printf("sw: %d sh: %d\n", screenRect.Dx(), screenRect.Dy())
+
+	//draw.Draw(p.pixelSurface, screenRect, _console.sprites[userSpriteBank1], spriteSrcRect.Min, draw.Over)
+	options := &drawx.Options{
+		SrcMask:  _console.sprites[userSpriteMask1],
+		SrcMaskP: image.Point{0, 0},
+	}
+	// options = nil
+	fmt.Printf("TEMP: options: %#v\n", options)
+	drawx.NearestNeighbor.Scale(p.pixelSurface, screenRect, _console.sprites[userSpriteBank1], spriteSrcRect, drawx.Over, options)
+	//p.gc.Rotate(45 * math.Pi / 180)
+	//p.gc.DrawImage(_console.sprites[userSpriteBank1], x, y)
+	//p.gc.Rotate(0)
+
+	// screenRect = image.Rect(50, 50, sw, sh)
+	// draw.DrawMask(p.pixelSurface, screenRect, _console.sprites[userSpriteBank1], screenRect.Min, nil, draw.Over)
 	// // copy sprite data from sprite sheet onto sprite surface
 	// err = sprites.Blit(spriteSrcRect, ss1, ss1Rect)
 	// if err != nil {
@@ -598,10 +780,10 @@ func (p *pixelBuffer) GetColorID(rgba rgba) Color {
 func (p *pixelBuffer) PaletteReset() {
 	p.palette.PaletteReset()
 	// reset palette on sprites
-	setSurfacePalette(p.palette, _console.sprites[systemSpriteBank])
-	setSurfacePalette(p.palette, _console.sprites[userSpriteBank1])
+	//setSurfacePalette(p.palette, _console.sprites[systemSpriteBank])
+	//setSurfacePalette(p.palette, _console.sprites[userSpriteBank1])
 	// reset palette on pixel buffer
-	setSurfacePalette(p.palette, p.pixelSurface)
+	//setSurfacePalette(p.palette, p.pixelSurface)
 }
 
 func (p *pixelBuffer) PaletteCopy() Paletter {

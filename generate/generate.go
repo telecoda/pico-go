@@ -70,8 +70,7 @@ func NewProject(projectName, consoleType string) error {
 
 	// create sub directories
 	os.MkdirAll(projectPath+"/code", 0777)
-	os.MkdirAll(projectPath+"/sprites", 0777)
-	os.MkdirAll(projectPath+"/audio", 0777)
+	os.MkdirAll(projectPath+"/assets", 0777)
 
 	filePath := projectPath + "/main.go"
 
@@ -97,14 +96,52 @@ func NewProject(projectName, consoleType string) error {
 		return err
 	}
 
-	// copy sprites to local proj
-	spritesFile := goPath + "/src/github.com/telecoda/pico-go/template/sprites/sprites.png"
+	// TODO - tidy up asset loading
+
+	// copy sprites to local project assets
+	spritesFile := goPath + "/src/github.com/telecoda/pico-go/template/assets/sprites.png"
 	spriteBytes, err := ioutil.ReadFile(spritesFile)
 	if err != nil {
 		return err
 	}
-	localSpriteFile := fmt.Sprintf("./%s/sprites/sprites.png", projectName)
+	localSpriteFile := fmt.Sprintf("./%s/assets/sprites.png", projectName)
 	err = ioutil.WriteFile(localSpriteFile, spriteBytes, 0600)
+	if err != nil {
+		return err
+	}
+
+	// copy font
+	fontFile := goPath + fmt.Sprintf("/src/github.com/telecoda/pico-go/consoles/%s/font.ttf", consoleType)
+	fontBytes, err := ioutil.ReadFile(fontFile)
+	if err != nil {
+		return err
+	}
+	localFontFile := fmt.Sprintf("./%s/assets/font.ttf", projectName)
+	err = ioutil.WriteFile(localFontFile, fontBytes, 0600)
+	if err != nil {
+		return err
+	}
+
+	// copy icons
+	iconFile := goPath + fmt.Sprintf("/src/github.com/telecoda/pico-go/consoles/%s/icons.png", consoleType)
+	iconBytes, err := ioutil.ReadFile(iconFile)
+	if err != nil {
+		return err
+	}
+	localIconFile := fmt.Sprintf("./%s/assets/icons.png", projectName)
+	err = ioutil.WriteFile(localIconFile, iconBytes, 0600)
+	if err != nil {
+		return err
+	}
+
+	// copy logo
+	logoFile := goPath + fmt.Sprintf("/src/github.com/telecoda/pico-go/consoles/%s/logo.png", consoleType)
+	logoBytes, err := ioutil.ReadFile(logoFile)
+	if err != nil {
+		return err
+	}
+	localLogoFile := fmt.Sprintf("./%s/assets/logo.png", projectName)
+	err = ioutil.WriteFile(localLogoFile, logoBytes, 0600)
 	if err != nil {
 		return err
 	}

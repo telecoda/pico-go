@@ -3,7 +3,6 @@ package console
 import (
 	"fmt"
 	"image"
-	"image/draw"
 	"io/ioutil"
 	"log"
 	"time"
@@ -37,6 +36,7 @@ const (
 const (
 	systemSpriteBank = 0
 	userSpriteBank1  = 1
+	userSpriteMask1  = 2
 )
 
 type Console interface {
@@ -153,7 +153,7 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	// init font
 
 	//fontPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/font.ttf", goPath, _console.consoleType)
-	fontPath := fmt.Sprintf("./font.ttf")
+	fontPath := fmt.Sprintf("./assets/font.ttf")
 	// font, err := ttf.OpenFont(fontPath, _console.Config.fontWidth)
 	// if err != nil {
 	// 	return nil, fmt.Errorf("Error loading font:%s", err)
@@ -199,7 +199,7 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	// }
 
 	//	logoPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/logo.png", goPath, _console.consoleType)
-	_, logo, err := ebitenutil.NewImageFromFile("./logo.png", ebiten.FilterNearest)
+	_, logo, err := ebitenutil.NewImageFromFile("./assets/logo.png", ebiten.FilterNearest)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
 	}
@@ -209,7 +209,7 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	// There are 2 sprite banks
 	// 0 = System sprites
 	// 1 = User sprite bank 1
-	_console.sprites = make([]*image.RGBA, 2)
+	_console.sprites = make([]*image.RGBA, 3)
 
 	// tempSurface, err := sdl.CreateRGBSurface(0, int32(cfg.ConsoleWidth), int32(cfg.ConsoleHeight), 8, 0, 0, 0, 0)
 	// if err != nil {
@@ -226,7 +226,7 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 
 	// init icons
 	//	iconsPath := fmt.Sprintf("%s/src/github.com/telecoda/pico-go/consoles/%s/icons.png", goPath, _console.consoleType)
-	_, icons, err := ebitenutil.NewImageFromFile("./icons.png", ebiten.FilterNearest)
+	_, icons, err := ebitenutil.NewImageFromFile("./assets/icons.png", ebiten.FilterNearest)
 	//icons, err := img.Load(iconsPath)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
@@ -249,7 +249,7 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 	// }
 
 	//sprites, err := img.Load("./sprites/sprites.png")
-	_, sprites, err := ebitenutil.NewImageFromFile("./sprites/sprites.png", ebiten.FilterNearest)
+	_, sprites, err := ebitenutil.NewImageFromFile("./assets/sprites.png", ebiten.FilterNearest)
 	if err != nil {
 		return nil, fmt.Errorf("Error loading image: %s\n", err)
 	}
@@ -261,6 +261,31 @@ func NewConsole(consoleType ConsoleType) (Console, error) {
 
 	// _console.sprites[userSpriteBank1] = spritesSurface
 	_console.sprites[userSpriteBank1] = sprites.(*image.RGBA)
+
+	// create a mask
+	_, masks, err := ebitenutil.NewImageFromFile("./assets/sprites.png", ebiten.FilterNearest)
+	if err != nil {
+		return nil, fmt.Errorf("Error loading image: %s\n", err)
+	}
+	_console.sprites[userSpriteMask1] = masks.(*image.RGBA)
+
+	// convert all black pixels to zero alpha
+	mask := _console.sprites[userSpriteMask1]
+	for x := 0; x < mask.Bounds().Dx(); x++ {
+		for y := 0; y < mask.Bounds().Dy(); y++ {
+			c := mask.RGBAAt(x, y)
+			if c.R == 0 && c.G == 0 && c.B == 0 {
+				c.A = 0
+				mask.SetRGBA(x, y, c)
+			} else {
+				c.A = 255
+				c.R = 255
+				c.G = 255
+				c.B = 255
+				mask.SetRGBA(x, y, c)
+			}
+		}
+	}
 
 	// initialise modes
 	modes, err := _console.initModes()
@@ -427,9 +452,9 @@ func (c *console) update(screen *ebiten.Image) error {
 		// }
 
 		// draw onto palette
-		draw.Draw(c.pImage, c.pImage.Bounds(), pb.gc.Image(), c.pImage.Bounds().Min, draw.Over)
+		//draw.Draw(c.pImage, c.pImage.Bounds(), pb.gc.Image(), c.pImage.Bounds().Min, draw.Over)
 		// draw back again
-		draw.Draw(pb.pixelSurface, c.pImage.Bounds(), c.pImage, c.pImage.Bounds().Min, draw.Over)
+		//draw.Draw(pb.pixelSurface, c.pImage.Bounds(), c.pImage, c.pImage.Bounds().Min, draw.Over)
 		screen.ReplacePixels(pb.pixelSurface.Pix)
 
 		ebitenutil.DebugPrint(screen, fmt.Sprintf("FPS: %f", ebiten.CurrentFPS()))

@@ -120,41 +120,41 @@ func newPico8Palette() *palette {
 	// set colours in palette
 	p.colors = make([]color.Color, TOTAL_COLORS)
 	p.originalColors = make([]color.Color, TOTAL_COLORS)
-	// p.originalColors[PICO8_BLACK] = color.RGBA{R: 0, G: 0, B: 0, A: 255}
-	// p.originalColors[PICO8_DARK_BLUE] = color.RGBA{R: 29, G: 43, B: 83, A: 255}
-	// p.originalColors[PICO8_DARK_PURPLE] = color.RGBA{R: 126, G: 37, B: 83, A: 255}
-	// p.originalColors[PICO8_DARK_GREEN] = color.RGBA{R: 0, G: 135, B: 81, A: 255}
-	// p.originalColors[PICO8_BROWN] = color.RGBA{R: 171, G: 82, B: 54, A: 255}
-	// p.originalColors[PICO8_DARK_GRAY] = color.RGBA{R: 95, G: 87, B: 79, A: 255}
-	// p.originalColors[PICO8_LIGHT_GRAY] = color.RGBA{R: 194, G: 195, B: 199, A: 255}
-	// p.originalColors[PICO8_WHITE] = color.RGBA{R: 255, G: 241, B: 232, A: 255}
-	// //	p.originalColors[PICO8_RED] = color.RGBA{R: 255, G: 0, B: 77, A: 255}
-	// p.originalColors[PICO8_RED] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	// p.originalColors[PICO8_ORANGE] = color.RGBA{R: 255, G: 163, B: 0, A: 255}
-	// p.originalColors[PICO8_YELLOW] = color.RGBA{R: 255, G: 236, B: 39, A: 255}
-	// p.originalColors[PICO8_GREEN] = color.RGBA{R: 0, G: 228, B: 54, A: 255}
-	// p.originalColors[PICO8_BLUE] = color.RGBA{R: 41, G: 173, B: 255, A: 255}
-	// p.originalColors[PICO8_INDIGO] = color.RGBA{R: 131, G: 118, B: 156, A: 255}
-	// p.originalColors[PICO8_PINK] = color.RGBA{R: 255, G: 119, B: 168, A: 255}
-	// p.originalColors[PICO8_PEACH] = color.RGBA{R: 255, G: 204, B: 170, A: 255}
+	p.originalColors[PICO8_BLACK] = color.RGBA{R: 0, G: 0, B: 0, A: 255}
+	p.originalColors[PICO8_DARK_BLUE] = color.RGBA{R: 29, G: 43, B: 83, A: 255}
+	p.originalColors[PICO8_DARK_PURPLE] = color.RGBA{R: 126, G: 37, B: 83, A: 255}
+	p.originalColors[PICO8_DARK_GREEN] = color.RGBA{R: 0, G: 135, B: 81, A: 255}
+	p.originalColors[PICO8_BROWN] = color.RGBA{R: 171, G: 82, B: 54, A: 255}
+	p.originalColors[PICO8_DARK_GRAY] = color.RGBA{R: 95, G: 87, B: 79, A: 255}
+	p.originalColors[PICO8_LIGHT_GRAY] = color.RGBA{R: 194, G: 195, B: 199, A: 255}
+	p.originalColors[PICO8_WHITE] = color.RGBA{R: 255, G: 241, B: 232, A: 255}
+	//	p.originalColors[PICO8_RED] = color.RGBA{R: 255, G: 0, B: 77, A: 255}
+	p.originalColors[PICO8_RED] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	p.originalColors[PICO8_ORANGE] = color.RGBA{R: 255, G: 163, B: 0, A: 255}
+	p.originalColors[PICO8_YELLOW] = color.RGBA{R: 255, G: 236, B: 39, A: 255}
+	p.originalColors[PICO8_GREEN] = color.RGBA{R: 0, G: 228, B: 54, A: 255}
+	p.originalColors[PICO8_BLUE] = color.RGBA{R: 41, G: 173, B: 255, A: 255}
+	p.originalColors[PICO8_INDIGO] = color.RGBA{R: 131, G: 118, B: 156, A: 255}
+	p.originalColors[PICO8_PINK] = color.RGBA{R: 255, G: 119, B: 168, A: 255}
+	p.originalColors[PICO8_PEACH] = color.RGBA{R: 255, G: 204, B: 170, A: 255}
 
-	p.originalColors = make([]color.Color, TOTAL_COLORS)
-	p.originalColors[0] = color.RGBA{R: 0, G: 0, B: 0, A: 255}
-	p.originalColors[1] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[2] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[3] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[4] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[5] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[6] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[7] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[8] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[9] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[10] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[11] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[12] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[13] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[14] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	p.originalColors[15] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors = make([]color.Color, TOTAL_COLORS)
+	// p.originalColors[0] = color.RGBA{R: 0, G: 0, B: 0, A: 255}
+	// p.originalColors[1] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[2] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[3] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[4] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[5] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[6] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[7] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[8] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[9] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[10] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[11] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[12] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[13] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[14] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	// p.originalColors[15] = color.RGBA{R: 255, G: 0, B: 0, A: 255}
 
 	// copy to working colors
 	for i := range p.originalColors {
@@ -325,18 +325,21 @@ func setSurfacePalette(palette Paletter, surface *image.RGBA) error {
 }
 
 func (p *palette) PaletteReset() {
-	p2 := _console.originalPalette
-	p.colorMap = p2.colorMap
-	p.colors = p2.colors
+
+	for i, c := range _console.originalPalette.colors {
+		p.colors[i] = c
+	}
+	p.updateColorMaps()
 }
 
 func (p *palette) PaletteCopy() Paletter {
-	p2 := _console.originalPalette
-	for i, c := range p.colors {
-		p2.colors[i] = c
-	}
-	p2.updateColorMaps()
-	return p2
+	// p2 := _console.originalPalette
+	// for i, c := range p.colors {
+	// 	p2.colors[i] = c
+	// }
+	// p2.updateColorMaps()
+	// return p2
+	return nil
 }
 
 func (p *palette) GetColors() []color.Color {
@@ -345,10 +348,10 @@ func (p *palette) GetColors() []color.Color {
 
 func (p *palette) MapColor(fromColor Color, toColor Color) error {
 	// valid request
-	if fromColor < 0 || int(fromColor) > len(p.colors) {
+	if fromColor < 0 || int(fromColor) > len(p.colors)-1 {
 		return fmt.Errorf("Error mapping color - fromColour outside range: %d", fromColor)
 	}
-	if toColor < 0 || int(toColor) > len(p.colors) {
+	if toColor < 0 || int(toColor) > len(p.originalColors)-1 {
 		return fmt.Errorf("Error mapping color - toColour outside range: %d", toColor)
 	}
 
